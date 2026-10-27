@@ -26,6 +26,6 @@ The five license and permit certificate templates:
 
 ## Written procedures (this folder)
 
-- Company License written procedure (steps 6.1–6.14) (pending upload)
+- Company License written procedure (steps 6.1–6.14): no separate document; section W of `../requirements-answers.md` is the design source
 - Operator License written procedure (pending from SARIS)
 - Import Permit written procedure (pending from SARIS)
