@@ -1,0 +1,84 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer Green Ring -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#3FA34D" stroke-width="10"/>
+  
+  <!-- Top Text - Somali -->
+  <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="none"/>
+  <text>
+    <textPath href="#topPath" startOffset="50%" text-anchor="middle" fill="#1D2D44" font-size="8" font-weight="bold">
+      Hay'adda Sharciyeynta Adeegyada iyo Baaritaanka Beeraha Soomaaliyeed
+    </textPath>
+  </text>
+  
+  <!-- Bottom Text - English -->
+  <path d="M 180 100 A 80 80 0 0 1 20 100" fill="none" stroke="none"/>
+  <text>
+    <textPath href="#bottomPath" startOffset="50%" text-anchor="middle" fill="#418FDE" font-size="8" font-weight="bold">
+      Somali Agricultural Regulatory and Inspection Service
+    </textPath>
+  </text>
+  
+  <!-- Inner White Circle -->
+  <circle cx="100" cy="100" r="70" fill="white" stroke="#3FA34D" stroke-width="2"/>
+  
+  <!-- Horizontal Divider Line -->
+  <line x1="30" y1="100" x2="170" y2="100" stroke="#3FA34D" stroke-width="1"/>
+  
+  <!-- Top Half - Coat of Arms -->
+  <g transform="translate(100, 70)">
+    <!-- Crown -->
+    <path d="M -15 -5 L -10 -15 L -5 -5 L 0 -15 L 5 -5 L 10 -15 L 15 -5 L 15 0 L -15 0 Z" fill="#F59E0B"/>
+    
+    <!-- Shield -->
+    <rect x="-12" y="0" width="24" height="20" fill="#418FDE" rx="2"/>
+    <circle cx="0" cy="10" r="6" fill="white"/>
+    
+    <!-- Leopards (simplified) -->
+    <ellipse cx="-20" cy="15" rx="8" ry="12" fill="#8B4513"/>
+    <ellipse cx="20" cy="15" rx="8" ry="12" fill="#8B4513"/>
+    
+    <!-- Crossed Spears -->
+    <line x1="-15" y1="25" x2="15" y2="35" stroke="#8B4513" stroke-width="1"/>
+    <line x1="15" y1="25" x2="-15" y2="35" stroke="#8B4513" stroke-width="1"/>
+    
+    <!-- Palm Leaves -->
+    <path d="M -10 35 Q -5 30 -10 25" stroke="#3FA34D" stroke-width="1" fill="none"/>
+    <path d="M 10 35 Q 5 30 10 25" stroke="#3FA34D" stroke-width="1" fill="none"/>
+  </g>
+  
+  <!-- Bottom Half - Icons -->
+  <g transform="translate(100, 130)">
+    <!-- Left - Beetle/Insect -->
+    <ellipse cx="-25" cy="0" rx="8" ry="5" fill="#8B4513"/>
+    <line x1="-30" y1="-3" x2="-35" y2="-5" stroke="#8B4513" stroke-width="1"/>
+    <line x1="-30" y1="3" x2="-35" y2="5" stroke="#8B4513" stroke-width="1"/>
+    <line x1="-20" y1="-3" x2="-15" y2="-5" stroke="#8B4513" stroke-width="1"/>
+    <line x1="-20" y1="3" x2="-15" y2="5" stroke="#8B4513" stroke-width="1"/>
+    
+    <!-- Middle - Laboratory Flask -->
+    <path d="M -8 -15 L -8 5 L -5 8 L 5 8 L 8 5 L 8 -15 Z" fill="#418FDE" stroke="#3FA34D" stroke-width="1"/>
+    <rect x="-5" y="-8" width="10" height="2" fill="#418FDE"/>
+    
+    <!-- Right - Plant Sprig -->
+    <path d="M 15 -10 Q 20 -15 25 -10 Q 20 -5 15 -10" fill="#3FA34D"/>
+    <path d="M 20 -10 Q 25 -5 20 0 Q 15 -5 20 -10" fill="#3FA34D"/>
+  </g>
+  
+  <!-- SARIS Text -->
+  <text x="100" y="180" text-anchor="middle" fill="#418FDE" font-size="16" font-weight="bold">
+    SARIS
+  </text>
+  
+  <!-- Leaf above I -->
+  <path d="M 95 170 Q 100 165 105 170" fill="#3FA34D"/>
+  
+  <!-- Stars -->
+  <polygon points="85,175 87,170 92,172 87,174 85,179" fill="#1D2D44"/>
+  <polygon points="115,175 117,170 122,172 117,174 115,179" fill="#1D2D44"/>
+  
+  <!-- Define the text paths -->
+  <defs>
+    <path id="topPath" d="M 20 100 A 80 80 0 0 1 180 100"/>
+    <path id="bottomPath" d="M 180 100 A 80 80 0 0 1 20 100"/>
+  </defs>
+</svg>
