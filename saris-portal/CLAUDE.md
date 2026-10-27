@@ -32,7 +32,7 @@ Key business rules:
 1. `docs/decisions-log.md`: decisions with `Status: Confirmed` are binding.
 2. `docs/design/`: the approved design deliverables (`01-architecture.md`, `02-data-model.md`, ...).
 3. `docs/requirements-answers.md`: stakeholder answers to requirements questions.
-4. `docs/forms/`: the three Phase 1 application forms.
+4. `docs/forms/`: written procedures, the three application forms (`applications/`) and the certificate templates (`templates/`).
 
 If two sources disagree, the higher one wins. Still report the conflict to the user.
 
@@ -101,7 +101,9 @@ saris-portal/
 │   ├── decisions-log.md          # D-xxx decisions (binding when Confirmed)
 │   ├── requirements-answers.md   # stakeholder answers
 │   ├── design/                   # approved design deliverables from Claude.ai
-│   └── forms/                    # the 3 Phase 1 application forms
+│   └── forms/                    # written procedures
+│       ├── applications/         # the 3 Phase 1 application forms
+│       └── templates/            # license and permit certificate templates
 └── src/                          # application code (not started)
 ```
 
