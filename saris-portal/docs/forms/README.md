@@ -14,13 +14,15 @@ The three Phase 1 application forms:
 
 ## `templates/`
 
-The five license and permit certificate templates (pending upload):
+The five license and permit certificate templates:
 
-- Importation License (PCPIL)
-- Wholesale License (PCPWS)
-- Retailer License (PCPRT)
-- Operator License (PCA)
-- Import Permit (PCPIP)
+| Certificate | Prefix | File |
+|---|---|---|
+| Importation License | PCPIL | `PCP_IMPORTATION_LICENSE.docx` |
+| Wholesale License | PCPWS | `PCP_LICENSE_Wholesale_.docx` |
+| Retailer License | PCPRT | `PCP_LICENSE_Retailer.docx` |
+| Operator License | PCA | `PCP_OPERATOR_LICENSE.docx` |
+| Import Permit | PCPIP | `PCP_IMPORT_PERMIT-revised_18th_May_2026.docx` |
 
 ## Written procedures (this folder)
 
