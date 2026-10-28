@@ -12,6 +12,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useTranslation } from '@/lib/i18n';
 import { dashboard } from '@/routes';
 import { index as users } from '@/routes/users';
 import type { NavItem } from '@/types';
@@ -19,25 +20,26 @@ import AppLogo from './app-logo';
 
 export function AppSidebar() {
     const { auth } = usePage().props;
+    const { t } = useTranslation();
     const can = (permission: string) =>
         auth.permissions?.includes(permission) ?? false;
 
     const mainNavItems: NavItem[] = [
-        { title: 'Dashboard', href: dashboard(), icon: Home },
+        { title: t('Dashboard'), href: dashboard(), icon: Home },
         ...(can('view user')
-            ? [{ title: 'Users', href: users(), icon: Users }]
+            ? [{ title: t('Users'), href: users(), icon: Users }]
             : []),
         ...(can('assign permissions')
             ? [
                   {
-                      title: 'Permissions',
+                      title: t('Permissions'),
                       href: '/roles/permissions',
                       icon: Shield,
                   },
               ]
             : []),
         ...(can('view role')
-            ? [{ title: 'Roles', href: '/roles', icon: Building2 }]
+            ? [{ title: t('Roles'), href: '/roles', icon: Building2 }]
             : []),
     ];
 

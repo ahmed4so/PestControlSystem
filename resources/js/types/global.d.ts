@@ -1,3 +1,4 @@
+import type { Translations } from '@/lib/i18n';
 import type { Auth } from '@/types/auth';
 
 declare module '@inertiajs/core' {
@@ -6,6 +7,8 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             sidebarOpen: boolean;
+            locale: 'en' | 'so';
+            translations: Translations;
             [key: string]: unknown;
         };
     }
