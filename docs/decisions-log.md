@@ -53,7 +53,7 @@ Entry format:
 
 ## D-005: Profile edits and amendments
 - Date: 2026-10-27
-- Status: Confirmed
+- Status: Superseded by D-073
 - Source: Stakeholder (A6, A8)
 - Decision: No separate profile approval; the profile is verified with the first license application. Ordinary profile edits are allowed. Changes to license-relevant fields require an amendment application.
 - Reason: Keep the profile current without bypassing review.
@@ -165,7 +165,7 @@ Entry format:
 
 ## D-018: Persons, premises and facility photos
 - Date: 2026-10-27
-- Status: Confirmed
+- Status: Superseded by D-066 for the person rule only (premises and photo rules remain)
 - Source: Stakeholder (B6, B7, B8)
 - Decision: A technical person may be linked to more than one company (flagged to staff). A company may register multiple premises; each application selects one or more. A photo is mandatory for each facilities and safety checklist item.
 - Reason: Single source of truth with evidence.
@@ -385,7 +385,7 @@ Entry format:
 
 ## D-044: One open application per service and category
 - Date: 2026-10-27
-- Status: Confirmed
+- Status: Amended by D-072 (no limit for Import Permits)
 - Source: Claude.ai design chat
 - Decision: A company may have only one open (not final) application per service and license category at a time.
 - Reason: Prevents duplicate processing.
@@ -557,6 +557,122 @@ Entry format:
 
 ---
 
+## Data Model Decisions (confirmed 2026-10-28)
+
+## D-065: Embedded address
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: The address is a set of `address_*` columns (FMS and region from lists, district, town or market, street, details) on companies, persons and premises, copied as-is into snapshots.
+- Reason: One structured format (D-019) without extra joins.
+- Affects: Company, Person, Premises, snapshots
+
+## D-066: One company per national ID
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder (replaces the flag in D-018 / B6)
+- Decision: A national ID can exist in only one company in the whole system, for every person including the Owner/MD. A duplicate is blocked with a message that does not name the other company. When a person moves, the new company contacts SARIS; staff verify and release the ID from the old company (reason mandatory, audit-logged). The old company is notified and marked amendment required.
+- Reason: Prevents the same person serving several companies.
+- Affects: Person (unique `active_nid_key`), Admin Portal, notifications
+
+## D-067: Typed documents with history
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Documents have a type; a new upload of the same type replaces the current one and keeps history (`replaced_by_id`); every file is an immutable StoredFile.
+- Reason: Single current document with full history.
+- Affects: Document, StoredFile
+
+## D-068: One licenses table
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Licenses and Import Permits are stored in one `licenses` table, distinguished by `document_type`, each with a separate immutable LicenseSnapshot.
+- Reason: One numbering, lifecycle and verification model.
+- Affects: License, LicenseSnapshot, verification
+
+## D-069: Snapshot format
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Submission and license snapshots are versioned JSON (`schema_version`) with a SHA-256 hash. Files are referenced by `stored_file_id`, never copied.
+- Reason: Integrity and long-term readability.
+- Affects: ApplicationVersion, LicenseSnapshot
+
+## D-070: Typed application tables
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Application data is stored in typed tables (ImportPermitDetail, ApplicationPremises, ApplicationPerson), not a generic JSON form store.
+- Reason: Validation, reporting and clear business rules.
+- Affects: Applications module
+
+## D-071: Workflow configuration tables
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Workflow templates, stages and transitions are database tables seeded from configuration files. WorkflowAction is the immutable history of every transition.
+- Reason: Implements D-041.
+- Affects: Workflow module
+
+## D-072: No limit on open Import Permits
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder (amends D-044 for the Import Permit)
+- Decision: A company may have any number of open Import Permit applications. The system warns, without blocking, when another open permit exists for the same product.
+- Reason: One product per permit (D-021); a consignment may need several permits at once.
+- Affects: Application validation
+
+## D-073: Company data editing and locking
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder (supersedes the profile-edit part of D-005)
+- Decision: Company profile, persons and premises are editable only before the first submission, or while a Company or Operator License application is in Draft or Returned. Edits are saved immediately. At all other times, including while any application is in process and after a license is issued, the data is locked. Import Permit drafts do not unlock it. Exceptions: products can be added or edited at any time but need staff verification (D-039); renewed commerce and tax certificates can be uploaded at any time and staff are notified. The lock is enforced in the backend.
+- Reason: Data under review or printed on a license changes only through a license application.
+- Affects: Company, Person, Premises, Document, policies, Company Portal UI
+
+## D-074: One receipt, one payment
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: A receipt number can clear only one payment (unique `cleared_receipt_key`).
+- Reason: Prevents reuse of a receipt.
+- Affects: Payment
+
+## D-075: Number formats
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Application references `CL-YYYY-NNNNN`, `OL-YYYY-NNNNN`, `IP-YYYY-NNNNN`; permission-to-pay letters `PTP-YYYY-NNNN`; account recovery requests `AR-YYYY-NNNN`. All from `number_sequences`.
+- Reason: Readable, yearly references.
+- Affects: NumberSequence, Applications, Payments, Identity
+
+## D-076: Normalisation on save
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Emails lowercase and trimmed; phones in international format (+252…); registration, tax and ID numbers trimmed and uppercased.
+- Reason: Prevents duplicates from typing differences.
+- Affects: All input validation
+
+## D-077: Inspection per premises
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: One inspection per selected premises, with a configurable checklist from procedure 6.6 including the four SOPs; photos, video and GPS recorded by the Inspector; the signed report is locked.
+- Reason: Implements procedure 6.5–6.7 and D-025.
+- Affects: Inspection module
+
+## D-078: Fee currency
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: All SARIS fees are in USD.
+- Reason: Stakeholder answer.
+- Affects: FeeSchedule, PermissionToPayLetter, Payment
+
+---
+
 ## Open Questions
 
 1. Fee schedule per service and category (F1).
@@ -569,3 +685,6 @@ Entry format:
 8. Droplet details: size, OS, PHP version and other sites hosted.
 9. Final domain (assumed `portal.saris.gov.so`).
 10. Staging location: subdomain on the same droplet (recommended) or a second droplet.
+11. Maximum size for inspection videos (proposed 50 MB).
+12. Official FMS and region list.
+13. Formulation types: free text or fixed list?
