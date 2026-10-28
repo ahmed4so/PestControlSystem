@@ -108,7 +108,14 @@ class RoleController extends Controller implements HasMiddleware
         $permissionIds = $request->validated('permission_ids', []);
 
         // Sync permissions (this will add new ones and remove those not in the list)
+        $before = $role->permissions->pluck('name')->all();
         $role->syncPermissions($permissionIds);
+
+        activity('audit')
+            ->performedOn($role)
+            ->event('permissions_changed')
+            ->withProperties(['old' => ['permissions' => $before], 'attributes' => ['permissions' => $role->permissions()->pluck('name')->all()]])
+            ->log('permissions_changed');
 
         return redirect()->route('roles.permissions')->with('success', 'Permissions assigned successfully');
     }
@@ -130,7 +137,15 @@ class RoleController extends Controller implements HasMiddleware
         $roleIds = $request->validated('role_ids', []);
 
         // Sync roles (this will add new ones and remove those not in the list)
+        $before = $user->getRoleNames()->all();
         $user->syncRoles($roleIds);
+
+        // Role changes are audit-logged with before and after roles (03 §5.2).
+        activity('audit')
+            ->performedOn($user)
+            ->event('roles_changed')
+            ->withProperties(['old' => ['roles' => $before], 'attributes' => ['roles' => $user->getRoleNames()->all()]])
+            ->log('roles_changed');
 
         return redirect()->route('roles.assign')->with('success', 'Roles assigned successfully to '.$user->name);
     }

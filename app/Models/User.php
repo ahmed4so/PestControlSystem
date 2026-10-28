@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domain\Audit\Concerns\Audited;
 use App\Domain\Identity\Enums\AccountStatus;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -15,7 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
+    use Audited, HasFactory, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
 
     // Staff roles and permissions are seeded for the 'web' guard (D-048).
     protected string $guard_name = 'web';
