@@ -1,7 +1,7 @@
 # Deliverable 1 — System Architecture (v2, based on the existing codebase)
 
 - Project: SARIS Company Portal
-- Version: 2.1 (approved; replaces the v1 draft, which assumed no existing code)
+- Version: 2.2 (approved; Cloudflare limited to R2 storage by D-094)
 - Date: 2026-10-28
 - Based on: `docs/decisions-log.md` (D-001 to D-046), `docs/requirements-answers.md`,
   `docs/design/00-current-state.md` (commit `009f947`)
@@ -46,10 +46,11 @@ flowchart LR
     ST["SARIS staff<br/>(TOTP 2FA)"]
     PUB["Public / customs<br/>(scans QR)"]
 
-    subgraph CF["Cloudflare"]
-        WAF["DNS, TLS, WAF,<br/>DDoS, rate limits"]
+    subgraph CF["Cloudflare (storage only)"]
         R2[("R2 private bucket")]
     end
+
+    FW["DigitalOcean Cloud Firewall"]
 
     subgraph DO["DigitalOcean droplet"]
         APP["SARIS Portal<br/>(Laravel + Inertia/React)"]
@@ -58,17 +59,17 @@ flowchart LR
 
     RS["Resend (email)"]
 
-    CU --> WAF
-    ST --> WAF
-    PUB --> WAF
-    WAF --> APP
+    CU --> FW
+    ST --> FW
+    PUB --> FW
+    FW --> APP
     APP --> DB
     APP --> R2
     APP --> RS
 ```
 
-External services in Phase 1: Cloudflare (edge protection, R2 storage) and Resend
-(email) only (D-030).
+External services in Phase 1: Cloudflare R2 (file storage only, D-094) and Resend
+(email) (D-030). The domain is served directly by the droplet.
 
 ---
 
@@ -76,14 +77,15 @@ External services in Phase 1: Cloudflare (edge protection, R2 storage) and Resen
 
 ```mermaid
 flowchart TB
-    subgraph Edge["Cloudflare"]
-        DNS["portal.saris.gov.so"]
+    subgraph Edge["Cloudflare R2 (storage only)"]
         R2[("R2: saris-portal-files")]
         R2B[("R2: saris-portal-backups")]
     end
 
+    DNS["portal.saris.gov.so<br/>(DigitalOcean Cloud Firewall)"]
+
     subgraph Droplet["DigitalOcean droplet (isolated app user)"]
-        NGX["Nginx<br/>(Cloudflare IPs only)"]
+        NGX["Nginx<br/>(Let's Encrypt TLS, rate limits, fail2ban)"]
         FPM["PHP-FPM pool<br/>Laravel app"]
         QW["Queue worker<br/>(Supervisor)"]
         SCH["Scheduler<br/>(cron, every minute)"]
@@ -101,12 +103,12 @@ flowchart TB
 
 | Component | Role |
 |---|---|
-| Nginx | Web server; accepts traffic only from Cloudflare IP ranges |
+| Nginx | Web server; HTTPS with Let's Encrypt, HSTS, rate limits; fail2ban; behind DigitalOcean Cloud Firewall and ufw (D-094) |
 | PHP-FPM + Laravel | All pages for both portals and the public pages |
 | Queue worker | PDF generation, emails, image processing |
 | Scheduler | Expiry and reminder jobs (section 8) |
 | MySQL 8 | All data; also the session, cache and queue store (the existing `database` drivers) |
-| Cloudflare R2 | Uploaded files and generated PDFs (D-040); separate bucket for backups |
+| Cloudflare R2 | Uploaded files and generated PDFs (D-040); separate bucket for backups. The only Cloudflare service used |
 | Resend | Outgoing email from a saris.gov.so address |
 
 **No Redis in Phase 1.** The existing database drivers for sessions, cache and queues
@@ -288,7 +290,7 @@ emailed.
 
 | Topic | Approach |
 |---|---|
-| Security | OWASP defaults, Cloudflare WAF, rate limits, lockout, CSRF (built into Laravel/Inertia), strong passwords, mandatory staff 2FA, encrypted sensitive fields. Detail in Deliverable 3. |
+| Security | OWASP defaults, Nginx and Laravel rate limits, fail2ban, lockout, CSRF (built into Laravel/Inertia), strong passwords, mandatory staff 2FA, encrypted sensitive fields. Detail in Deliverable 3. |
 | Audit | Every login, submission, workflow action, payment action, product verification, role or user change is logged (actor, time, IP, before/after). |
 | Languages | Somali and English UI, user can switch; data in English; bilingual emails and certificates (D-032). |
 | Low bandwidth | Mobile-first React pages, lazy-loaded pages, image compression, paginated lists, autosaved drafts (D-046). |
@@ -343,7 +345,7 @@ pestcontrolsystem/            ← repository root = the Laravel app
 | D-054 | i18n with `lang/en.json` and `lang/so.json` shared to React through Inertia. |
 | D-055 | Audit logging with `spatie/laravel-activitylog`. |
 | D-056 | R2 via the S3 driver, private bucket, 5-minute signed download URLs, local file serving disabled. |
-| D-057 | Isolated deployment on the existing droplet; production and staging environments. |
+| D-057 | Isolated deployment on the existing droplet; production and staging environments (network edge per D-094). |
 | D-058 | Queue worker (Supervisor) and scheduler (cron) for background jobs. |
 | D-059 | Nightly encrypted database backup to a separate R2 bucket. |
 | D-060 | Move `saris-portal/docs/` to `docs/` at the root, merge the CLAUDE.md files, remove `saris-portal/`. |

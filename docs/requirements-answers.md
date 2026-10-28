@@ -20,8 +20,9 @@
   the first license application.
 - **A7:** No migration of legacy paper licenses. Existing licensees apply through
   the portal as new applicants.
-- **A8:** Ordinary profile edits are allowed. Changes to license-relevant fields
-  require an amendment application. An issued license is never modified after approval.
+- **A8:** **Superseded** by D-073. Company data is editable only before the first
+  submission or while a Company/Operator License application is in Draft or Returned;
+  it is locked at all other times. An issued license is never modified after approval.
 - **A9:** Self-service password reset by email. If the company has lost access to
   its email, it submits a support request to SARIS (staff-assisted recovery).
 - **A10:** The account holder may be any person authorized by the company.
@@ -49,8 +50,9 @@
 - **B5:** Expiry dates of the Ministry of Commerce registration and tax compliance
   certificates are tracked. Submission is blocked if expired; a reminder is sent
   30 days before expiry.
-- **B6:** The same technical person may be listed by more than one company; staff
-  are shown a flag.
+- **B6:** **Superseded** by D-066. A national ID can exist in only one company
+  (all persons, including the Owner/MD); duplicates are blocked and the System
+  Administrator releases an ID when a person moves.
 - **B7:** A photo is mandatory for each facilities and safety checklist item.
 - **B8:** A company may register multiple premises; each application selects one or more.
 - **B9:** One structured address format everywhere; FMS and region selected from lists.
@@ -117,6 +119,7 @@
 ## F. Payments
 
 - **F1:** **Pending.** Official fee amounts per service and per license category.
+  All fees are in **USD** (D-078).
 - **F2:** For all three services, the fee is paid after the Departmental Director's
   recommendation and before the DG decision.
 - **F3:** The company pays at the SARIS office, uploads the receipt in the portal and
@@ -145,7 +148,8 @@
 
 - **H1:** User interface in Somali and English; data entry in English.
 - **H2:** Fewer than 500 companies expected in the first two years.
-- **H3:** Hosted on SARIS's existing DigitalOcean droplet(s), behind Cloudflare.
+- **H3:** Hosted on SARIS's existing DigitalOcean droplet(s). **Corrected 2026-10-28:**
+  Cloudflare is used only for R2 file storage, not in front of the domain (D-094).
 - **H4:** All records are kept forever. Nothing is hard-deleted.
 - **H5:** (Default) Data-protection principles: consent at sign-up, encryption,
   minimal public data, full audit trail.

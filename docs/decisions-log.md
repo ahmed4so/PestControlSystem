@@ -293,7 +293,7 @@ Entry format:
 
 ## D-033: Hosting, stack and scale
 - Date: 2026-10-27
-- Status: Confirmed
+- Status: Amended by D-094 (Cloudflare limited to R2)
 - Source: Stakeholder (H2, H3, H7)
 - Decision: Backend in PHP/Laravel. Hosted on SARIS's existing DigitalOcean droplet(s) behind Cloudflare. Designed for fewer than 500 companies in the first two years. Full stack to be defined in docs/design/08-tech-stack.md.
 - Reason: Team skills and existing infrastructure.
@@ -445,7 +445,7 @@ Entry format:
 
 ## D-051: System Administrator role
 - Date: 2026-10-28
-- Status: Confirmed
+- Status: Amended by D-095 (also handles account recovery and ID release)
 - Source: Claude.ai design chat
 - Decision: The `Super Admin` role and the `Gate::before` bypass are removed. A `System Administrator` role manages staff users, roles and reference data only and has no workflow permissions. The D-023 roles are seeded.
 - Reason: Nobody may act in the workflow without the stage role.
@@ -493,7 +493,7 @@ Entry format:
 
 ## D-057: Deployment and environments
 - Date: 2026-10-28
-- Status: Confirmed
+- Status: Amended by D-094 (Nginx public behind DigitalOcean Cloud Firewall; no Cloudflare proxy)
 - Source: Claude.ai design chat
 - Decision: Isolated deployment on the existing droplet (own Linux user, PHP-FPM pool, database and user; Nginx accepts only Cloudflare IPs). Production and staging environments.
 - Reason: Implements H3 safely.
@@ -670,6 +670,146 @@ Entry format:
 - Decision: All SARIS fees are in USD.
 - Reason: Stakeholder answer.
 - Affects: FeeSchedule, PermissionToPayLetter, Payment
+
+---
+
+## Security Decisions (confirmed 2026-10-28)
+
+## D-079: Fortify wiring per area
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: `Fortify::ignoreRoutes()`; Fortify controllers registered in `routes/admin.php` and `routes/portal.php`; a `SetAuthArea` middleware, running before `StartSession`, sets the Fortify guard, password broker, home path and session cookie per area. Rate-limit keys include the area.
+- Reason: Implements D-062.
+- Affects: Identity module, routes, middleware, tests
+
+## D-080: Bot protection without outside services
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder (modified)
+- Decision: Public forms (sign-up, new temporary password, forgot password, account recovery) use a hidden honeypot field, a minimum fill time and rate limits. Responses are identical whether or not the email exists.
+- Reason: No Cloudflare in front of the domain (D-094); no third-party CAPTCHA.
+- Affects: Identity module, public forms
+
+## D-081: Account lockout
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: 5 consecutive failed logins lock the account for 15 minutes; the owner is emailed; the System Administrator can unlock staff; a password reset unlocks a company account.
+- Reason: Brute-force protection.
+- Affects: Identity module, users, company_users
+
+## D-082: Password policy and expiry
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder (modified)
+- Decision: Both realms, all environments except tests: 12+ characters, upper and lower case, number, symbol, not breached. Passwords expire every 90 days (reminder 14 days before; forced change at next login). The last 5 passwords cannot be reused. bcrypt cost 12. A password change ends other sessions.
+- Reason: Stakeholder requires periodic expiry; history prevents cycling.
+- Affects: Identity module, password_histories, scheduler
+
+## D-083: Staff account creation
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: The System Administrator creates staff accounts; the system emails a temporary password valid 24 hours; forced change and 2FA set-up at first login. Administrators never set passwords.
+- Reason: Nobody knows another user's password.
+- Affects: Identity module, UserController
+
+## D-084: Sessions
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder (timeouts)
+- Decision: Separate encrypted session cookies (`Secure`, `HttpOnly`, `SameSite=Lax`). Idle timeout 15 minutes for staff, 30 minutes for companies; staff absolute limit 12 hours. No "remember me".
+- Reason: Stakeholder answer.
+- Affects: Session config, middleware
+
+## D-085: Password re-confirmation
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Re-entering the password is required for sensitive actions (DG decision, license issue, payment clearance, inspection signing, enforcement, user and role changes, recovery decisions, ID release, 2FA reset; company submission and 2FA changes). Valid 15 minutes for staff, 30 for companies.
+- Reason: Protects decisions from an unattended session.
+- Affects: Identity, Workflow
+
+## D-086: Segregation of duties
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: The System Administrator cannot hold a workflow role. On the same application one person cannot both recommend (Director) and decide (DG), clear the payment and decide, or review as Registrar and issue the permission-to-pay letter. Delegates act only within their dates.
+- Reason: No single person controls an application end to end.
+- Affects: Workflow module, roles
+
+## D-087: Staff 2FA reset
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: The System Administrator resets a staff member's 2FA after face-to-face verification; the user enrols again at next login; audit-logged.
+- Reason: Lost device recovery for mandatory 2FA.
+- Affects: Identity module
+
+## D-088: National ID protection
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: National IDs are encrypted at rest; an HMAC-SHA256 hash column provides lookup and the unique key for D-066.
+- Reason: Data protection without losing the duplicate check.
+- Affects: Person, 02-data-model
+
+## D-089: Upload security
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Type detected from file content (PDF, JPG, PNG); size limits; images re-encoded on the server; PDFs with JavaScript or encryption rejected; random storage keys; downloads as attachments. Antivirus in Phase 2.
+- Reason: Safe handling of uploaded files.
+- Affects: Documents module
+
+## D-090: Transport security and headers
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: TLS 1.2+ on Nginx with a Let's Encrypt certificate (auto-renewed), HTTP redirected to HTTPS, HSTS. Nonce-based CSP, frame denial, nosniff, referrer and permissions policies.
+- Reason: Browser and transport protection.
+- Affects: Nginx, middleware
+
+## D-091: Append-only audit log
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Audit rows are never updated or deleted; MySQL triggers reject UPDATE and DELETE. Staff views and downloads of company documents are logged.
+- Reason: Tamper-evident records kept forever.
+- Affects: Audit module
+
+## D-092: Recovery approval effects
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Approving an account recovery ends all sessions, sends a temporary password (1 hour) to the new email and a notice to the old email; optional 2FA reset.
+- Reason: Detects and limits account takeover.
+- Affects: Identity module
+
+## D-093: Company login email change
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: The account holder can change the login email after password confirmation; a confirmation link goes to the new address and a notice to the old one; the change applies only when the link is used.
+- Reason: Self-service without takeover risk.
+- Affects: Identity module, company_users
+
+## D-094: Cloudflare limited to R2
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: Cloudflare is used only for R2 file storage. The domain is served directly by Nginx on the droplet with Let's Encrypt TLS, rate limits and fail2ban, behind a DigitalOcean Cloud Firewall and ufw. No Cloudflare proxy, WAF or Turnstile. Edge DDoS protection is accepted as absent in Phase 1 and can be added later without code changes.
+- Reason: Stakeholder decision.
+- Affects: Deployment, 01-architecture, 03-auth-security
+
+## D-095: Recovery and ID release by System Administrator
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: The System Administrator handles account recovery requests and national-ID releases. The role still has no workflow permissions.
+- Reason: Stakeholder answer.
+- Affects: Roles, Identity module, Admin Portal
 
 ---
 

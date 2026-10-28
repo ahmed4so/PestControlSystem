@@ -1,7 +1,7 @@
 # Deliverable 2 — Data Model
 
 - Project: SARIS Company Portal
-- Version: 1.1 (approved 2026-10-28)
+- Version: 1.2 (approved 2026-10-28; password history added by D-082)
 - Date: 2026-10-28
 - Based on: `docs/decisions-log.md` (D-001 to D-064), `docs/requirements-answers.md`,
   `docs/design/01-architecture.md` (v2.1), `docs/design/00-current-state.md`
@@ -135,8 +135,9 @@ R = read, W = write, — = no access.
 | first_login | bool | Set `true` on creation; forces password change |
 | password | string | Hashed |
 | two_factor_secret, two_factor_recovery_codes, two_factor_confirmed_at | text / datetime | Fortify; mandatory for staff (D-052) |
-| failed_login_attempts | int, default 0 | Lockout (Deliverable 3) |
+| failed_login_attempts | int, default 0 | Lockout (D-081) |
 | locked_until | datetime, null | |
+| password_changed_at | datetime | 90-day expiry (D-082) |
 | last_login_at | datetime, null | |
 | email_verified_at, remember_token, deleted_at | | |
 
@@ -157,12 +158,22 @@ Access: C —, A R/W (System Administrator).
 | email_verified_at | datetime, null | Set on first successful login with the temporary password |
 | two_factor_secret, two_factor_recovery_codes, two_factor_confirmed_at | | Optional (D-064) |
 | status | enum `ACTIVE`, `INACTIVE` | |
-| failed_login_attempts, locked_until, last_login_at | | Lockout |
+| failed_login_attempts, locked_until, last_login_at | | Lockout (D-081) |
+| password_changed_at | datetime | 90-day expiry (D-082) |
+| pending_email, pending_email_token_hash, pending_email_expires_at | string, string, datetime, null | Login email change in progress (D-093) |
 | preferred_locale | enum `en`, `so` | UI language (D-032) |
 | terms_accepted_at | datetime | Data-protection consent at sign-up (H5) |
 | deleted_at | | |
 
 Access: C R/W (own row, limited fields), A R (and W only via account recovery).
+
+#### PasswordHistory (`password_histories`) — D-082
+
+| Field | Type | Notes |
+|---|---|---|
+| account_type, account_id | morph | User or CompanyUser |
+| password_hash | string | Previous password hash; the last 5 are checked on every change |
+| created_at | datetime | |
 
 #### AccountRecoveryRequest (`account_recovery_requests`)
 
@@ -178,7 +189,7 @@ Access: C R/W (own row, limited fields), A R (and W only via account recovery).
 | status | enum `PENDING`, `APPROVED`, `REJECTED` | |
 | company_id | FK→companies, null | Matched by staff |
 | reset_two_factor | bool | Staff choice (D-064) |
-| reviewed_by | FK→users, null | |
+| reviewed_by | FK→users, null | System Administrator (D-095) |
 | reviewed_at | datetime, null | |
 | decision_reason | text, null | Mandatory on rejection |
 | submitted_ip | string(45) | |
@@ -291,7 +302,8 @@ Access: C R/W (own), A R.
 | company_id | FK→companies | Owner company |
 | full_name | string(150) | |
 | nationality | char(2) | ISO country code; printed on certificate when Owner/MD (D-013) |
-| national_id_no | string(60) | Normalised; **unique across the whole system** while not released (D-066) |
+| national_id_no | text (encrypted) | Normalised, then encrypted at rest (D-088) |
+| national_id_hash | char(64) | HMAC-SHA256 of the normalised ID; used for lookup |
 | email, phone | string | |
 | address_* | §4.9 | Required for Owner/MD |
 | qualification | string(200), null | Technical persons (minimum BSc) |
@@ -300,9 +312,9 @@ Access: C R/W (own), A R.
 | training_pcp_handling | text, null | Form 1 and 2 |
 | training_fumigation | text, null | Form 2 only |
 | released_at | datetime, null | Set when SARIS staff release the ID to another company (D-066) |
-| released_by | FK→users, null | |
+| released_by | FK→users, null | System Administrator (D-095) |
 | release_reason | text, null | Mandatory on release |
-| active_nid_key | string(60), generated, **unique** | Equals `national_id_no` while `released_at` and `deleted_at` are null, otherwise `NULL`; enforces D-066 in the database |
+| active_nid_key | char(64), generated, **unique** | Equals `national_id_hash` while `released_at` and `deleted_at` are null, otherwise `NULL`; enforces D-066 in the database |
 | deleted_at | | |
 
 A person becomes the Owner/MD through `companies.owner_person_id`, and a technical person
