@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Domain\Identity\Support\PasswordPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -26,9 +27,6 @@ class AppServiceProvider extends ServiceProvider
 
         DB::prohibitDestructiveCommands(app()->isProduction());
 
-        Password::defaults(fn (): ?Password => app()->isProduction()
-            ? Password::min(12)->mixedCase()->letters()->numbers()->symbols()->uncompromised()
-            : null
-        );
+        Password::defaults(fn (): ?Password => PasswordPolicy::defaults());
     }
 }
