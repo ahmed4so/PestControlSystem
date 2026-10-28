@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,10 +22,6 @@ class AppServiceProvider extends ServiceProvider
 
         // ── Authorization ─────────────────────────────────────────────────────
         Gate::before(fn ($user) => $user->hasRole('Super Admin') ? true : null);
-
-        Passport::enablePasswordGrant();
-        Passport::tokensExpireIn(now()->addMinutes(60));
-        Passport::refreshTokensExpireIn(now()->addDays(30));
     }
 
     protected function configureDefaults(): void
