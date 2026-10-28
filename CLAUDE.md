@@ -56,7 +56,7 @@ If two sources disagree, the higher one wins. Still report the conflict to the u
 ## Tech stack
 Laravel 12 (PHP 8.3) · Inertia 2 · React 19 + TypeScript · Tailwind 4 + shadcn/ui ·
 Fortify (both portals) · spatie/laravel-permission · spatie/laravel-activitylog ·
-MySQL 8 · database queue/cache/session · Cloudflare R2 (S3 driver) · Resend · mPDF ·
+MySQL 8 · database queue/cache/session · Cloudflare R2 (S3 driver) · Resend · PhpWord + LibreOffice (PDF on demand) ·
 Pest. Inertia SSR kept as in the repo. Emails from noreply@saris.gov.so. Full detail: docs/design/08-tech-stack.md.
 
 ### Commands
