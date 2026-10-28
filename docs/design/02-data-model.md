@@ -1,7 +1,7 @@
 # Deliverable 2 — Data Model
 
 - Project: SARIS Company Portal
-- Version: 1.3 (approved 2026-10-28; automatic issue D-106, no withdrawal D-101)
+- Version: 1.4 (approved 2026-10-28; documents on demand D-145, settings and signatures D-140, staff language D-125)
 - Date: 2026-10-28
 - Based on: `docs/decisions-log.md` (D-001 to D-064), `docs/requirements-answers.md`,
   `docs/design/01-architecture.md` (v2.1), `docs/design/00-current-state.md`
@@ -139,6 +139,9 @@ R = read, W = write, — = no access.
 | locked_until | datetime, null | |
 | password_changed_at | datetime | 90-day expiry (D-082) |
 | last_login_at | datetime, null | |
+| preferred_locale | enum `en`, `so`, default `en` | Email language order (D-125) |
+| title | string(150), null | Printed under the signature, e.g. "Director General" (D-140) |
+| signature_file_id | FK→stored_files, null | Signature image (PNG); required before a DG or delegate can approve (D-140) |
 | email_verified_at, remember_token, deleted_at | | |
 
 Relationships: roles (spatie), delegations, workflow actions, assignments.
@@ -247,6 +250,14 @@ Matching is case-insensitive on name (and CAS number when present). Access: C �
 
 Access: C —, A R/W (System Administrator).
 
+#### SystemSetting (`system_settings`) — D-140, D-146
+
+| Field | Type | Notes |
+|---|---|---|
+| key | string(100), unique | e.g. `documents.stamp_file_id`, `documents.place_of_issue`, `documents.footer_contact`, `payments.instructions` |
+| value | text | |
+| updated_by | FK→users | Every change audit-logged |
+
 #### NumberSequence (`number_sequences`)
 
 | Field | Type | Notes |
@@ -302,7 +313,7 @@ Access: C R/W (own), A R.
 | company_id | FK→companies | Owner company |
 | full_name | string(150) | |
 | nationality | char(2) | ISO country code; printed on certificate when Owner/MD (D-013) |
-| national_id_no | text (encrypted) | Normalised, then encrypted at rest (D-088) |
+| national_id_no | text (encrypted) | Exactly 11 digits (D-133), then encrypted at rest (D-088) |
 | national_id_hash | char(64) | HMAC-SHA256 of the normalised ID; used for lookup |
 | email, phone | string | |
 | address_* | §4.9 | Required for Owner/MD |
@@ -592,7 +603,7 @@ premises, and copied as-is into snapshots:
 | payment_instructions | text | |
 | issued_by | FK→users | Payment Officer |
 | issued_at | datetime | |
-| pdf_file_id | FK→stored_files | Generated letter |
+| template_code | string(40) | Letter template version used (D-137); the PDF is generated on demand (D-145) |
 
 #### Payment (`payments`) — one row per receipt upload
 
@@ -637,10 +648,10 @@ kept on resubmission after deferral (D-043). Access: C R/W (own uploads), A R/W.
 | superseded_by_id | FK→licenses, null | Successor (D-007) |
 | flagged_at, flag_reason | datetime, text, null | Permit flagged when its Importation License is suspended or cancelled (D-010) |
 | verification_code | string(40), unique | Random; used in the QR URL `/verify/{code}` |
-| pdf_file_id | FK→stored_files, null | Official PDF (D-012) |
+| template_code | string(40) | Official .docx template version, e.g. `IMPORTATION_LICENSE_V1` (D-137). No PDF is stored; it is generated on demand (D-145) |
 
 No `deleted_at` use: licenses are never deleted. Only `status`, `issued_*`,
-`superseded_by_id`, `flagged_*` and `pdf_file_id` change after creation, and only through
+`superseded_by_id` and `flagged_*` change after creation, and only through
 the Licensing module. Access: C R (own), A R/W (Licensing module), P R (limited fields, D-012).
 
 #### LicenseSnapshot (`license_snapshots`) — immutable
@@ -782,7 +793,9 @@ flowchart LR
    snapshot, never from live data.
 2. **License snapshot.** At DG approval, the license data is built from the **approved
    version's snapshot** plus decision data (number, registered date, validity, signer,
-   delegation). This is exactly what the certificate prints and the PDF is generated from it.
+   delegation, and the `stored_file_id` of the signature and stamp images used). This is
+   exactly what the certificate prints; the PDF is generated from it each time it is
+   downloaded (D-145).
 3. **Files** are referenced by `stored_file_id`. Because files are never overwritten
    (D-056), a snapshot always points to the original file.
 4. **Integrity.** Each snapshot has a SHA-256 hash. Each snapshot includes a

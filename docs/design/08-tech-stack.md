@@ -1,7 +1,7 @@
 # Deliverable 8 — Technology Stack and Coding Conventions
 
 - Project: SARIS Company Portal
-- Version: 1.1 (approved 2026-10-28)
+- Version: 1.2 (approved 2026-10-28; documents from official .docx templates, D-138)
 - Date: 2026-10-28
 - Based on: `docs/design/00-current-state.md`, `docs/decisions-log.md` (D-001 to D-107),
   Deliverables 01–04
@@ -44,7 +44,8 @@ This deliverable fills the **Tech stack** and **Coding conventions** sections of
 |---|---|---|
 | Audit log | `spatie/laravel-activitylog` | Decided (D-055) |
 | R2 storage | `league/flysystem-aws-s3-v3` | Laravel's S3 driver works with R2 (D-056) |
-| PDF certificates and letters | `mpdf/mpdf` | Pure PHP (no Chrome on the server); good Unicode and right-to-left support for the bilingual Somali/English certificates and the Arabic letterhead text (D-109) |
+| Fill official Word templates | `phpoffice/phpword` (TemplateProcessor) | Fills the official SARIS .docx templates with text and images (D-138) |
+| Convert to PDF | LibreOffice (headless, server package) | Faithful .docx → PDF conversion, including the Arabic letterhead text (D-109) |
 | QR codes | `chillerlan/php-qrcode` | Maintained; generates SVG/PNG without extra system libraries |
 | Image re-encoding | `intervention/image` (GD driver) | Strips metadata and hidden content from uploads (D-089) |
 | Honeypot | `spatie/laravel-honeypot` | Bot protection without outside services (D-080) |
@@ -66,6 +67,7 @@ Built-in features used instead of packages: rate limiting, encryption casts, `ha
 | Database | MySQL 8.0, bound to localhost |
 | Processes | Supervisor runs `php artisan queue:work` and `php artisan inertia:start-ssr`; cron runs `php artisan schedule:run` every minute |
 | Node | Node 22 LTS, to build front-end assets and run the Inertia SSR server |
+| Documents | LibreOffice (headless) and the template fonts, including Noto Naskh Arabic (D-109, D-138) |
 | Firewall | DigitalOcean Cloud Firewall + ufw (22, 80, 443) |
 | Server-side rendering | **Kept as the repository has it** (D-110): the SSR bundle is built with `npm run build:ssr` and the SSR server runs under Supervisor (`php artisan inertia:start-ssr`). If it stops, Inertia falls back to normal browser rendering |
 
@@ -236,7 +238,7 @@ Replace the two placeholder sections in CLAUDE.md with:
 ## Tech stack
 Laravel 12 (PHP 8.3) · Inertia 2 · React 19 + TypeScript · Tailwind 4 + shadcn/ui ·
 Fortify (both portals) · spatie/laravel-permission · spatie/laravel-activitylog ·
-MySQL 8 · database queue/cache/session · Cloudflare R2 (S3 driver) · Resend · mPDF ·
+MySQL 8 · database queue/cache/session · Cloudflare R2 (S3 driver) · Resend · PhpWord + LibreOffice (PDF on demand) ·
 Pest. Inertia SSR kept as in the repo. Emails from noreply@saris.gov.so. Full detail: docs/design/08-tech-stack.md.
 
 ### Commands
@@ -278,7 +280,7 @@ Pest. Inertia SSR kept as in the repo. Emails from noreply@saris.gov.so. Full de
 | Decision | Summary |
 |---|---|
 | D-108 | Added packages as in §1.3. |
-| D-109 | PDF engine: mPDF (pure PHP, Unicode and right-to-left support). |
+| D-109 | PDF engine: official .docx templates filled with PhpWord, converted by headless LibreOffice, on demand. |
 | D-110 | Inertia server-side rendering is kept as the repository has it; the SSR server runs under Supervisor in production. |
 | D-111 | All existing UI libraries are kept (shadcn/ui, `@headlessui/react`, `@heroui/alert`); no new UI library without a decision. |
 | D-112 | Server baseline in §1.4 (PHP 8.3, MySQL 8.0, Nginx, Supervisor for queue and SSR, Node 22). |

@@ -1,7 +1,7 @@
 # Deliverable 4 — Configurable Workflow Engine
 
 - Project: SARIS Company Portal
-- Version: 1.1 (approved 2026-10-28)
+- Version: 1.2 (approved 2026-10-28; documents on demand, D-145)
 - Date: 2026-10-28
 - Based on: `docs/decisions-log.md` (D-001 to D-095), `docs/requirements-answers.md`
   (section W, written procedure 6.1–6.14), `docs/design/02-data-model.md` (v1.2),
@@ -84,7 +84,7 @@ sequenceDiagram
         E->>DB: 8. update status (and resume_stage, open_key)
         E->>DB: 9. insert WorkflowAction + audit entry
         E->>DB: COMMIT
-        E->>Q: 10. emails, PDF generation (after commit)
+        E->>Q: 10. emails (after commit)
         E-->>U: success, new status
     end
 ```
@@ -94,8 +94,9 @@ Rules:
 1. **One transaction.** Effects, status change and history are saved together or not at all.
 2. **No double processing.** The row lock plus `expected_status` mean two staff members clicking
    at the same time cannot both act; the second sees "already processed".
-3. **Slow work after commit.** PDFs and emails run on the queue only after the transaction has
-   succeeded (D-058), so a failed transition never sends an email.
+3. **Emails after commit.** Emails run on the queue only after the transaction has succeeded
+   (D-058), so a failed transition never sends an email. PDFs are not produced here; they are
+   generated on demand when downloaded (D-145).
 4. **Every check runs on the server**, whatever the UI shows (D-015, D-086).
 5. **The UI asks the engine** which actions the current user can perform
    (`availableActions(application, user)`), so buttons always match the rules.
@@ -182,7 +183,7 @@ the company.
 | T18 | `AWAITING_PAYMENT` | `UPLOAD_RECEIPT` | COMPANY | `PAYMENT_VERIFICATION` | receipt number, date, amount, file | RecordPayment(SUBMITTED), Notify(→ Payment Officer) |
 | T19 | `PAYMENT_VERIFICATION` | `CLEAR_PAYMENT` | PAYMENT_OFFICER (password confirmed) | `DG_DECISION` | AmountMatchesLetter, ReceiptNotUsed (D-074) | ClearPayment, Notify(PAYMENT_CLEARED) |
 | T20 | `PAYMENT_VERIFICATION` | `REJECT_RECEIPT` | PAYMENT_OFFICER | `AWAITING_PAYMENT` | comment | RejectPayment, Notify(RECEIPT_REJECTED) |
-| T21 | `DG_DECISION` | `APPROVE` | DIRECTOR_GENERAL or delegate (password confirmed) | `ISSUED` | PaymentCleared, Segregation, ActiveDelegation* | IssueLicense (number, LicenseSnapshot, QR code, `ACTIVE`, register; PDF job), SupersedePreviousLicense*, ClearAmendmentFlag*, ClearOpenKey, SetDecidedAt, Notify(ISSUED, after the PDF is ready) |
+| T21 | `DG_DECISION` | `APPROVE` | DIRECTOR_GENERAL or delegate (password confirmed) | `ISSUED` | PaymentCleared, Segregation, ActiveDelegation*, SignerHasSignature (D-140) | IssueLicense (number, LicenseSnapshot with signature and stamp file IDs, QR code, `ACTIVE`, register), SupersedePreviousLicense*, ClearAmendmentFlag*, ClearOpenKey, SetDecidedAt, Notify(ISSUED) |
 | T22 | `DG_DECISION` | `DEFER` | DIRECTOR_GENERAL or delegate | `RETURNED` | comment | SetResumeStage(CONSOLIDATED_REVIEW), Notify(RETURNED) |
 | T23 | `DG_DECISION` | `REJECT` | DIRECTOR_GENERAL or delegate (password confirmed) | `REJECTED` | comment | ClearOpenKey, SetDecidedAt, Notify(REJECTED) |
 | T25 | `RETURNED` | `RESUBMIT` | COMPANY (password confirmed) | value of `resume_stage` | Same as T1 (except reference) | CreateVersionSnapshot, ClearResumeStage, Notify(RESUBMITTED → staff) |
@@ -358,9 +359,9 @@ For a staff action, the engine checks in this order:
 | FlagRestrictedIngredient | Set `has_restricted_ingredient` (D-021) |
 | CreateAssignment / EndAssignment | Technical Reviewer assignment |
 | CreateInspections / UpdateInspectionDate / SetConductedAt / SignInspection / CancelOpenInspections | One inspection per premises (D-077) |
-| IssuePermissionToPayLetter | Letter number, fee copied from schedule, PDF job (D-028, D-038) |
+| IssuePermissionToPayLetter | Letter number, fee copied from schedule, template version (D-028, D-038); PDF on demand (D-145) |
 | RecordPayment / ClearPayment / RejectPayment | Payment rows and statuses (D-074) |
-| IssueLicense | At DG approval: license number, LicenseSnapshot from the approved version, verification code, status `ACTIVE`, register updated, PDF generated on the queue with the DG (or delegate) signature image, stamp image and QR code (D-106) |
+| IssueLicense | At DG approval: license number, LicenseSnapshot from the approved version, verification code, status `ACTIVE`, register updated; the snapshot records the signer's signature and stamp image files; PDF generated on demand when downloaded (D-106, D-145) |
 | SupersedePreviousLicense | Previous license `SUPERSEDED`, linked (D-007) |
 | ClearAmendmentFlag | Clear `companies.amendment_required_at` |
 | Notify(template) | Queue the email after commit (detailed in Deliverable 7) |
@@ -457,7 +458,7 @@ differences, review items, inspections, payments and the full WorkflowAction tim
 7. The Import Permit cannot be approved if the Importation License became inactive during review.
 8. Renewal outside the window is refused, and a renewal inside the last 30 days is flagged late.
 9. Issuing a renewal or amendment supersedes the previous license; a renewal approved before expiry starts the day after the old license expires.
-11. DG approval issues the license in the same transaction (number, snapshot, `ACTIVE`), and the PDF is generated afterwards with the signer's signature image.
+11. DG approval issues the license in the same transaction (number, snapshot, `ACTIVE`); downloading it later produces the same PDF every time from the snapshot and the recorded template version.
 10. Loading a definition with an unreachable stage, unknown guard or unknown role fails.
 
 ---

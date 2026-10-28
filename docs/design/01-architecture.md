@@ -1,7 +1,7 @@
 # Deliverable 1 — System Architecture (v2, based on the existing codebase)
 
 - Project: SARIS Company Portal
-- Version: 2.4 (approved; SSR server kept, D-110)
+- Version: 2.5 (approved; documents generated on demand, D-145)
 - Date: 2026-10-28
 - Based on: `docs/decisions-log.md` (D-001 to D-046), `docs/requirements-answers.md`,
   `docs/design/00-current-state.md` (commit `009f947`)
@@ -105,7 +105,8 @@ flowchart TB
 |---|---|
 | Nginx | Web server; HTTPS with Let's Encrypt, HSTS, rate limits; fail2ban; behind DigitalOcean Cloud Firewall and ufw (D-094) |
 | PHP-FPM + Laravel | All pages for both portals and the public pages |
-| Queue worker | PDF generation, emails, image processing |
+| Queue worker | Emails, image processing |
+| LibreOffice (headless) | Converts filled official .docx templates to PDF when a document is downloaded (D-138, D-145) |
 | Inertia SSR server | Server-side rendering kept as in the repository (D-110); runs under Supervisor; pages fall back to browser rendering if it stops |
 | Scheduler | Expiry and reminder jobs (section 8) |
 | MySQL 8 | All data; also the session, cache and queue store (the existing `database` drivers) |
@@ -265,12 +266,13 @@ The license check runs again at `DG_DECISION`.
 3. Files are never overwritten; a replacement is a new file. Snapshots stay valid forever.
 4. Downloads: the backend checks permission and redirects to a 5-minute signed R2 URL.
 
-### 7.3 License issue (D-106)
+### 7.3 License issue and documents (D-106, D-145)
 
 When the DG (or delegate) approves, the same transaction creates the license number,
-LicenseSnapshot and QR verification code and sets the license `ACTIVE`. A queued job then
-generates the PDF with the signer's signature image, the stamp image and the QR code, and
-the company is emailed when the PDF is ready.
+LicenseSnapshot (including the signature and stamp files used) and QR verification code and
+sets the license `ACTIVE`; the company is emailed after commit. No PDF is stored: whenever a
+license, permit or letter is opened, the official .docx template is filled with the saved
+data and converted to PDF on the spot (06-documents §2).
 
 ---
 

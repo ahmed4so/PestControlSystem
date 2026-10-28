@@ -897,7 +897,7 @@ Entry format:
 
 ## D-106: Automatic license issue at DG approval
 - Date: 2026-10-28
-- Status: Confirmed
+- Status: Amended by D-145 (PDF generated on demand, not on the queue)
 - Source: Stakeholder (supersedes D-029; amends D-022, D-023)
 - Decision: When the DG or delegate approves, the license or permit is issued in the same transaction: number, LicenseSnapshot, verification code, status ACTIVE, register entry. The PDF is generated on the queue with the signer's signature image, stamp image and QR code, and the company is emailed when it is ready. There is no Licensing/Records Officer role and no LICENSE_PREPARATION stage. Written procedure 6.13 should be updated by SARIS to match.
 - Reason: Stakeholder decision; faster issue.
@@ -917,7 +917,7 @@ Entry format:
 
 ## D-108: Added packages
 - Date: 2026-10-28
-- Status: Confirmed
+- Status: Amended by D-138 (phpoffice/phpword instead of mpdf/mpdf)
 - Source: Claude.ai design chat
 - Decision: spatie/laravel-activitylog, league/flysystem-aws-s3-v3, mpdf/mpdf, chillerlan/php-qrcode, intervention/image (GD), spatie/laravel-honeypot, spatie/laravel-csp, spatie/laravel-backup, larastan/larastan (dev); npm browser-image-compression.
 - Reason: Each implements a confirmed decision with a maintained package.
@@ -925,7 +925,7 @@ Entry format:
 
 ## D-109: PDF engine
 - Date: 2026-10-28
-- Status: Confirmed
+- Status: Amended by D-138 (official .docx templates filled with PhpWord, converted by headless LibreOffice)
 - Source: Claude.ai design chat
 - Decision: Certificates, permits and permission-to-pay letters are generated with mPDF from HTML templates.
 - Reason: Pure PHP; Unicode and right-to-left support; no browser on the server.
@@ -949,7 +949,7 @@ Entry format:
 
 ## D-112: Server baseline
 - Date: 2026-10-28
-- Status: Confirmed
+- Status: Amended by D-138 (LibreOffice and template fonts on the server)
 - Source: Claude.ai design chat
 - Decision: PHP-FPM 8.3 with required extensions, MySQL 8.0 on localhost, Nginx with Let's Encrypt, Supervisor for the queue worker and SSR server, cron for the scheduler, Node 22 LTS.
 - Reason: Supported versions matching the stack.
@@ -1005,6 +1005,246 @@ Entry format:
 
 ---
 
+## Implementation Plan Decisions (confirmed 2026-10-28)
+
+## D-119: Phases and releases
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Build in Phases 0–7 (09-implementation-plan §3). Release 1 = Company License (all three categories) end to end, after Phases 0–5. Release 2 = Import Permit with My Products and Operator License, after Phases 6–7.
+- Reason: The Company License is the prerequisite for the Import Permit (D-015) and exercises every part of the system.
+- Affects: Implementation plan, all modules
+
+## D-120: Remaining design deliverables
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Deliverable 05 is reduced to per-field validation rules. Deliverables 05, 06 (documents) and 07 (notifications) are designed while Phases 0–3 are built; 05 and 07 are required before Phase 4A, 06 before Phase 4B.
+- Reason: Most lifecycle content is already in 02 and 04; no waiting time.
+- Affects: Design plan
+
+## D-121: Phase process
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: One branch per phase, one pull request per sub-feature, tests and `composer run check` passing, "Done when" checklist complete. Implementation decisions not covered by the design are logged as Proposed and confirmed in the design Project before the phase is merged to main.
+- Reason: Design and code stay consistent.
+- Affects: All phases, CLAUDE.md
+
+## D-122: Deployment and rollback
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: deploy/deploy.sh deploys from main into releases/<timestamp>, backs up the database first, runs migrations and workflows:load, switches a `current` symlink, restarts the queue and SSR processes, checks /up, and rolls back by switching the symlink. The last 5 releases are kept; database changes stay backward-compatible for one release.
+- Reason: Safe updates and one-step rollback.
+- Affects: Deployment, Phase 5
+
+## D-123: Acceptance testing and sign-off
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder (sign-off) and Claude.ai design chat
+- Decision: Each release is tested on staging by SARIS staff in each role and 2–3 volunteer companies (09 §5). The SARIS IT Advisor signs off acceptance before every release goes live.
+- Reason: Real users confirm the system before go-live.
+- Affects: Phase 5, Releases 1 and 2
+
+## D-124: Backlog out of scope
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Antivirus scanning, edge protection, closing abandoned applications, revocation/blacklisting, reports, SMS, online payment, NIRA verification, online product registration and a configurable license lifecycle are not part of Releases 1 and 2.
+- Reason: Keep the first releases focused.
+- Affects: Scope
+
+---
+
+## Notifications, Field Rules and Documents Decisions (confirmed 2026-10-28)
+
+## D-125: Bilingual emails
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Every email contains both languages, the recipient's preferred language first; staff get `users.preferred_locale` (default en).
+- Reason: Readable by every recipient (D-032).
+- Affects: Notifications, users
+
+## D-126: No email attachments
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Emails never carry attachments; they link to portal pages that require login.
+- Reason: Security and low bandwidth.
+- Affects: Notifications
+
+## D-127: Staff notification recipients
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Staff emails go to all active holders of the stage role, or only to the assignee when one exists; never for the user's own action.
+- Reason: Right people, no noise.
+- Affects: Notifications
+
+## D-128: Notification catalogue
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: The codes, triggers and recipients in 07-notifications §3.
+- Reason: Complete event coverage.
+- Affects: Notifications, Workflow, Licensing, Identity
+
+## D-129: Email delivery handling
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Emails are queued after commit, retried 3 times, logged without the body; failures are visible to the System Administrator.
+- Reason: Reliable, private delivery.
+- Affects: Notifications
+
+## D-130: Email format
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: HTML plus plain-text versions with a light layout; subject format `SARIS — {subject} — {reference}`.
+- Reason: Works on basic phones and slow connections.
+- Affects: Notifications
+
+## D-131: Draft validation
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Drafts save without required-field checks (format rules still apply); full validation and workflow guards run at submit and resubmit.
+- Reason: Autosave never fails (D-046).
+- Affects: Applications, Form Requests
+
+## D-132: Technical person national ID
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: The technical person's national ID is required, although not on the paper forms.
+- Reason: Needed for the duplicate block (D-066).
+- Affects: Person, Forms 1 and 2
+
+## D-133: Common field formats
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder (ID format) and Claude.ai design chat
+- Decision: Formats in 05-field-rules §2: names, phone in international format with +252 default, registration numbers, national ID of exactly 11 digits (NIRA), files.
+- Reason: Consistent validation.
+- Affects: All forms
+
+## D-134: Origin registration number required
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Registration number in the country of origin is required for products.
+- Reason: Printed on the Import Permit.
+- Affects: Product
+
+## D-135: Photo and video limits
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Up to 5 photos per checklist item; inspection videos MP4 up to 50 MB.
+- Reason: Closes the inspection media question.
+- Affects: FacilityChecklistPhoto, InspectionMedia
+
+## D-136: Inspection GPS
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: The inspection report records the device GPS position; if unavailable, the Inspector enters a reason.
+- Reason: Evidence of the visit (6.6).
+- Affects: Inspection
+
+## D-137: Template versions
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Official templates are versioned and never deleted; each license and letter records its `template_code`, and the license snapshot records the signature and stamp files used at approval, so every download is identical.
+- Reason: Reproducible documents.
+- Affects: Licensing, Documents
+
+## D-138: Official .docx templates filled with saved data
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder (supersedes the HTML/letterhead-image approach)
+- Decision: Documents are produced by filling the official SARIS .docx templates (copies in resources/templates with placeholders) with the saved snapshot data using phpoffice/phpword, then converting to PDF with headless LibreOffice.
+- Reason: Documents look exactly like the official SARIS templates.
+- Affects: Documents, 08-tech-stack, server
+
+## D-139: Document field mapping and signer
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Field mapping in 06-documents §3; the signer's own name and title are printed, with "for the Director General" when a delegate signs.
+- Reason: Matches the templates; correct signer (D-027).
+- Affects: Documents
+
+## D-140: Signatures, stamp and settings
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Each signer's signature image (`users.signature_file_id`) and title, the stamp and document settings (place of issue, footer, payment instructions) are managed by the System Administrator in `system_settings`; a DG or delegate cannot approve until their signature exists.
+- Reason: Controlled, audited document assets.
+- Affects: Users, SystemSetting, Workflow (T21)
+
+## D-141: QR verification
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Every license and permit carries a QR code to `/verify/{code}` (32 random characters) with the code and URL printed below; the public page shows only number, company, type, status and dates.
+- Reason: Authenticity check for customs and the public.
+- Affects: Documents, Verification
+
+## D-142: Template wording corrections
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Corrections listed in 06-documents §6 are applied only after SARIS approves the wording.
+- Reason: Legal text is SARIS's to change.
+- Affects: Templates
+
+## D-143: Valid-from line
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: A "Valid from" line is printed only when it differs from the issue date (early renewal, D-107).
+- Reason: Clear validity for early renewals.
+- Affects: Templates
+
+## D-144: Date format and place of issue
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Dates printed DD/MM/YYYY; place of issue from settings.
+- Reason: Matches the templates.
+- Affects: Documents
+
+## D-145: Documents generated on demand
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder (supersedes the store-once proposal)
+- Decision: No PDF is stored. Each time a license, permit or letter is opened or downloaded, it is generated from the saved data and the recorded template version. Every download is audit-logged. At most 2 conversions run at once.
+- Reason: Stakeholder decision; always produced from the saved data.
+- Affects: Documents, Licensing, Payments, 01, 02, 04
+
+## D-146: Permission-to-pay letter
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Letter content as in 06-documents §3.3 using a SARIS letter template; payment instructions come from settings.
+- Reason: Procedure 6.10.
+- Affects: Payments, Documents
+
+## D-147: License register
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Admin register of all licenses and permits with filters and CSV export; exports are audit-logged.
+- Reason: Procedure 6.13 register.
+- Affects: Admin Portal, Licensing
+
+---
+
 ## Open Questions
 
 1. Fee schedule per service and category (F1).
@@ -1017,9 +1257,12 @@ Entry format:
 8. Droplet details: size, OS, PHP version and other sites hosted.
 9. Final domain (assumed `portal.saris.gov.so`).
 10. Staging location: subdomain on the same droplet (recommended) or a second droplet.
-11. Maximum size for inspection videos (proposed 50 MB).
+11. ~~Maximum size for inspection videos~~ — answered by D-135.
 12. Official FMS and region list.
 13. Formulation types: free text or fixed list?
 14. Abandoned applications: with no withdrawal (D-101) and no time limit (C4), may a staff role close an application left in RETURNED or AWAITING_PAYMENT for a long time (e.g. 6 months)?
 15. SARIS to update written procedure 6.13 to reflect automatic issue (D-106).
 16. Is GitHub Actions enabled on the repository? Until confirmed, `composer run check` is mandatory before every commit (D-114).
+17. Release 1 go-live date: not fixed yet; set when Phase 5 is near.
+18. SARIS to approve the template wording corrections (06-documents §6) and provide the Somali wording for the Wholesale and Retailer declarations.
+19. SARIS to provide the DG signature image, the stamp image, the final .docx templates and a permission-to-pay letter template.
