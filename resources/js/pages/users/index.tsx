@@ -1,6 +1,9 @@
 import { Alert } from '@heroui/alert';
-import { Button } from '@/components/ui/button';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Edit, Mail, UserCheck, UserPlus, UserX, Users } from 'lucide-react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -17,16 +20,15 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
+import { activate, deactivate } from '@/routes/users';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Edit, Mail, Trash2, UserPlus, Users } from 'lucide-react';
-import { useState } from 'react';
 
 interface User {
     id: number;
     name: string;
     email: string;
     email_verified_at: string | null;
+    status: 'ACTIVE' | 'INACTIVE';
     created_at: string;
     updated_at: string;
 }
@@ -39,16 +41,23 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function UserIndex({ users }: { users: User[] }) {
-    const [deletingUser, setDeletingUser] = useState<User | null>(null);
+    // Staff users are deactivated, never deleted (D-053).
+    const [deactivatingUser, setDeactivatingUser] = useState<User | null>(
+        null,
+    );
     const { flash } = usePage<{ flash: { success?: string; error?: string } }>().props;
 
-    const handleDelete = () => {
-        if (deletingUser) {
-            router.delete(`/users/${deletingUser.id}`, {
+    const handleDeactivate = () => {
+        if (deactivatingUser) {
+            router.post(deactivate.url(deactivatingUser.id), {}, {
                 preserveScroll: true,
-                onSuccess: () => setDeletingUser(null),
+                onSuccess: () => setDeactivatingUser(null),
             });
         }
+    };
+
+    const handleActivate = (user: User) => {
+        router.post(activate.url(user.id), {}, { preserveScroll: true });
     };
 
     return (
@@ -74,6 +83,7 @@ export default function UserIndex({ users }: { users: User[] }) {
                 </div>
 
                 {flash?.success && <Alert color="success" title={flash.success} />}
+                {flash?.error && <Alert color="danger" title={flash.error} />}
 
                 {users.length === 0 ? (
                     <Card>
@@ -99,6 +109,11 @@ export default function UserIndex({ users }: { users: User[] }) {
                                         <div className="flex-1">
                                             <CardTitle className="flex items-center gap-2">
                                                 {user.name}
+                                                {user.status === 'INACTIVE' && (
+                                                    <Badge variant="destructive">
+                                                        Inactive
+                                                    </Badge>
+                                                )}
                                                 {user.email_verified_at ? (
                                                     <Badge variant="default">
                                                         Verified
@@ -140,13 +155,29 @@ export default function UserIndex({ users }: { users: User[] }) {
                                                 Edit
                                             </Link>
                                         </Button>
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            onClick={() => setDeletingUser(user)}
-                                        >
-                                            <Trash2 />
-                                        </Button>
+                                        {user.status === 'ACTIVE' ? (
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                aria-label="Deactivate"
+                                                onClick={() =>
+                                                    setDeactivatingUser(user)
+                                                }
+                                            >
+                                                <UserX />
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                aria-label="Activate"
+                                                onClick={() =>
+                                                    handleActivate(user)
+                                                }
+                                            >
+                                                <UserCheck />
+                                            </Button>
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -156,29 +187,30 @@ export default function UserIndex({ users }: { users: User[] }) {
             </div>
 
             <Dialog
-                open={!!deletingUser}
-                onOpenChange={(open) => !open && setDeletingUser(null)}
+                open={!!deactivatingUser}
+                onOpenChange={(open) => !open && setDeactivatingUser(null)}
             >
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Delete User</DialogTitle>
+                        <DialogTitle>Deactivate User</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete{' '}
+                            Deactivate{' '}
                             <span className="font-semibold">
-                                {deletingUser?.name}
+                                {deactivatingUser?.name}
                             </span>
-                            ? This action cannot be undone.
+                            ? They are signed out at once and cannot sign in
+                            until the account is activated again.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <Button
                             variant="outline"
-                            onClick={() => setDeletingUser(null)}
+                            onClick={() => setDeactivatingUser(null)}
                         >
                             Cancel
                         </Button>
-                        <Button variant="destructive" onClick={handleDelete}>
-                            Delete
+                        <Button variant="destructive" onClick={handleDeactivate}>
+                            Deactivate
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Domain\Identity\Enums\AccountStatus;
 use App\Domain\Identity\Enums\StaffRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -24,7 +25,7 @@ class SystemAdministratorSeeder extends Seeder
             [
                 'name' => 'System Administrator',
                 'password' => 'password',
-                'status' => 'active',
+                'status' => AccountStatus::Active,
                 'first_login' => false,
                 'email_verified_at' => now(),
             ]

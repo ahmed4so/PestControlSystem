@@ -32,7 +32,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'view user',
                 'create user',
                 'update user',
-                'deactivate user',
+                'suspend user',
                 'view role',
                 'create role',
                 'update role',

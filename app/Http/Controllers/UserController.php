@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Identity\Actions\DeactivateStaffUser;
+use App\Domain\Identity\Enums\AccountStatus;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Inertia\Inertia;
@@ -19,7 +22,7 @@ class UserController extends Controller implements HasMiddleware
             new Middleware('permission:view user', only: ['index', 'show']),
             new Middleware('permission:create user', only: ['create', 'store']),
             new Middleware('permission:update user', only: ['edit', 'update']),
-            new Middleware('permission:delete user', only: ['destroy']),
+            new Middleware('permission:suspend user', only: ['deactivate', 'activate']),
         ];
     }
 
@@ -50,9 +53,10 @@ class UserController extends Controller implements HasMiddleware
      */
     public function store(StoreUserRequest $request): RedirectResponse
     {
-        $user = User::create([
+        User::create([
             ...$request->validated(),
-            'status' => 'active',
+            'status' => AccountStatus::Active,
+            'first_login' => true,
         ]);
 
         return redirect()
@@ -99,14 +103,26 @@ class UserController extends Controller implements HasMiddleware
     }
 
     /**
-     * Remove the specified user from storage.
+     * Deactivate a staff user. Staff users are never deleted (D-053).
      */
-    public function destroy(User $user): RedirectResponse
+    public function deactivate(Request $request, User $user, DeactivateStaffUser $deactivate): RedirectResponse
     {
-        $user->delete();
+        if ($request->user()->is($user)) {
+            return back()->with('error', 'You cannot deactivate your own account.');
+        }
 
-        return redirect()
-            ->route('users.index')
-            ->with('success', 'User deleted successfully.');
+        $deactivate($user);
+
+        return back()->with('success', 'User deactivated.');
+    }
+
+    /**
+     * Reactivate a deactivated staff user.
+     */
+    public function activate(User $user): RedirectResponse
+    {
+        $user->update(['status' => AccountStatus::Active]);
+
+        return back()->with('success', 'User activated.');
     }
 }

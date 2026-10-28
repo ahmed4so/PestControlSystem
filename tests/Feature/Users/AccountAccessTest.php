@@ -5,7 +5,7 @@ use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 
 test('inactive accounts are logged out of the dashboard', function () {
-    $user = User::factory()->suspendedAccount()->create();
+    $user = User::factory()->inactive()->create();
 
     $this->actingAs($user)
         ->get(route('dashboard'))
