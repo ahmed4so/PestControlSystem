@@ -1,7 +1,7 @@
 # Deliverable 3 — Authentication and Security
 
 - Project: SARIS Company Portal
-- Version: 1.1 (approved 2026-10-28)
+- Version: 1.2 (approved 2026-10-28; Records Officer removed by D-106)
 - Date: 2026-10-28
 - Based on: `docs/decisions-log.md` (D-001 to D-078), `docs/design/01-architecture.md` (v2.1),
   `docs/design/02-data-model.md` (v1.1), `docs/design/00-current-state.md`
@@ -209,7 +209,7 @@ for 15 minutes for staff and 30 minutes for companies.
 
 | Realm | Actions |
 |---|---|
-| Staff | DG decision; license issue; payment clearance; inspection report signing (D-077); enforcement actions; role and user changes; account recovery decisions; national-ID release; 2FA reset |
+| Staff | DG decision (which also issues the license); payment clearance; inspection report signing (D-077); enforcement actions; role and user changes; account recovery decisions; national-ID release; 2FA reset |
 | Company | Submitting an application (declaration); changing 2FA settings |
 
 ---
@@ -254,24 +254,23 @@ are checked **twice**: the user must hold the role for the stage in the Workflow
 submit that inspection report, and only the assigned Technical Reviewer can complete that
 review.
 
-| Capability | Sys Admin | Registrar | Tech Reviewer | Inspector | Dept Director | Payment Officer | DG / delegate | Records Officer |
-|---|---|---|---|---|---|---|---|---|
-| Manage staff users and roles | ✓ | | | | | | | |
-| Manage reference data, fees, restricted list | ✓ | | | | | | | |
-| View applications and company files | | ✓ | assigned | assigned | ✓ | ✓ | ✓ | ✓ |
-| Acknowledge, admin review, technical review, consolidated review | | ✓ | technical review only | | | | | |
-| Return to company | | ✓ | | | | | ✓ (Defer) | |
-| Assign Technical Reviewer, schedule inspection | | ✓ | | | | | | |
-| Record and sign inspection report | | | | ✓ | | | | |
-| Recommend / return to Registrar | | | | | ✓ | | | |
-| Issue permission-to-pay letter; clear or reject payment | | | | | | ✓ | | |
-| Approve / defer / reject | | | | | | | ✓ | |
-| Prepare and issue license | | | | | | | | ✓ |
-| Verify products | | ✓ | | | | | | |
-| Request suspension / cancellation | | ✓ | | | ✓ | | | |
-| Approve enforcement action | | | | | | | ✓ | |
-| Account recovery, national-ID release | ✓ | | | | | | | |
-| View audit log | ✓ (security events) | | | | ✓ | | ✓ | |
+| Capability | Sys Admin | Registrar | Tech Reviewer | Inspector | Dept Director | Payment Officer | DG / delegate |
+|---|---|---|---|---|---|---|---|
+| Manage staff users and roles | ✓ | | | | | | |
+| Manage reference data, fees, restricted list | ✓ | | | | | | |
+| View applications and company files | | ✓ | assigned | assigned | ✓ | ✓ | ✓ |
+| Acknowledge, admin review, technical review, consolidated review | | ✓ | technical review only | | | | |
+| Return to company | | ✓ | | | | | ✓ (Defer) |
+| Assign Technical Reviewer, schedule inspection | | ✓ | | | | | |
+| Record and sign inspection report | | | | ✓ | | | |
+| Recommend / return to Registrar | | | | | ✓ | | |
+| Issue permission-to-pay letter; clear or reject payment | | | | | | ✓ | |
+| Approve / defer / reject | | | | | | | ✓ |
+| Verify products | | ✓ | | | | | |
+| Request suspension / cancellation | | ✓ | | | ✓ | | |
+| Approve enforcement action | | | | | | | ✓ |
+| Account recovery, national-ID release | ✓ | | | | | | |
+| View audit log | ✓ (security events) | | | | ✓ | | ✓ |
 
 ### 11.2 Segregation of duties
 
@@ -374,7 +373,7 @@ These rules are enforced in the Workflow module, not just by role assignment:
 | Company data | Profile, person, premises, document and product create/update (before and after values) |
 | Workflow | Every WorkflowAction (also kept in its own table) |
 | Payments | Letter issued, receipt uploaded, cleared, rejected |
-| Licensing | License prepared, issued, superseded, expired, enforcement actions |
+| Licensing | License issued (at DG approval), superseded, expired, enforcement actions |
 | Data access | Staff viewing or downloading company documents, IDs and receipts |
 
 Each entry records: actor type and ID, role used, IP, user agent, time, subject, event, and

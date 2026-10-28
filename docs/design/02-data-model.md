@@ -1,7 +1,7 @@
 # Deliverable 2 — Data Model
 
 - Project: SARIS Company Portal
-- Version: 1.2 (approved 2026-10-28; password history added by D-082)
+- Version: 1.3 (approved 2026-10-28; automatic issue D-106, no withdrawal D-101)
 - Date: 2026-10-28
 - Based on: `docs/decisions-log.md` (D-001 to D-064), `docs/requirements-answers.md`,
   `docs/design/01-architecture.md` (v2.1), `docs/design/00-current-state.md`
@@ -430,7 +430,7 @@ Access: C R/W, A R and verify.
 | open_key | string(80), null | Uniqueness key while open; `NULL` once final (§6.5) |
 | is_late_renewal | bool | Renewal submitted within 30 days of expiry (D-009) |
 | has_restricted_ingredient | bool | Flag to staff (D-021) |
-| first_submitted_at, decided_at, withdrawn_at | datetime, null | |
+| first_submitted_at, decided_at | datetime, null | |
 | deleted_at | | Discarded drafts only |
 
 Unique (company_id, open_key). Access: C R/W (draft and returned), A R.
@@ -625,15 +625,14 @@ kept on resubmission after deferral (D-043). Access: C R/W (own uploads), A R/W.
 | company_id | FK→companies | |
 | application_id | FK→applications, unique | |
 | application_version_id | FK→application_versions | Version that was approved |
-| status | enum `PREPARED`, `ACTIVE`, `EXPIRED`, `SUPERSEDED`, `SUSPENDED`, `CANCELLED` | `PREPARED` during LICENSE_PREPARATION |
+| status | enum `ACTIVE`, `EXPIRED`, `SUPERSEDED`, `SUSPENDED`, `CANCELLED` | `ACTIVE` at DG approval (D-106) |
 | company_name | string(200) | Copied for register and public verification |
 | registered_date | date | DG approval date (D-013) |
-| valid_from | date | Issue date |
+| valid_from | date | Approval date; for a renewal approved before expiry, the day after the old license expires (D-107) |
 | expires_on | date | +1 year licenses (D-009), +90 days permits (D-021) |
 | approved_by | FK→users | Actual signer (D-027) |
 | approved_on_behalf_of | FK→users, null | DG, when a delegate signed |
-| issued_by | FK→users, null | Licensing/Records Officer |
-| issued_at | datetime, null | |
+| issued_at | datetime | Time of DG approval (automatic issue, D-106) |
 | previous_license_id | FK→licenses, null | License renewed or amended |
 | superseded_by_id | FK→licenses, null | Successor (D-007) |
 | flagged_at, flag_reason | datetime, text, null | Permit flagged when its Importation License is suspended or cancelled (D-010) |
@@ -703,11 +702,9 @@ Message bodies are not stored (they may contain temporary passwords).
 | `AWAITING_PAYMENT` | Payment Required |
 | `PAYMENT_VERIFICATION` | Payment Under Verification |
 | `DG_DECISION` | Under Review |
-| `LICENSE_PREPARATION` | Approved |
 | `ISSUED` | Approved |
 | `RETURNED` | Action Required |
 | `REJECTED` | Rejected |
-| `WITHDRAWN` | Withdrawn |
 
 Import Permit (until its procedure arrives, D-041): same list without
 `INSPECTION_SCHEDULED` and `INSPECTION_REPORT`.
@@ -718,13 +715,14 @@ Import Permit (until its procedure arrives, D-041): same list without
 `ASSIGN_TECHNICAL_REVIEWER`, `SCHEDULE_INSPECTION`, `SUBMIT_INSPECTION_REPORT`,
 `COMPLETE_CONSOLIDATED_REVIEW`, `RECOMMEND`, `RETURN_TO_REGISTRAR`,
 `ISSUE_PERMISSION_TO_PAY`, `UPLOAD_RECEIPT`, `CLEAR_PAYMENT`, `REJECT_RECEIPT`,
-`APPROVE`, `DEFER`, `REJECT`, `ISSUE_LICENSE`, `RETURN_TO_COMPANY`, `WITHDRAW`.
+`APPROVE`, `DEFER`, `REJECT`, `RETURN_TO_COMPANY`, `RECORD_INSPECTION_VISIT`,
+`RESCHEDULE_INSPECTION` (D-099). There is no `WITHDRAW` (D-101) and no `ISSUE_LICENSE` (D-106).
 
 ### 5.3 Other status sets
 
 | Entity | Values |
 |---|---|
-| License | `PREPARED`, `ACTIVE`, `EXPIRED`, `SUPERSEDED`, `SUSPENDED`, `CANCELLED` |
+| License | `ACTIVE`, `EXPIRED`, `SUPERSEDED`, `SUSPENDED`, `CANCELLED` |
 | Product | `PENDING_VERIFICATION`, `VERIFIED`, `REJECTED` |
 | Payment | `SUBMITTED`, `CLEARED`, `REJECTED` |
 | Inspection | `SCHEDULED`, `COMPLETED`, `CANCELLED` |
@@ -835,7 +833,7 @@ Rules:
 ### 6.5 One open application rule (D-044)
 
 `applications.open_key` is set while the application is not final and cleared (`NULL`)
-when it becomes `ISSUED`, `REJECTED` or `WITHDRAWN`. A unique index on
+when it becomes `ISSUED` or `REJECTED`. A unique index on
 (company_id, open_key) enforces the rule in the database:
 
 | Service | open_key |

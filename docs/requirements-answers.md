@@ -73,7 +73,8 @@
 
 - **C1:** **Superseded** by the written procedure (section W). Roles are: Pesticide
   Registrar, Technical Reviewer (optional, formally assigned), Inspector, Departmental
-  Director, Payment Officer, Director General (or delegate), Licensing/Records Officer.
+  Director, Payment Officer, Director General (or delegate). The Licensing/Records Officer
+  step was removed by D-106 (automatic issue at DG approval).
 - **C2:** **Superseded** by the written procedure. The Departmental Director records a
   recommendation or returns the file; only the DG decides.
 - **C3:** Premises inspection is mandatory for the Company License and Operator
@@ -179,10 +180,10 @@ Company License workflow.
 | 6.11 Payment and receipt upload | `AWAITING_PAYMENT` | Company |
 | 6.11 Payment verification | `PAYMENT_VERIFICATION` | Payment Officer |
 | 6.12 Final decision: Approved / Deferred / Rejected | `DG_DECISION` | Director General (or delegate) |
-| 6.13 License preparation, register entry, issuance | `LICENSE_PREPARATION` → `ISSUED` | Licensing/Records Officer |
+| 6.13 License issue and register entry — **automatic at DG approval** (D-106) | `ISSUED` | System |
 | 6.14 Monitoring, renewal, enforcement | License lifecycle | SARIS |
 
-Other statuses: `RETURNED` (company action required), `REJECTED`, `WITHDRAWN`.
+Other statuses: `RETURNED` (company action required), `REJECTED`. No withdrawal (D-101).
 
 Rules from the procedure:
 - Only the DG can reject. The Departmental Director returns files internally to the

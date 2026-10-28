@@ -1,7 +1,7 @@
 # Deliverable 1 — System Architecture (v2, based on the existing codebase)
 
 - Project: SARIS Company Portal
-- Version: 2.2 (approved; Cloudflare limited to R2 storage by D-094)
+- Version: 2.3 (approved; automatic license issue D-106)
 - Date: 2026-10-28
 - Based on: `docs/decisions-log.md` (D-001 to D-046), `docs/requirements-answers.md`,
   `docs/design/00-current-state.md` (commit `009f947`)
@@ -264,11 +264,12 @@ The license check runs again at `DG_DECISION`.
 3. Files are never overwritten; a replacement is a new file. Snapshots stay valid forever.
 4. Downloads: the backend checks permission and redirects to a 5-minute signed R2 URL.
 
-### 7.3 License issue (D-029)
+### 7.3 License issue (D-106)
 
-DG approval queues a job that generates the number, LicenseSnapshot, QR code and PDF.
-The Records Officer checks and issues it; the license becomes Active and the company is
-emailed.
+When the DG (or delegate) approves, the same transaction creates the license number,
+LicenseSnapshot and QR verification code and sets the license `ACTIVE`. A queued job then
+generates the PDF with the signer's signature image, the stamp image and the QR code, and
+the company is emailed when the PDF is ready.
 
 ---
 

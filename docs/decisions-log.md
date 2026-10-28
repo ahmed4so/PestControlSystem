@@ -89,7 +89,7 @@ Entry format:
 
 ## D-009: Validity, renewal and expiry
 - Date: 2026-10-27
-- Status: Confirmed
+- Status: Amended by D-107 (renewal start date)
 - Source: Stakeholder (D1, D2, D3) and written procedure 6.14
 - Decision: Company and Operator Licenses are valid 1 year from the issue date. The renewal window opens 60 days before expiry with a pre-filled form. Renewal is due 30 days before expiry; later renewals are accepted but flagged as late. Licenses expire on the expiry date with no grace period; after expiry a New application is required.
 - Reason: Matches the written procedure.
@@ -201,7 +201,7 @@ Entry format:
 
 ## D-022: Adopt the written procedure for the Company License
 - Date: 2026-10-27
-- Status: Confirmed
+- Status: Amended by D-101 and D-106 (no WITHDRAWN status; no LICENSE_PREPARATION stage)
 - Source: Stakeholder (written procedure 6.1–6.14)
 - Decision: The Company License workflow follows the official procedure: SUBMITTED → ADMIN_REVIEW → TECHNICAL_DOC_REVIEW → INSPECTION_SCHEDULED → INSPECTION_REPORT → CONSOLIDATED_REVIEW → DIRECTOR_REVIEW → PERMISSION_TO_PAY → AWAITING_PAYMENT → PAYMENT_VERIFICATION → DG_DECISION → LICENSE_PREPARATION → ISSUED. Other statuses: DRAFT, RETURNED, REJECTED, WITHDRAWN.
 - Reason: Official SARIS procedure.
@@ -209,7 +209,7 @@ Entry format:
 
 ## D-023: Staff roles
 - Date: 2026-10-27
-- Status: Confirmed
+- Status: Amended by D-106 (Licensing/Records Officer role removed)
 - Source: Stakeholder (written procedure; supersedes C1 and C2)
 - Decision: Staff roles are Pesticide Registrar, Technical Reviewer (optional, formally assigned), Inspector, Departmental Director, Payment Officer, Director General (with delegate), Licensing/Records Officer.
 - Reason: Matches the written procedure.
@@ -257,7 +257,7 @@ Entry format:
 
 ## D-029: License preparation by Records Officer
 - Date: 2026-10-27
-- Status: Confirmed
+- Status: Superseded by D-106
 - Source: Stakeholder (written procedure 6.13)
 - Decision: After DG approval, the system pre-generates the license (number, snapshot, QR, PDF). The Licensing/Records Officer checks it, applies signature/stamp and issues it. The license register is updated automatically.
 - Reason: Written procedure.
@@ -395,7 +395,7 @@ Entry format:
 - Date: 2026-10-27
 - Status: Confirmed
 - Source: Claude.ai design chat
-- Decision: Companies see simplified statuses (Draft, Submitted, Under Review, Inspection Scheduled, Action Required, Payment Required, Payment Under Verification, Approved, Rejected, Withdrawn). Staff see the exact stage.
+- Decision: Companies see simplified statuses (Draft, Submitted, Under Review, Inspection Scheduled, Action Required, Payment Required, Payment Under Verification, Approved, Rejected). Staff see the exact stage.
 - Reason: Clear for applicants without exposing internal steps.
 - Affects: Company Portal UI
 
@@ -813,11 +813,111 @@ Entry format:
 
 ---
 
+## Workflow Engine Decisions (confirmed 2026-10-28)
+
+## D-096: Workflow engine contract
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Every transition locks the application row and checks `expected_status`; then, in order: transition lookup, realm, role, assignment, delegation, password confirmation, payload, guards. Effects, status change and WorkflowAction are saved in one transaction; emails and PDFs run on the queue after commit.
+- Reason: No double processing; all-or-nothing changes.
+- Affects: Workflow module
+
+## D-097: Workflow definitions as configuration
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Definitions are versioned PHP files in `config/workflows/`, validated and loaded into the workflow tables. Guards and effects are named classes in `app/Domain/Workflow`. Conditional targets are allowed. Applications keep the version they started with.
+- Reason: New services without code changes (D-041).
+- Affects: Workflow module
+
+## D-098: Company License transition matrix
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: The transitions in 04-workflow-engine §5.2, including: after a DG deferral the application passes consolidated review and goes directly to DG decision (payment kept); the Registrar can order a re-inspection from consolidated review.
+- Reason: Implements procedure 6.1–6.12 and D-043.
+- Affects: Workflow definition COMPANY_LICENSE_V1
+
+## D-099: Inspection visit and reschedule actions
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: New actions `RECORD_INSPECTION_VISIT` (Inspector; INSPECTION_SCHEDULED → INSPECTION_REPORT) and `RESCHEDULE_INSPECTION` (Registrar).
+- Reason: Procedure 6.5–6.6.
+- Affects: Workflow, Inspection, 02-data-model §5.2
+
+## D-100: Interim Operator License and Import Permit workflows
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Operator License copies the Company License flow with Form 2 requirements and PCA license. Import Permit is the same flow without inspection, with Importation License re-checked at DG approval, and a PCPIP permit valid 90 days.
+- Reason: Until SARIS provides those procedures (D-041).
+- Affects: Workflow definitions OPERATOR_LICENSE_V1, IMPORT_PERMIT_V1
+
+## D-101: No withdrawal
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: Companies cannot withdraw a submitted application. There is no WITHDRAW action and no WITHDRAWN status. A submitted application ends only as ISSUED or REJECTED. Unsubmitted drafts can be discarded.
+- Reason: Stakeholder decision.
+- Affects: Workflow, Application, Company Portal
+
+## D-102: Review checklists per stage
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Registrar review items per stage (04 §5.3 and §7), each Compliant, Deficient or Clarification required with a comment when not compliant; stored as configuration.
+- Reason: Procedure 6.3, 6.4, 6.8.
+- Affects: Workflow, ReviewItem
+
+## D-103: Renewal and amendment workflow
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Renewal and amendment use the service's definition; extra guards (previous license Active, renewal window) and effects (late flag, supersede previous license, clear amendment flag).
+- Reason: One workflow per service.
+- Affects: Workflow, Licensing
+
+## D-104: Coded license lifecycle
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: License statuses (ACTIVE, EXPIRED, SUPERSEDED, SUSPENDED, CANCELLED) and enforcement actions are a coded state machine in Phase 1, not configurable.
+- Reason: Small, stable rules.
+- Affects: Licensing module
+
+## D-105: Staff work queues
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: My work (stage role or assignment), by-stage counts and ages, waiting on company, and flags (late renewals, restricted ingredients, amendment required, flagged permits).
+- Reason: Daily staff work.
+- Affects: Admin Portal
+
+## D-106: Automatic license issue at DG approval
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder (supersedes D-029; amends D-022, D-023)
+- Decision: When the DG or delegate approves, the license or permit is issued in the same transaction: number, LicenseSnapshot, verification code, status ACTIVE, register entry. The PDF is generated on the queue with the signer's signature image, stamp image and QR code, and the company is emailed when it is ready. There is no Licensing/Records Officer role and no LICENSE_PREPARATION stage. Written procedure 6.13 should be updated by SARIS to match.
+- Reason: Stakeholder decision; faster issue.
+- Affects: Workflow, Licensing, Documents, roles
+
+## D-107: Renewal start date
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder (amends D-009)
+- Decision: A renewed license starts the day after the old license expires, or on the approval date if the old license has already expired, and is valid for 1 year. The old license becomes SUPERSEDED when the new one starts.
+- Reason: No days lost for companies that renew early.
+- Affects: Licensing, LicenseSnapshot
+
+---
+
 ## Open Questions
 
 1. Fee schedule per service and category (F1).
 2. Written procedures for the Operator License and Import Permit.
-3. Does a renewed license start on its approval date, or the day after the old license expires?
+3. ~~Renewal start date~~ — answered by D-107.
 4. How long can an application wait in AWAITING_PAYMENT?
 5. Which staff role initiates a suspension (Registrar or Departmental Director)?
 6. Are revocation, non-renewal and blacklisting (procedure 6.14) needed in Phase 1?
@@ -828,3 +928,5 @@ Entry format:
 11. Maximum size for inspection videos (proposed 50 MB).
 12. Official FMS and region list.
 13. Formulation types: free text or fixed list?
+14. Abandoned applications: with no withdrawal (D-101) and no time limit (C4), may a staff role close an application left in RETURNED or AWAITING_PAYMENT for a long time (e.g. 6 months)?
+15. SARIS to update written procedure 6.13 to reflect automatic issue (D-106).
