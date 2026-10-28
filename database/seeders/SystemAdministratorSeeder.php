@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
+use App\Domain\Identity\Enums\StaffRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
-class SuperAdminSeeder extends Seeder
+class SystemAdministratorSeeder extends Seeder
 {
     /**
-     * Super Admin account for local development only.
+     * System Administrator account for local development only.
      */
     public function run(): void
     {
@@ -20,13 +22,14 @@ class SuperAdminSeeder extends Seeder
         $user = User::query()->updateOrCreate(
             ['email' => 'admin@example.com'],
             [
-                'name' => 'Super Admin',
-                'password' => Hash::make('password'),
+                'name' => 'System Administrator',
+                'password' => 'password',
                 'status' => 'active',
+                'first_login' => false,
                 'email_verified_at' => now(),
             ]
         );
 
-        $user->syncRoles(['Super Admin']);
+        $user->syncRoles([StaffRole::SystemAdministrator->value]);
     }
 }

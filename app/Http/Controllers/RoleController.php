@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Domain\Identity\Enums\StaffRole;
 use App\Http\Requests\AssignPermissionsRequest;
 use App\Http\Requests\AssignRoleRequest;
 use App\Http\Requests\StoreRoleRequest;
@@ -73,8 +73,13 @@ class RoleController extends Controller implements HasMiddleware
         return redirect()->route('roles.index')->with('success', 'Role updated successfully');
     }
 
-    public function destroy(Role $role)
+    public function destroy(Role $role): RedirectResponse
     {
+        // The designed staff roles cannot be deleted (D-023, D-051).
+        if (StaffRole::tryFrom($role->name) !== null) {
+            return redirect()->route('roles.index')->with('error', 'This role is part of the approved design and cannot be deleted.');
+        }
+
         $role->delete();
 
         return redirect()->route('roles.index')->with('success', 'Role deleted successfully');

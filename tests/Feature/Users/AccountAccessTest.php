@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Identity\Enums\StaffRole;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 
@@ -27,11 +28,11 @@ test('users without the permission cannot manage users', function () {
         ->assertForbidden();
 });
 
-test('super admins can manage users and roles', function () {
+test('system administrators can manage users and roles', function () {
     $this->seed(RolesAndPermissionsSeeder::class);
 
     $admin = User::factory()->create();
-    $admin->assignRole('Super Admin');
+    $admin->assignRole(StaffRole::SystemAdministrator->value);
 
     $this->actingAs($admin)->get(route('users.index'))->assertOk();
     $this->actingAs($admin)->get(route('roles.index'))->assertOk();
