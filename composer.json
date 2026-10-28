@@ -10,12 +10,20 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "chillerlan/php-qrcode": "^6.0",
         "inertiajs/inertia-laravel": "^2.0",
+        "intervention/image": "^4.4",
         "laravel/fortify": "^1.30",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.9",
+        "league/flysystem-aws-s3-v3": "^3.35",
+        "phpoffice/phpword": "^1.4",
         "resend/resend-laravel": "^1.4",
+        "spatie/laravel-activitylog": "^4.12",
+        "spatie/laravel-backup": "^10.3",
+        "spatie/laravel-csp": "^3.30",
+        "spatie/laravel-honeypot": "^4.7",
         "spatie/laravel-permission": "^6.24"
     },
     "require-dev": {
