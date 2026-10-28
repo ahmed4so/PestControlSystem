@@ -140,7 +140,7 @@
   certificates are verified manually.
 - **G3:** NIDs are verified manually from the uploaded ID copies. No NIRA integration.
 - **G4:** Email only in Phase 1 (no SMS), including sign-up OTP and password reset.
-- **G5:** Email provider: **Resend**, sending from a saris.gov.so address.
+- **G5:** Email provider: **Resend**, sending from **noreply@saris.gov.so** (D-118).
 - **G6:** (Default) No integration with other SARIS systems in Phase 1.
 - **G7:** Both portals on one domain, separated by login. Staff may log in from
   anywhere with a strong password and mandatory two-factor authentication.

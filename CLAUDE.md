@@ -53,35 +53,20 @@ If two sources disagree, the higher one wins. Still report the conflict to the u
   - No secrets in code or git.
 - **Tests:** write tests for every business rule and workflow transition, including the forbidden paths: wrong portal, wrong company, missing license.
 
-## Commands
+## Tech stack
+Laravel 12 (PHP 8.3) · Inertia 2 · React 19 + TypeScript · Tailwind 4 + shadcn/ui ·
+Fortify (both portals) · spatie/laravel-permission · spatie/laravel-activitylog ·
+MySQL 8 · database queue/cache/session · Cloudflare R2 (S3 driver) · Resend · mPDF ·
+Pest. Inertia SSR kept as in the repo. Emails from noreply@saris.gov.so. Full detail: docs/design/08-tech-stack.md.
 
-```bash
-composer run dev            # serve + queue:listen + vite (concurrently)
-composer run test           # config:clear, pint --test, then full test suite
-php artisan test --compact tests/Feature/Users/AccountAccessTest.php
-php artisan test --compact --filter="inactive accounts"
-vendor/bin/pint --dirty     # format changed PHP (run before finishing)
-npm run lint                # eslint --fix
-npm run types               # tsc --noEmit
-npm run build               # needed if the UI throws "Unable to locate file in Vite manifest"
-php artisan wayfinder:generate --with-form   # regenerate resources/js/{actions,routes,wayfinder} after route changes
-php artisan migrate:fresh --seed             # roles/permissions + local admin@example.com / password
-```
+### Commands
+- Install: `composer install && npm ci && cp .env.example .env && php artisan key:generate`
+- DB: `php artisan migrate --seed && php artisan workflows:load`
+- Run: `composer run dev`
+- Test: `php artisan test` (MySQL 8, database saris_portal_testing)
+- Check before every commit: `composer run check` (Pint, Larastan, ESLint, TypeScript, tests, audits, build)
 
-Tests run against the **MySQL** database named in `phpunit.xml` (`DB_DATABASE`), not SQLite, so that database has to exist. Feature tests use `RefreshDatabase` through `tests/Pest.php`.
-
-## Stack
-
-Laravel 12, Inertia v2 + React 19 + TypeScript, Tailwind v4 + shadcn/ui, and Wayfinder for typed routes. Fortify handles auth (login, password reset, email verification, 2FA), spatie/laravel-permission handles roles, Resend sends email, and tests use Pest.
-
-Confirmed target (D-047, D-049, D-050, D-055, D-056):
-- One modular monolith with no JSON API.
-- Passport and Jetstream removed.
-- MySQL 8 with database session/cache/queue drivers.
-- spatie/laravel-activitylog for audit.
-- Cloudflare R2 through the S3 driver for files.
-
-Remaining stack details come in `docs/design/08-tech-stack.md`.
+> **Not built yet:** `composer run check`, `php artisan workflows:load` and Larastan don't exist in the repo yet, and `phpunit.xml` still uses `fertitrack_testing`. Until they are added, run the existing checks: `vendor/bin/pint --dirty`, `npm run lint`, `npm run types`, `php artisan test --compact <file or --filter>`. After route changes run `php artisan wayfinder:generate --with-form`; run `npm run build` if the UI throws "Unable to locate file in Vite manifest".
 
 ## Architecture (current code)
 
@@ -107,15 +92,22 @@ Remaining stack details come in `docs/design/08-tech-stack.md`.
   - Pages in `resources/js/pages/{admin,portal,public}`.
   - UI text in `lang/{en,so}.json` (D-054).
 
-## Conventions (from Laravel Boost guidelines)
+## Coding conventions
+- Business logic in app/Domain/<Module>/Actions; controllers thin; Form Requests validate; Policies authorize.
+- Change application/license status ONLY via WorkflowEngine::perform() / Licensing module.
+- Store and read files ONLY via the Documents module.
+- Use exact names from docs/design/02-data-model.md and 04-workflow-engine.md.
+- strict_types, typed everything, backed enums, $fillable, soft deletes, transactions for multi-row writes.
+- Every UI string via __() / t(); keys in lang/en.json and lang/so.json.
+- React pages in pages/{admin,portal,public}; use the UI libraries already in the repo (no new ones); Wayfinder routes; no dangerouslySetInnerHTML.
+- Every business rule and workflow transition has Pest tests (allowed and refused).
+- Never log passwords, tokens or national IDs. No secrets in code.
 
-- Validate with Form Request classes, not inline. Use `Model::query()` rather than `DB::`. Eager-load to avoid N+1 queries.
-- Give every method an explicit return type. Use constructor property promotion and curly braces on all control structures.
-- Call `env()` only inside config files.
-- When you modify a column in a migration, restate all of its existing attributes.
-- Create files with `php artisan make:* --no-interaction`, and create tests with `php artisan make:test --pest`. New models get factories.
-- Every change needs a test. Run only the affected tests, and don't delete tests without approval.
-- Follow sibling files for structure and naming. Don't add dependencies or new top-level folders without approval.
+Also from the Laravel Boost guidelines:
+- Use `Model::query()` rather than `DB::`; eager-load to avoid N+1 queries. Call `env()` only inside config files.
+- When you modify a column in a migration, restate all of its existing attributes. Never edit a merged migration; add a new one.
+- Create files with `php artisan make:* --no-interaction` and tests with `php artisan make:test --pest`. New models get factories.
+- Run only the affected tests; don't delete tests without approval. Don't add dependencies or top-level folders without a decision.
 
 ## Repository layout
 

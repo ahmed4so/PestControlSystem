@@ -1,7 +1,7 @@
 # Deliverable 1 — System Architecture (v2, based on the existing codebase)
 
 - Project: SARIS Company Portal
-- Version: 2.3 (approved; automatic license issue D-106)
+- Version: 2.4 (approved; SSR server kept, D-110)
 - Date: 2026-10-28
 - Based on: `docs/decisions-log.md` (D-001 to D-046), `docs/requirements-answers.md`,
   `docs/design/00-current-state.md` (commit `009f947`)
@@ -106,6 +106,7 @@ flowchart TB
 | Nginx | Web server; HTTPS with Let's Encrypt, HSTS, rate limits; fail2ban; behind DigitalOcean Cloud Firewall and ufw (D-094) |
 | PHP-FPM + Laravel | All pages for both portals and the public pages |
 | Queue worker | PDF generation, emails, image processing |
+| Inertia SSR server | Server-side rendering kept as in the repository (D-110); runs under Supervisor; pages fall back to browser rendering if it stops |
 | Scheduler | Expiry and reminder jobs (section 8) |
 | MySQL 8 | All data; also the session, cache and queue store (the existing `database` drivers) |
 | Cloudflare R2 | Uploaded files and generated PDFs (D-040); separate bucket for backups. The only Cloudflare service used |

@@ -913,6 +913,98 @@ Entry format:
 
 ---
 
+## Tech Stack Decisions (confirmed 2026-10-28)
+
+## D-108: Added packages
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: spatie/laravel-activitylog, league/flysystem-aws-s3-v3, mpdf/mpdf, chillerlan/php-qrcode, intervention/image (GD), spatie/laravel-honeypot, spatie/laravel-csp, spatie/laravel-backup, larastan/larastan (dev); npm browser-image-compression.
+- Reason: Each implements a confirmed decision with a maintained package.
+- Affects: composer.json, package.json
+
+## D-109: PDF engine
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Certificates, permits and permission-to-pay letters are generated with mPDF from HTML templates.
+- Reason: Pure PHP; Unicode and right-to-left support; no browser on the server.
+- Affects: Documents module, Deliverable 6
+
+## D-110: Server-side rendering kept
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: Inertia SSR stays as the repository has it. Production builds the SSR bundle and runs `php artisan inertia:start-ssr` under Supervisor; pages fall back to browser rendering if it stops.
+- Reason: Stakeholder decision.
+- Affects: Deployment, 08-tech-stack
+
+## D-111: UI libraries kept
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: All existing UI libraries are kept (shadcn/ui on Radix, @headlessui/react, @heroui/alert). No new UI library is added without a decision.
+- Reason: Stakeholder decision.
+- Affects: Frontend
+
+## D-112: Server baseline
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: PHP-FPM 8.3 with required extensions, MySQL 8.0 on localhost, Nginx with Let's Encrypt, Supervisor for the queue worker and SSR server, cron for the scheduler, Node 22 LTS.
+- Reason: Supported versions matching the stack.
+- Affects: Deployment
+
+## D-113: Backend coding conventions
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Business logic in app/Domain/<Module>/Actions; thin controllers; Form Requests; Policies; strict types and backed enums; $fillable; transactions for multi-row writes; status changes only through WorkflowEngine::perform() or the Licensing module; files only through the Documents module; no hard-coded fees, lists or durations.
+- Reason: Consistency and no bypass of rules.
+- Affects: All backend code, CLAUDE.md
+
+## D-114: Quality checks
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder (option chosen)
+- Decision: Pint, ESLint, TypeScript, Larastan level 5, Pest on MySQL 8, composer and npm audits, and builds run on GitHub Actions for every pull request if available; otherwise `composer run check` runs them locally and must pass before every commit.
+- Reason: Catch errors before merge.
+- Affects: CI, composer.json, CLAUDE.md
+
+## D-115: Git rules
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Protected main; work on feature/, fix/ or docs/ branches; merge through pull requests after checks pass; commit messages cite decision numbers where relevant.
+- Reason: Controlled changes.
+- Affects: Repository
+
+## D-116: Translation files
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: UI text in lang/en.json and lang/so.json with the English text as key; a test fails if a Somali key is missing; SARIS staff review Somali text before go-live.
+- Reason: Implements D-032 and D-054.
+- Affects: Frontend, backend, tests
+
+## D-117: National-ID hash key
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: A separate NID_HASH_KEY environment variable is used for the national-ID HMAC hash.
+- Reason: Duplicate detection survives an APP_KEY rotation.
+- Affects: Identity, Person, .env
+
+## D-118: Sender address
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: Portal emails are sent from noreply@saris.gov.so; the domain is verified in Resend with SPF and DKIM records before go-live.
+- Reason: Stakeholder answer.
+- Affects: Notifications, DNS
+
+---
+
 ## Open Questions
 
 1. Fee schedule per service and category (F1).
@@ -930,3 +1022,4 @@ Entry format:
 13. Formulation types: free text or fixed list?
 14. Abandoned applications: with no withdrawal (D-101) and no time limit (C4), may a staff role close an application left in RETURNED or AWAITING_PAYMENT for a long time (e.g. 6 months)?
 15. SARIS to update written procedure 6.13 to reflect automatic issue (D-106).
+16. Is GitHub Actions enabled on the repository? Until confirmed, `composer run check` is mandatory before every commit (D-114).
