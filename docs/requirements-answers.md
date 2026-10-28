@@ -2,7 +2,7 @@
 
 - Project: SARIS Company Portal (Somali Agricultural Regulatory & Inspection Service)
 - Source: Stakeholder answers given in the Claude.ai design Project
-- Last updated: 2026-10-27
+- Last updated: 2026-10-28
 - Rule: These answers override any design assumption. Where an answer was later
   replaced, it is marked **Superseded** with the reference that replaces it.
 
@@ -129,8 +129,9 @@
 
 ## G. Integrations
 
-- **G1:** The Admin Portal has not been started. Both portals are built together on
-  one shared backend and database.
+- **G1:** **Corrected 2026-10-28.** A Laravel 12 + Inertia/React scaffold already exists
+  with staff user and role management (see docs/design/00-current-state.md). Both
+  portals are built on it, sharing one backend and database (D-047).
 - **G2:** (Default) No Ministry of Commerce or Ministry of Finance integration;
   certificates are verified manually.
 - **G3:** NIDs are verified manually from the uploaded ID copies. No NIRA integration.

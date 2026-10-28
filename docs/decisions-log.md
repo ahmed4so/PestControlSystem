@@ -321,7 +321,7 @@ Entry format:
 
 ## D-036: Backend separation of the two portals
 - Date: 2026-10-27
-- Status: Confirmed
+- Status: Superseded by D-048 (separate account tables kept; API routes replaced by Inertia route groups)
 - Source: Claude.ai design chat
 - Decision: Separate account tables for company users and staff; separate sessions and token audiences; company endpoints under `/api/portal/*` and admin endpoints under `/api/admin/*`, each with its own middleware. A company token is rejected by every admin endpoint and the reverse.
 - Reason: Keeps full separation while using one domain (D-031).
@@ -409,6 +409,154 @@ Entry format:
 
 ---
 
+## Architecture Decisions (confirmed 2026-10-28)
+
+## D-047: Build on the existing application
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat (based on docs/design/00-current-state.md)
+- Decision: The portal is built on the existing Laravel app in the repository root: Laravel 12, Inertia 2, React 19 + TypeScript, Tailwind 4 + shadcn/ui, Fortify, spatie/laravel-permission, Resend, Pest. One modular monolith; no separate JSON API in Phase 1.
+- Reason: The scaffold already exists (corrects G1); the team knows the stack.
+- Affects: Whole codebase, docs/design/01-architecture.md, 08-tech-stack.md
+
+## D-048: Portal separation with Inertia
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat (replaces the API part of D-036)
+- Decision: `users` / `App\Models\User` holds staff only; a new `company_users` / `App\Models\CompanyUser` table holds company accounts. Separate guards (`web` for staff, `company` for companies), separate route files (`routes/admin.php`, `routes/portal.php`), URL prefixes `/admin/*` and `/portal/*`, separate middleware groups and separate session cookies (`saris_admin_session`, `saris_portal_session`). Every company query is scoped to the user's company. Controllers are split into Admin, Portal and Public namespaces.
+- Reason: Same full separation as D-036 without building an API the app does not use.
+- Affects: Authentication, routing, middleware, models, tests
+
+## D-049: Remove Passport and Jetstream
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: laravel/passport and laravel/jetstream are removed with their routes, tables, traits and config.
+- Reason: Unused; live broken routes; extra attack surface.
+- Affects: composer.json, User model, migrations, routes
+
+## D-050: Database and drivers
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: MySQL 8 in all environments (test database renamed `saris_portal_testing`). Database drivers for session, cache and queue; no Redis in Phase 1.
+- Reason: One less service to maintain; enough for < 500 companies.
+- Affects: Configuration, deployment, tests
+
+## D-051: System Administrator role
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: The `Super Admin` role and the `Gate::before` bypass are removed. A `System Administrator` role manages staff users, roles and reference data only and has no workflow permissions. The D-023 roles are seeded.
+- Reason: Nobody may act in the workflow without the stage role.
+- Affects: Roles and permissions, seeders, AppServiceProvider
+
+## D-052: Mandatory staff 2FA
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Middleware forces every staff user to set up and use TOTP 2FA before any admin page.
+- Reason: Implements D-031 and D-037.
+- Affects: Authentication, middleware
+
+## D-053: Soft deletes and deactivation
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: All models use soft deletes. Staff users are deactivated (status enum: active, inactive), never deleted. Account self-delete features are removed.
+- Reason: Implements D-034.
+- Affects: All models, UserController, settings pages
+
+## D-054: Languages implementation
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: UI text in `lang/en.json` and `lang/so.json`, shared to React through Inertia with a small `t()` helper.
+- Reason: Implements D-032.
+- Affects: Frontend, lang files
+
+## D-055: Audit logging package
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Audit logging uses spatie/laravel-activitylog, used append-only.
+- Reason: Proven package, same vendor as the permission package.
+- Affects: Audit module, all modules
+
+## D-056: File storage implementation
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Cloudflare R2 through Laravel's S3 driver; private bucket; files never overwritten; downloads through 5-minute signed URLs after a permission check; local `storage/{path}` serving disabled.
+- Reason: Implements D-040 securely.
+- Affects: Filesystem config, Documents module
+
+## D-057: Deployment and environments
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Isolated deployment on the existing droplet (own Linux user, PHP-FPM pool, database and user; Nginx accepts only Cloudflare IPs). Production and staging environments.
+- Reason: Implements H3 safely.
+- Affects: Deployment
+
+## D-058: Background jobs
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: A queue worker (Supervisor) runs PDF generation, emails and image processing; the scheduler (cron) runs expiry, reminder, cleanup and backup jobs.
+- Reason: Keeps web requests fast; timed lifecycle rules.
+- Affects: Deployment, Licensing, Notifications
+
+## D-059: Backups
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Nightly encrypted database backup to a separate R2 bucket.
+- Reason: Records are kept forever (D-034).
+- Affects: Deployment
+
+## D-060: Repository layout
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: `saris-portal/docs/` moves to `docs/` at the repository root; the two CLAUDE.md files are merged into the root CLAUDE.md; `saris-portal/` is removed.
+- Reason: The application lives at the repository root.
+- Affects: Repository, CLAUDE.md
+
+## D-061: Code organisation
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Claude.ai design chat
+- Decision: Business logic in `app/Domain/<Module>` (Identity, CompanyRegistry, Products, Applications, Workflow, Inspection, Payments, Licensing, Documents, Notifications, Audit, ReferenceData); models in `app/Models`; controllers in `Admin/`, `Portal/`, `Public/`.
+- Reason: Clear modules within standard Laravel layout.
+- Affects: Codebase structure
+
+## D-062: Fortify for both portals
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: Fortify handles login, logout, password reset and 2FA for both staff and companies. Its routes are registered for `/admin` (staff guard, `users`) and for the company area (company guard, `company_users`); a middleware sets the Fortify guard and password broker per area. No custom login system. Tests must prove that each portal's login rejects the other portal's accounts.
+- Reason: Reuse proven code; less custom security code.
+- Affects: Identity module, FortifyServiceProvider, routes, tests
+
+## D-063: Company sign-up with temporary password
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: Sign-up form (Full Name, Email, Phone) creates a CompanyUser and emails a random temporary password valid for 1 hour. The company logs in through Fortify; the existing ForcePasswordChange middleware forces a new password first. Receiving the email verifies the address. The company can request a new temporary password if it expires.
+- Reason: Implements the sign-up flow with existing components.
+- Affects: Identity module, CompanyUser, notifications
+
+## D-064: Optional 2FA for companies
+- Date: 2026-10-28
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: Companies may switch on TOTP 2FA (Fortify). If they lose both the authenticator and the recovery codes, staff reset 2FA after an approved account recovery request (D-003).
+- Reason: Extra security without forcing it on all companies.
+- Affects: Identity module, AccountRecoveryRequest, Admin Portal
+
+---
+
 ## Open Questions
 
 1. Fee schedule per service and category (F1).
@@ -418,3 +566,6 @@ Entry format:
 5. Which staff role initiates a suspension (Registrar or Departmental Director)?
 6. Are revocation, non-renewal and blacklisting (procedure 6.14) needed in Phase 1?
 7. Which staff role verifies company products (D-039)? Default: Pesticide Registrar.
+8. Droplet details: size, OS, PHP version and other sites hosted.
+9. Final domain (assumed `portal.saris.gov.so`).
+10. Staging location: subdomain on the same droplet (recommended) or a second droplet.
