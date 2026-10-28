@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Identity\Support\PasswordPolicy;
-use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\Admin\StoreUserRequest;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 

@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\Settings\PasswordController;
-use App\Http\Controllers\Settings\ProfileController;
-use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
+use App\Http\Controllers\Admin\Settings\PasswordController;
+use App\Http\Controllers\Admin\Settings\ProfileController;
+use App\Http\Controllers\Admin\Settings\TwoFactorAuthenticationController;
 use App\Http\Middleware\ForcePasswordChange;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;

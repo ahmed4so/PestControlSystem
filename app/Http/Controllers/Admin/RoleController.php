@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Domain\Identity\Enums\StaffRole;
-use App\Http\Requests\AssignPermissionsRequest;
-use App\Http\Requests\AssignRoleRequest;
-use App\Http\Requests\StoreRoleRequest;
-use App\Http\Requests\UpdateRoleRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AssignPermissionsRequest;
+use App\Http\Requests\Admin\AssignRoleRequest;
+use App\Http\Requests\Admin\StoreRoleRequest;
+use App\Http\Requests\Admin\UpdateRoleRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;

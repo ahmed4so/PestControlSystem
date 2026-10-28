@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../wayfinder'
 /**
-* @see \App\Http\Controllers\RoleController::assign
-* @see app/Http/Controllers/RoleController.php:104
+* @see \App\Http\Controllers\Admin\RoleController::assign
+* @see app/Http/Controllers/Admin/RoleController.php:105
 * @route '/roles/permissions'
 */
 export const assign = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -15,8 +15,8 @@ assign.definition = {
 } satisfies RouteDefinition<["post"]>
 
 /**
-* @see \App\Http\Controllers\RoleController::assign
-* @see app/Http/Controllers/RoleController.php:104
+* @see \App\Http\Controllers\Admin\RoleController::assign
+* @see app/Http/Controllers/Admin/RoleController.php:105
 * @route '/roles/permissions'
 */
 assign.url = (options?: RouteQueryOptions) => {
@@ -24,8 +24,8 @@ assign.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see \App\Http\Controllers\RoleController::assign
-* @see app/Http/Controllers/RoleController.php:104
+* @see \App\Http\Controllers\Admin\RoleController::assign
+* @see app/Http/Controllers/Admin/RoleController.php:105
 * @route '/roles/permissions'
 */
 assign.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -34,8 +34,8 @@ assign.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 })
 
 /**
-* @see \App\Http\Controllers\RoleController::assign
-* @see app/Http/Controllers/RoleController.php:104
+* @see \App\Http\Controllers\Admin\RoleController::assign
+* @see app/Http/Controllers/Admin/RoleController.php:105
 * @route '/roles/permissions'
 */
 const assignForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -44,8 +44,8 @@ const assignForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> =>
 })
 
 /**
-* @see \App\Http\Controllers\RoleController::assign
-* @see app/Http/Controllers/RoleController.php:104
+* @see \App\Http\Controllers\Admin\RoleController::assign
+* @see app/Http/Controllers/Admin/RoleController.php:105
 * @route '/roles/permissions'
 */
 assignForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

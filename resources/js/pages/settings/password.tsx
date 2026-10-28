@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import type { BreadcrumbItem } from '@/types';
-import PasswordController from '@/actions/App/Http/Controllers/Settings/PasswordController';
+import PasswordController from '@/actions/App/Http/Controllers/Admin/Settings/PasswordController';
 import { edit } from '@/routes/user-password';
 
 const breadcrumbs: BreadcrumbItem[] = [
