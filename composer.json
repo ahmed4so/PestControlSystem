@@ -87,7 +87,7 @@
             "phpstan analyse --memory-limit=1G --no-progress",
             "@php artisan test",
             "@composer audit --locked",
-            "npm audit --omit=dev --audit-level=moderate",
+            "@php artisan security:npm-audit",
             "npm run build",
             "npm run build:ssr"
         ],
@@ -125,7 +125,7 @@
         },
         "audit": {
             "ignore": {
-                "PKSA-zk1n-qbm6-d3rq": "Low: web-auth/webauthn-lib fake-credential generator, pulled in by laravel/fortify via laravel/passkeys (pinned). Passkeys are not used (Proposed D-153)."
+                "PKSA-zk1n-qbm6-d3rq": "Low: web-auth/webauthn-lib, pulled in by laravel/fortify through laravel/passkeys (pinned); passkeys are not used. Reviewed monthly in config/security.php (D-153, D-161)."
             }
         }
     },
