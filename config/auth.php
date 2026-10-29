@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\CompanyUser;
 use App\Models\User;
 
 return [
@@ -38,9 +39,16 @@ return [
     */
 
     'guards' => [
+        // Staff (Admin Portal).
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
+        ],
+
+        // Companies (Company Portal); never shares a table or session with staff (D-048).
+        'company' => [
+            'driver' => 'session',
+            'provider' => 'company_users',
         ],
 
     ],
@@ -66,6 +74,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+
+        'company_users' => [
+            'driver' => 'eloquent',
+            'model' => CompanyUser::class,
         ],
 
         // 'users' => [
@@ -97,6 +110,13 @@ return [
         'users' => [
             'provider' => 'users',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+
+        'company_users' => [
+            'provider' => 'company_users',
+            'table' => 'company_user_password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,
         ],

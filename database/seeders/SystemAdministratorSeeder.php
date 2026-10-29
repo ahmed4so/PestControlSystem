@@ -28,6 +28,7 @@ class SystemAdministratorSeeder extends Seeder
                 'status' => AccountStatus::Active,
                 'first_login' => false,
                 'email_verified_at' => now(),
+                'password_changed_at' => now(),
             ]
         );
 
