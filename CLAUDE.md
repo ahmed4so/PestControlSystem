@@ -23,7 +23,7 @@ Key business rules:
 - Sign-up: Full Name, Email, Phone → emailed temporary password (1 hour) → login → forced password change → company profile (D-063).
 - Shared data (company profile, persons, premises, products) is entered once and referenced by applications. Submissions and issued licenses keep **immutable snapshots** (D-006, D-042).
 
-**Current state:** the app is still the base layer described in `docs/design/00-current-state.md`. It has auth, staff user management and roles/permissions, but no SARIS domain features yet. The confirmed architecture (`docs/design/01-architecture.md` §6, D-047 to D-064) changes parts of that base layer. The **Architecture** section below describes the code **as it is today**, until those changes land.
+**Current state:** Phase 0 (clean-up and foundations, `docs/plans/phase-0-follow-up.md`, 09 §3) is done; `docs/design/00-current-state.md` describes the code before it. There are no SARIS domain features yet. The **Architecture** section below describes the code as it is today.
 
 ## Sources of truth (priority order)
 
