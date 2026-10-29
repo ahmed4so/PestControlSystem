@@ -16,6 +16,7 @@ use Spatie\Csp\Preset;
  */
 class SarisPolicy implements Preset
 {
+    // Removed when the fonts are self-hosted in Phase 1 (D-157).
     private const FONTS = 'https://fonts.bunny.net';
 
     public function configure(Policy $policy): void

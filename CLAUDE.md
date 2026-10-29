@@ -84,7 +84,7 @@ Pest. Inertia SSR kept as in the repo. Emails from noreply@saris.gov.so. Full de
 - Test: `php artisan test` (MySQL 8, database saris_portal_testing)
 - Check before every commit: `composer run check` (Pint, Larastan, ESLint, TypeScript, tests, audits, build)
 
-> **Notes:** `php artisan workflows:load` arrives with the workflow engine (Phase 3). For a quick loop, run `vendor/bin/pint --dirty`, `npm run lint`, `npm run types` and `php artisan test --compact <file or --filter>`. After route changes run `php artisan wayfinder:generate --with-form`; run `npm run build` if the UI throws "Unable to locate file in Vite manifest".
+> **Notes:** `php artisan workflows:load` arrives with the workflow engine (Phase 3). `php artisan security:npm-audit` is the npm step of the check; it fails on any advisory not listed in `config/security.php` and on any list entry past its monthly `review_by` date (D-153). `php artisan translations:report` lists Somali entries still equal to the English (`--fail` is the Phase 5 go-live check, D-154). For a quick loop, run `vendor/bin/pint --dirty`, `npm run lint`, `npm run types` and `php artisan test --compact <file or --filter>`. After route changes run `php artisan wayfinder:generate --with-form`; run `npm run build` if the UI throws "Unable to locate file in Vite manifest".
 
 ## Architecture (current code, after Phase 0)
 
