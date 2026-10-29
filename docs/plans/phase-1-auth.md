@@ -1,9 +1,9 @@
 # Plan: Phase 1 — Authentication for both portals
 
-- Status: Draft, waiting for approval
+- Status: Approved (2026-10-29)
 - Branch: `claude/funny-franklin-ikvmdt`
 - Date: 2026-10-29
-- Delivery: the whole phase in one go, on one branch, as one pull request (see §9, item 1)
+- Delivery: in one go with Phase 2 (company profile), on one branch, as one pull request (D-163). Phase 2 has its own plan.
 
 ## 1. Scope
 
@@ -328,11 +328,11 @@ Each step is one or more commits on `feature/phase-1-auth`; the tests for a step
 6. **Somali text:** all new keys get English placeholders (D-154); the translation report grows accordingly.
 7. **Larastan** still can't run here; CI must run it (open question 16).
 
-## 9. Proposed decisions (to confirm)
+## 9. Decisions (confirmed 2026-10-29)
 
 | ID | Proposal | Why |
 |---|---|---|
-| D-163 | Phase 1 is delivered in one go: one branch, one pull request, small commits per step. This departs from 09 Phase 1's "one pull request per row group" (D-121). | Your instruction. |
+| D-163 | Phases 1 and 2 are delivered in one go: one branch, one pull request, small commits per step. This departs from 09's "one pull request per row group" (D-121). | Your instruction. |
 | D-164 | `users` gets a `temp_password_expires_at` column (not in 02 §4.1) to enforce the 24-hour staff temporary password (D-083). | D-083 needs it; 02 lists it only for company users. |
 | D-165 | Fortify's `registration` and `emailVerification` features stay off for both portals. Sign-up is the custom `/signup` flow, and the email address is verified by the first successful login with the emailed temporary password (D-063). Staff use the same rule, since their temporary password is emailed too. The `verified` middleware and the verification pages are removed. | 03 §4 replaces both features. |
 | D-166 | Company auth pages sit at the root (`/login`, `/signup`, …) and company app pages under `/portal`, as in 03 §2. `/` is a public landing page with links to the company login and the staff login. | 03 §2 gives the URLs; the landing page is not specified. |
@@ -342,7 +342,7 @@ Each step is one or more commits on `feature/phase-1-auth`; the tests for a step
 | D-170 | The email footer contact details and "do not reply" text live in `config/identity.php` until `system_settings` exists (Phase 4B), then move there. | 07 assumes settings; the table arrives later. |
 | D-171 | Permission names for the new admin actions: unlocking uses `unlock account`, 2FA reset uses `reset two factor`, re-sending a staff temporary password uses `create user`, and the failed-emails page uses `manage system settings`. No new permissions are added. | Reuses the confirmed D-149 permissions. |
 
-## 10. Open questions
+## 10. Answered questions
 
-1. Do you want Phase 2 (company profile) in the same go, or only Phase 1 as planned here? The plan assumes Phase 1 only.
-2. Should `/` be a simple landing page (D-166), or should it redirect straight to the company `/login`?
+1. Phase 2 (company profile) is delivered in the same go, under its own plan `docs/plans/phase-2-company-profile.md` (D-163).
+2. `/` is a landing page with links to both logins (D-166 confirmed).

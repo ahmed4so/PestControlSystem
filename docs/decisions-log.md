@@ -1025,7 +1025,7 @@ Entry format:
 
 ## D-121: Phase process
 - Date: 2026-10-28
-- Status: Confirmed
+- Status: Confirmed (amended by D-163 for Phases 1 and 2)
 - Source: Claude.ai design chat
 - Decision: One branch per phase, one pull request per sub-feature, tests and `composer run check` passing, "Done when" checklist complete. Implementation decisions not covered by the design are logged as Proposed and confirmed in the design Project before the phase is merged to main.
 - Reason: Design and code stay consistent.
@@ -1370,6 +1370,82 @@ Entry format:
 - Decision: `php artisan translations:report` lists Somali entries identical to the English; with `--fail` it is the Phase 5 go-live check for zero untranslated entries (D-154).
 - Reason: Implements the translation report in D-154.
 - Affects: lang files, Phase 5 go-live checklist
+
+---
+
+## Phase 1 Decisions (confirmed 2026-10-29)
+
+## D-163: Phase 1 and Phase 2 delivered in one go
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: Phase 1 (authentication) and Phase 2 (company profile) are built on one branch and delivered as one pull request, with small commits per step. Each phase still has its own approved plan in `docs/plans/`. This replaces the "one pull request per row group" in 09 §3 for these two phases.
+- Reason: Stakeholder instruction (2026-10-29).
+- Affects: 09 §3, D-121
+
+## D-164: Staff temporary-password expiry column
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: `users` gets a `temp_password_expires_at` column, used to enforce the 24-hour staff temporary password (D-083). 02 §4.1 lists the column only for `company_users`.
+- Reason: D-083 needs a stored expiry.
+- Affects: 02 §4.1, users table
+
+## D-165: No Fortify registration or email verification
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: Fortify's `registration` and `emailVerification` features stay off for both portals. Company sign-up is the custom `/signup` flow. The email address counts as verified when the account first logs in with the emailed temporary password (D-063); staff follow the same rule. The `verified` middleware and the verification pages are removed.
+- Reason: 03 §4 replaces both features.
+- Affects: Fortify config, auth routes and pages
+
+## D-166: Public URLs
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: Company auth pages sit at the root (`/login`, `/signup`, `/temporary-password`, `/forgot-password`, `/reset-password/{token}`, `/two-factor-challenge`) and company app pages under `/portal`, as in 03 §2. `/` is a public landing page with links to the company login and the staff login.
+- Reason: 03 §2 gives the URLs; the landing page was not specified.
+- Affects: routes/public.php, routes/portal.php
+
+## D-167: Bilingual emails while Somali is a placeholder
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: While a Somali line still equals its English placeholder (D-154), an email shows that text once instead of twice. Once real Somali text exists, both languages are shown as D-125 requires.
+- Reason: Avoids every email repeating the same English text.
+- Affects: Notifications module
+
+## D-168: Self-hosted font packages
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: Fonts are self-hosted with the npm packages `@fontsource/dm-sans`, `@fontsource/fraunces` and `@fontsource/instrument-sans`. The CSP allows fonts from `'self'` only.
+- Reason: Implements D-157 with maintained packages.
+- Affects: package.json, app.css, SarisPolicy
+
+## D-169: Language switch
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: Guests choose the language through `/locale/{en,so}`, stored in a `locale` cookie. Logged-in users use their `preferred_locale`, which the language switch also updates.
+- Reason: D-032 lets the user switch; the mechanism was not specified.
+- Affects: SetLocale middleware, layouts
+
+## D-170: Email footer settings
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: The email footer contact details and "do not reply" text live in `config/identity.php` until `system_settings` exists (Phase 4B), then move there.
+- Reason: 07 assumes system settings; the table arrives later.
+- Affects: Notifications module, config/identity.php
+
+## D-171: Permissions for the new admin actions
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: Unlocking uses `unlock account`, 2FA reset uses `reset two factor`, re-sending a staff temporary password uses `create user`, and the failed-emails page uses `manage system settings`. No new permissions are added.
+- Reason: Reuses the confirmed D-149 permissions.
+- Affects: Admin user controller, RolesAndPermissionsSeeder
 
 ---
 
