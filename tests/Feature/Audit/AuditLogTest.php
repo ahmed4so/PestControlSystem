@@ -10,34 +10,29 @@ use App\Models\AuditActivity;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
-// Phase 0 "Done when": an audit row cannot be updated or deleted (D-091).
-it('rejects UPDATE on audit rows in the database', function () {
-    $entry = activity('audit')->log('test entry');
-
-    expect(fn () => DB::table('activity_log')->where('id', $entry->id)->update(['description' => 'changed']))
-        ->toThrow(QueryException::class, 'cannot be updated');
-
-    expect(DB::table('activity_log')->where('id', $entry->id)->value('description'))->toBe('test entry');
-});
-
-it('rejects DELETE on audit rows in the database', function () {
-    $entry = activity('audit')->log('test entry');
-
-    expect(fn () => DB::table('activity_log')->where('id', $entry->id)->delete())
-        ->toThrow(QueryException::class, 'cannot be deleted');
-
-    expect(DB::table('activity_log')->where('id', $entry->id)->exists())->toBeTrue();
-});
-
-it('refuses to update or delete audit entries through the model', function () {
+// Phase 0 "Done when": an audit row cannot be updated or deleted (D-091, D-160).
+it('refuses to update or delete audit entries, leaving the row unchanged', function () {
     $entry = activity('audit')->log('test entry');
 
     expect(fn () => $entry->update(['description' => 'changed']))->toThrow(LogicException::class)
         ->and(fn () => $entry->delete())->toThrow(LogicException::class);
+
+    $row = DB::table('activity_log')->where('id', $entry->id)->first();
+
+    expect($row)->not->toBeNull()
+        ->and($row->description)->toBe('test entry');
+});
+
+it('has no database triggers on the audit log (D-160)', function () {
+    $triggers = DB::table('information_schema.TRIGGERS')
+        ->where('EVENT_OBJECT_SCHEMA', DB::connection()->getDatabaseName())
+        ->where('EVENT_OBJECT_TABLE', 'activity_log')
+        ->count();
+
+    expect($triggers)->toBe(0);
 });
 
 it('logs staff user changes with before and after values, never the password', function () {

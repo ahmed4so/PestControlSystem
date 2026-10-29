@@ -1,6 +1,6 @@
 # Plan: Phase 0 follow-up
 
-- Status: Draft, waiting for approval
+- Status: Approved (2026-10-29)
 - Branch: `feature/phase-0-foundations` (not merged)
 - Date: 2026-10-29
 

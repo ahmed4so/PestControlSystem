@@ -108,7 +108,7 @@ Pest. Inertia SSR kept as in the repo. Emails from noreply@saris.gov.so. Full de
   - Controllers declare `permission:<name>` middleware through `HasMiddleware`.
   - `RolesAndPermissionsSeeder` is authoritative: it seeds the System Administrator and the D-023 roles with their permissions, deletes any permission not listed, and removes `Super Admin`. There is no `Gate::before` bypass.
   - Everything is seeded on the `web` guard, and `User::$guard_name = 'web'`.
-- **Audit log**: `activity_log` (model `App\Models\AuditActivity`) is append-only; MySQL triggers reject UPDATE and DELETE. Never schedule `activitylog:clean`.
+- **Audit log**: `activity_log` (model `App\Models\AuditActivity`) is append-only by application rule (D-160): the model refuses updates and deletes, and there are no database triggers. Never write code that changes audit rows, and never schedule `activitylog:clean`.
 - **Frontend shared props** (`HandleInertiaRequests`): `auth.user`, `auth.permissions`, `flash.success` / `flash.error`, `sidebarOpen`, `locale` and `translations`. Use `useTranslation()` from `@/lib/i18n` and `t('English text')`; add every key to both `lang/en.json` and `lang/so.json`.
 - **Frontend layout**: pages live in `resources/js/pages/<area>/` and are rendered with `Inertia::render('<area>/page')`. Import backend routes from `@/routes/...` or `@/actions/...` (Wayfinder) instead of hard-coding URLs. Those directories are generated, so don't edit them by hand.
 - **Target code organisation** (D-061): pages move to `resources/js/pages/{admin,portal,public}` in Phase 1.

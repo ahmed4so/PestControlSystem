@@ -8,8 +8,9 @@ use LogicException;
 use Spatie\Activitylog\Models\Activity;
 
 /**
- * An append-only audit entry (D-055, D-091). The database triggers reject
- * changes as well; this model refuses them before they reach the database.
+ * An append-only audit entry (D-055, D-091). The log is append-only by
+ * application rule (D-160): this model refuses updates and deletes, and no
+ * code path changes audit rows. There are no database triggers.
  */
 class AuditActivity extends Activity
 {
