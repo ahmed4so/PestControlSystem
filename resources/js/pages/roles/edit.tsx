@@ -1,3 +1,4 @@
+import { Form, Head, Link } from '@inertiajs/react';
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { type Role, type BreadcrumbItem } from '@/types';
-import { Form, Head, Link } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

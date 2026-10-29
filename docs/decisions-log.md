@@ -1353,6 +1353,26 @@ Entry format:
 
 ---
 
+## Phase 0 Follow-up Decisions (confirmed 2026-10-29)
+
+## D-161: Reviewed audit allow-list
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-0-follow-up.md)
+- Decision: Ignored audit advisories live in `config/security.php` with the advisory ID, package, reason and a `review_by` date 30 days ahead. `php artisan security:npm-audit` fails on any npm advisory that is not listed (all severities) and on any entry past its review date. The Composer list is mirrored in `composer.json` (`config.audit.ignore`) and a test keeps the two in sync.
+- Reason: Implements the ID, reason and monthly re-check required by D-153.
+- Affects: config/security.php, composer run check, composer.json
+
+## D-162: Translation report
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-0-follow-up.md)
+- Decision: `php artisan translations:report` lists Somali entries identical to the English; with `--fail` it is the Phase 5 go-live check for zero untranslated entries (D-154).
+- Reason: Implements the translation report in D-154.
+- Affects: lang files, Phase 5 go-live checklist
+
+---
+
 ## Open Questions
 
 1. Fee schedule per service and category (F1).

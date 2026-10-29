@@ -1,0 +1,11 @@
+# Larastan static analysis, level 5 to start (D-114, 08-tech-stack §8).
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - app
+        - config
+        - database
+        - routes

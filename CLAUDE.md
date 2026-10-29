@@ -23,7 +23,7 @@ Key business rules:
 - Sign-up: Full Name, Email, Phone → emailed temporary password (1 hour) → login → forced password change → company profile (D-063).
 - Shared data (company profile, persons, premises, products) is entered once and referenced by applications. Submissions and issued licenses keep **immutable snapshots** (D-006, D-042).
 
-**Current state:** the app is still the base layer described in `docs/design/00-current-state.md`. It has auth, staff user management and roles/permissions, but no SARIS domain features yet. The confirmed architecture (`docs/design/01-architecture.md` §6, D-047 to D-064) changes parts of that base layer. The **Architecture** section below describes the code **as it is today**, until those changes land.
+**Current state:** Phase 0 (clean-up and foundations, `docs/plans/phase-0-follow-up.md`, 09 §3) is done; `docs/design/00-current-state.md` describes the code before it. There are no SARIS domain features yet. The **Architecture** section below describes the code as it is today.
 
 ## Sources of truth (priority order)
 
@@ -84,31 +84,34 @@ Pest. Inertia SSR kept as in the repo. Emails from noreply@saris.gov.so. Full de
 - Test: `php artisan test` (MySQL 8, database saris_portal_testing)
 - Check before every commit: `composer run check` (Pint, Larastan, ESLint, TypeScript, tests, audits, build)
 
-> **Not built yet:** `composer run check`, `php artisan workflows:load` and Larastan don't exist in the repo yet, and `phpunit.xml` still uses `fertitrack_testing`. Until they are added, run the existing checks: `vendor/bin/pint --dirty`, `npm run lint`, `npm run types`, `php artisan test --compact <file or --filter>`. After route changes run `php artisan wayfinder:generate --with-form`; run `npm run build` if the UI throws "Unable to locate file in Vite manifest".
+> **Notes:** `php artisan workflows:load` arrives with the workflow engine (Phase 3). `php artisan security:npm-audit` is the npm step of the check; it fails on any advisory not listed in `config/security.php` and on any list entry past its monthly `review_by` date (D-153). `php artisan translations:report` lists Somali entries still equal to the English (`--fail` is the Phase 5 go-live check, D-154). For a quick loop, run `vendor/bin/pint --dirty`, `npm run lint`, `npm run types` and `php artisan test --compact <file or --filter>`. After route changes run `php artisan wayfinder:generate --with-form`; run `npm run build` if the UI throws "Unable to locate file in Vite manifest".
 
-## Architecture (current code)
+## Architecture (current code, after Phase 0)
 
 - **Routes**:
-  - `routes/web.php` holds the dashboard, `users` and `roles` routes behind `auth` + `active` + `verified` + `ForcePasswordChange`.
-  - `routes/settings.php` holds profile, password, appearance and 2FA.
-  - `routes/api.php` has an empty `/v1` group (Passport; to be removed per D-049).
-  - Target: `routes/admin.php` (`/admin/*`), `routes/portal.php` (`/portal/*`) and public routes (D-048).
+  - `routes/web.php` holds the dashboard, `users` and `roles` routes behind `auth` + `active` + `verified` + `ForcePasswordChange`. Users have no delete route; `users.deactivate` / `users.activate` replace it (D-053).
+  - `routes/settings.php` holds profile, password, appearance and 2FA (no self-delete).
+  - There is no API (Passport and Jetstream removed, D-049).
+  - Target for Phase 1: `routes/admin.php` (`/admin/*`), `routes/portal.php` (`/portal/*`) and public routes (D-048).
+- **Controllers and requests**: staff controllers in `app/Http/Controllers/Admin`, form requests in `app/Http/Requests/Admin`; `Portal/` and `Public/` are empty until Phase 1.
+- **Domain modules** (`app/Domain/<Module>`, D-061):
+  - `Identity`: `StaffRole` and `AccountStatus` enums, `DeactivateStaffUser`, `PasswordPolicy`, `Translations`.
+  - `Audit`: `Audited` trait (logs before/after, never hidden attributes, masks `auditMaskedAttributes()`).
+  - `Documents`: `FileStorage`, the only way to read and write files (R2 disk `r2`).
+  - `ReferenceData`: `NumberPrefix` and `NumberSequencer` (locked yearly numbers).
+  - The other modules are empty folders.
 - **Account gates** (`app/Http/Middleware`):
-  - `EnsureUserIsActive` (alias `active`) logs out any user whose `users.status` isn't `active`.
-  - `ForcePasswordChange` redirects users with `first_login = true` to the password settings page.
+  - `EnsureUserIsActive` (alias `active`) logs out users whose status isn't `ACTIVE`.
+  - `ForcePasswordChange` redirects users with `first_login = true` to the password page; new staff users get `first_login = true`.
+  - `SecurityHeaders` plus spatie `AddCspHeaders` (policy `App\Http\Csp\SarisPolicy`) on every web response.
 - **Authorization**:
-  - Controllers declare `permission:<name>` middleware through `HasMiddleware`. See `UserController` and `RoleController`.
-  - Permissions are defined in `RolesAndPermissionsSeeder`, which also **deletes any permission not listed there**, so add new permissions to that list.
-  - `Gate::before` in `AppServiceProvider` grants `Super Admin` everything. To be replaced by a `System Administrator` role without the bypass (D-051).
+  - Controllers declare `permission:<name>` middleware through `HasMiddleware`.
+  - `RolesAndPermissionsSeeder` is authoritative: it seeds the System Administrator and the D-023 roles with their permissions, deletes any permission not listed, and removes `Super Admin`. There is no `Gate::before` bypass.
   - Everything is seeded on the `web` guard, and `User::$guard_name = 'web'`.
-- **Frontend shared props** (`HandleInertiaRequests`): `auth.user`, `auth.permissions` (all permission names), `flash.success` / `flash.error`, and `sidebarOpen`. The sidebar (`components/app-sidebar.tsx`) shows each nav item based on `auth.permissions`.
+- **Audit log**: `activity_log` (model `App\Models\AuditActivity`) is append-only by application rule (D-160): the model refuses updates and deletes, and there are no database triggers. Never write code that changes audit rows, and never schedule `activitylog:clean`.
+- **Frontend shared props** (`HandleInertiaRequests`): `auth.user`, `auth.permissions`, `flash.success` / `flash.error`, `sidebarOpen`, `locale` and `translations`. Use `useTranslation()` from `@/lib/i18n` and `t('English text')`; add every key to both `lang/en.json` and `lang/so.json`.
 - **Frontend layout**: pages live in `resources/js/pages/<area>/` and are rendered with `Inertia::render('<area>/page')`. Import backend routes from `@/routes/...` or `@/actions/...` (Wayfinder) instead of hard-coding URLs. Those directories are generated, so don't edit them by hand.
-- **Target code organisation** (D-061):
-  - Business logic in `app/Domain/<Module>`.
-  - Models in `app/Models`.
-  - Controllers in `app/Http/Controllers/{Admin,Portal,Public}`.
-  - Pages in `resources/js/pages/{admin,portal,public}`.
-  - UI text in `lang/{en,so}.json` (D-054).
+- **Target code organisation** (D-061): pages move to `resources/js/pages/{admin,portal,public}` in Phase 1.
 
 ## Coding conventions
 - Business logic in app/Domain/<Module>/Actions; controllers thin; Form Requests validate; Policies authorize.

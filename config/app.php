@@ -67,6 +67,9 @@ return [
 
     'timezone' => 'UTC',
 
+    // Dates are stored in UTC and shown to users in this time zone (02-data-model §1).
+    'display_timezone' => env('APP_DISPLAY_TIMEZONE', 'Africa/Mogadishu'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

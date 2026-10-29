@@ -1,4 +1,15 @@
+import { Head, router, usePage } from '@inertiajs/react';
+import { Check, ChevronsUpDown, Shield } from 'lucide-react';
+import { useState } from 'react';
 import AlertSuccess from '@/components/alert-success';
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/command';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -10,24 +21,13 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from '@/components/command';
-import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type Permission, type Role } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
-import { Check, ChevronsUpDown, Shield } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { type BreadcrumbItem, type Permission, type Role } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -62,19 +62,10 @@ export default function RolePermissions({
     const { flash } = usePage<{ flash: { success?: string; error?: string } }>()
         .props;
 
-    // Load permissions when role is selected
-    useEffect(() => {
-        if (selectedRole && selectedRole.permissions) {
-            setSelectedPermissions(
-                selectedRole.permissions.map((p) => p.id)
-            );
-        } else {
-            setSelectedPermissions([]);
-        }
-    }, [selectedRole]);
-
     const handleRoleSelect = (role: Role) => {
         setSelectedRole(role);
+        // Load the role's current permissions
+        setSelectedPermissions(role.permissions?.map((p) => p.id) ?? []);
         setOpen(false);
     };
 

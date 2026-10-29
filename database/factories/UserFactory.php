@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Domain\Identity\Enums\AccountStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -34,7 +35,7 @@ class UserFactory extends Factory
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
-            'status' => 'active',
+            'status' => AccountStatus::Active,
             'first_login' => false,
         ];
     }
@@ -49,17 +50,13 @@ class UserFactory extends Factory
         ]);
     }
 
-    public function pendingAccount(): static
+    /**
+     * Indicate that the account has been deactivated (D-053).
+     */
+    public function inactive(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'pending',
-        ]);
-    }
-
-    public function suspendedAccount(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => 'suspended',
+            'status' => AccountStatus::Inactive,
         ]);
     }
 

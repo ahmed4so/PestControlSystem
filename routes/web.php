@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Middleware\ForcePasswordChange;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -15,7 +15,10 @@ Route::middleware(['auth', 'active', 'verified', ForcePasswordChange::class])->g
 
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
-    Route::resource('users', UserController::class);
+    // Staff users are deactivated, never deleted (D-053).
+    Route::resource('users', UserController::class)->except(['destroy']);
+    Route::post('users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
+    Route::post('users/{user}/activate', [UserController::class, 'activate'])->name('users.activate');
 
     // 120 requests per minute
     Route::prefix('roles')->middleware('throttle:30,60')->group(function () {

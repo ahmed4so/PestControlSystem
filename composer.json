@@ -10,18 +10,25 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "chillerlan/php-qrcode": "^6.0",
         "inertiajs/inertia-laravel": "^2.0",
+        "intervention/image": "^4.4",
         "laravel/fortify": "^1.30",
         "laravel/framework": "^12.0",
-        "laravel/jetstream": "^5.5",
-        "laravel/passport": "^13.7",
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.9",
+        "league/flysystem-aws-s3-v3": "^3.35",
+        "phpoffice/phpword": "^1.4",
         "resend/resend-laravel": "^1.4",
+        "spatie/laravel-activitylog": "^4.12",
+        "spatie/laravel-backup": "^10.3",
+        "spatie/laravel-csp": "^3.30",
+        "spatie/laravel-honeypot": "^4.7",
         "spatie/laravel-permission": "^6.24"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.0",
         "laravel/boost": "2.0",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.24",
@@ -72,6 +79,18 @@
             "@test:lint",
             "@php artisan test"
         ],
+        "check": [
+            "@php artisan config:clear --ansi",
+            "pint --test",
+            "npm run lint:check",
+            "npm run types",
+            "phpstan analyse --memory-limit=1G --no-progress",
+            "@php artisan test",
+            "@composer audit --locked",
+            "@php artisan security:npm-audit",
+            "npm run build",
+            "npm run build:ssr"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
@@ -85,7 +104,6 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi",
-            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --graceful --ansi"
         ],
         "pre-package-uninstall": [
@@ -104,8 +122,16 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "audit": {
+            "ignore": {
+                "PKSA-zk1n-qbm6-d3rq": "Low: web-auth/webauthn-lib, pulled in by laravel/fortify through laravel/passkeys (pinned); passkeys are not used. Reviewed monthly in config/security.php (D-153, D-161)."
+            }
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "scripts-descriptions": {
+        "check": "All quality checks; must pass before every commit (D-114)."
+    }
 }

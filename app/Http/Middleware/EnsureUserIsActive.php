@@ -16,7 +16,7 @@ class EnsureUserIsActive
     {
         $user = $request->user();
 
-        if ($user === null || $user->status === 'active') {
+        if ($user === null || $user->isActive()) {
             return $next($request);
         }
 
