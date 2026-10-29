@@ -28,6 +28,7 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.0",
         "laravel/boost": "2.0",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.24",
@@ -78,6 +79,18 @@
             "@test:lint",
             "@php artisan test"
         ],
+        "check": [
+            "@php artisan config:clear --ansi",
+            "pint --test",
+            "npm run lint:check",
+            "npm run types",
+            "phpstan analyse --memory-limit=1G --no-progress",
+            "@php artisan test",
+            "@composer audit --locked",
+            "npm audit --omit=dev --audit-level=moderate",
+            "npm run build",
+            "npm run build:ssr"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
@@ -109,8 +122,16 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "audit": {
+            "ignore": {
+                "PKSA-zk1n-qbm6-d3rq": "Low: web-auth/webauthn-lib fake-credential generator, pulled in by laravel/fortify via laravel/passkeys (pinned). Passkeys are not used (Proposed D-153)."
+            }
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "scripts-descriptions": {
+        "check": "All quality checks; must pass before every commit (D-114)."
+    }
 }
