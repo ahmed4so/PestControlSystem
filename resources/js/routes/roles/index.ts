@@ -84,7 +84,7 @@ permissions.form = permissionsForm
 
 /**
 * @see \App\Http\Controllers\Admin\RoleController::assign
-* @see app/Http/Controllers/Admin/RoleController.php:116
+* @see app/Http/Controllers/Admin/RoleController.php:123
 * @route '/roles/assign'
 */
 export const assign = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -99,7 +99,7 @@ assign.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\RoleController::assign
-* @see app/Http/Controllers/Admin/RoleController.php:116
+* @see app/Http/Controllers/Admin/RoleController.php:123
 * @route '/roles/assign'
 */
 assign.url = (options?: RouteQueryOptions) => {
@@ -108,7 +108,7 @@ assign.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Admin\RoleController::assign
-* @see app/Http/Controllers/Admin/RoleController.php:116
+* @see app/Http/Controllers/Admin/RoleController.php:123
 * @route '/roles/assign'
 */
 assign.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -118,7 +118,7 @@ assign.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\Admin\RoleController::assign
-* @see app/Http/Controllers/Admin/RoleController.php:116
+* @see app/Http/Controllers/Admin/RoleController.php:123
 * @route '/roles/assign'
 */
 assign.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -128,7 +128,7 @@ assign.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\Admin\RoleController::assign
-* @see app/Http/Controllers/Admin/RoleController.php:116
+* @see app/Http/Controllers/Admin/RoleController.php:123
 * @route '/roles/assign'
 */
 const assignForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -138,7 +138,7 @@ const assignForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
 
 /**
 * @see \App\Http\Controllers\Admin\RoleController::assign
-* @see app/Http/Controllers/Admin/RoleController.php:116
+* @see app/Http/Controllers/Admin/RoleController.php:123
 * @route '/roles/assign'
 */
 assignForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -148,7 +148,7 @@ assignForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\Admin\RoleController::assign
-* @see app/Http/Controllers/Admin/RoleController.php:116
+* @see app/Http/Controllers/Admin/RoleController.php:123
 * @route '/roles/assign'
 */
 assignForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
