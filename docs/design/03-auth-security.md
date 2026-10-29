@@ -1,7 +1,7 @@
 # Deliverable 3 — Authentication and Security
 
 - Project: SARIS Company Portal
-- Version: 1.2 (approved 2026-10-28; Records Officer removed by D-106)
+- Version: 1.3 (approved; audit lock in application only, D-160)
 - Date: 2026-10-28
 - Based on: `docs/decisions-log.md` (D-001 to D-078), `docs/design/01-architecture.md` (v2.1),
   `docs/design/02-data-model.md` (v1.1), `docs/design/00-current-state.md`
@@ -379,8 +379,8 @@ These rules are enforced in the Workflow module, not just by role assignment:
 Each entry records: actor type and ID, role used, IP, user agent, time, subject, event, and
 before/after values with sensitive fields masked.
 
-**Append-only:** the application never updates or deletes audit rows, and MySQL triggers
-reject `UPDATE` and `DELETE` on the audit table. Entries are kept forever (D-034).
+**Append-only:** the application never updates or deletes audit rows; the audit model refuses
+updates and deletes (D-160). There are no database triggers. Entries are kept forever (D-034).
 
 ---
 
@@ -441,7 +441,7 @@ None for this deliverable.
 | D-088 | National IDs encrypted at rest, with an HMAC hash column for uniqueness and lookup (implements D-066). |
 | D-089 | Upload security in §12.2; antivirus scanning deferred to Phase 2. |
 | D-090 | Security headers including a nonce-based CSP; TLS on Nginx with Let's Encrypt and HSTS. |
-| D-091 | Append-only audit log enforced by database triggers; staff views and downloads of company documents are logged. |
+| D-091 | Append-only audit log enforced in the application (no database triggers, D-160); staff views and downloads of company documents are logged. |
 | D-092 | Account recovery approval ends all sessions, sends a temporary password to the new email and a notice to the old email. |
 | D-093 | The company can change its own login email: password confirmation, link to the new address, notice to the old address. |
 | D-094 | Cloudflare is used only for R2 storage, not in front of the domain. Nginx serves the domain directly with Let's Encrypt TLS, rate limits and fail2ban, behind a DigitalOcean Cloud Firewall and ufw. |

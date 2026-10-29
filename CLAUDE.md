@@ -27,18 +27,36 @@ Key business rules:
 
 ## Sources of truth (priority order)
 
-1. `docs/decisions-log.md`: decisions with `Status: Confirmed` are binding.
-2. `docs/design/`: approved design deliverables (`00-current-state.md`, `01-architecture.md`, `02-data-model.md`, …).
+1. `docs/decisions-log.md`: decisions with `Status: Confirmed` are binding. `Proposed` entries are not binding until the user confirms them.
+2. `docs/design/01–09`: the approved design deliverables (`00-current-state.md` is a snapshot of the code before the build).
 3. `docs/requirements-answers.md`: stakeholder answers. Section W is the Company License written procedure.
 4. `docs/forms/`: application forms (`applications/`) and certificate templates (`templates/`).
+5. `docs/plans/`: approved implementation plans. A plan carries out the design; it never overrides it.
 
 If two sources disagree, the higher one wins. Still report the conflict to the user.
 
+## How we work
+
+- **Who does what.**
+  - The Claude.ai Project is for brainstorming and decisions only.
+  - The user brings decisions from it to Claude Code as **decision briefs**.
+  - Claude Code writes every technical implementation plan and the code.
+- **Decision briefs.** Record each decision in a brief in `docs/decisions-log.md` as `Status: Confirmed`, with the next free D-number unless the brief gives one. Mark any entry it replaces as `Superseded by D-xxx` or `Amended by D-xxx`.
+  - If a brief comes with updated design documents, commit them with the log.
+  - If a brief conflicts with `docs/design/01–09` and no updated document comes with it, **stop and ask**.
+- **Plan before code.** Before coding any phase or feature:
+  1. Write the plan to `docs/plans/<phase-or-feature>.md` with these sections: Scope (in and out), Design references (D-numbers and design sections), Steps, Files, Migrations, Tests, Risks and open questions, and Proposed decisions.
+  2. Show the plan to the user and **wait for their approval**. Do not start coding until they approve.
+  3. On approval, set the plan's status line to `Approved (YYYY-MM-DD)` and commit it with the first change.
+  4. If the plan has to change while coding, update it and get approval again before continuing.
+- **Conflicts stop the work.** If a plan, or the code, would conflict with `docs/design/01–09` or a Confirmed decision, stop and ask the user. Never resolve it yourself.
+- **Your own choices.** Implementation choices that the design and the decisions log don't cover go into `docs/decisions-log.md` as `Status: Proposed`, `Source: Claude Code`, and are listed in the plan. They become Confirmed only when the user confirms them.
+
 ## Working rules
 
-- **Before any feature:** read the relevant design doc and the decisions log.
+- **Before any feature:** read the relevant design doc and the decisions log, then write the plan (see How we work).
 - **Design missing, unclear or conflicting** with the code or another doc: **STOP and ask the user**. Never guess business rules, statuses, roles or data fields.
-- **Implementation decision the design doesn't cover:** add it to `docs/decisions-log.md` with `Status: Proposed` and `Source: Claude Code`, and tell the user so they can confirm it in the design Project. Keep it easy to change until it is Confirmed.
+- **Implementation decision the design doesn't cover:** add it to `docs/decisions-log.md` with `Status: Proposed` and `Source: Claude Code`, and tell the user so they can confirm it. Keep it easy to change until it is Confirmed.
 - **Names:** use the exact entity, status and role names from the design docs, in code, database and UI.
 - **Portal separation:** the Company Portal must never reach Admin Portal routes or data, and the reverse. Enforce this in the backend: separate tables, guards, route files, middleware and session cookies (D-048). Scope every company query to the user's own company.
 - **Business rules and workflow:** enforce every rule server-side; UI checks are only a convenience. Only allowed workflow transitions may change an application's status, and only for a user who holds that stage's role.
@@ -121,6 +139,7 @@ Also from the Laravel Boost guidelines:
     ├── decisions-log.md        D-xxx decisions (binding when Confirmed)
     ├── requirements-answers.md stakeholder answers + written procedure (section W)
     ├── design/                 approved deliverables: 00-current-state.md, 01-architecture.md, …
+    ├── plans/                  implementation plans written by Claude Code, approved by the user
     └── forms/
         ├── applications/       the 3 Phase 1 application forms
         └── templates/          the 5 license and permit certificate templates
@@ -128,6 +147,7 @@ Also from the Laravel Boost guidelines:
 
 ## Session end checklist
 
-- [ ] Add any new implementation decision to `docs/decisions-log.md` as `Proposed`.
+- [ ] Record any decision brief from this session in `docs/decisions-log.md` as Confirmed.
+- [ ] Add any new implementation choice to `docs/decisions-log.md` as Proposed, and update the plan.
 - [ ] Run Pint and the affected tests; summarize what was done (features, files, tests, results).
-- [ ] List open questions and blockers for the design Project.
+- [ ] List open questions, blockers, and the Proposed decisions waiting for the user's confirmation.
