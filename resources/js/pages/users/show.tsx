@@ -1,10 +1,10 @@
+import { Head, Link } from '@inertiajs/react';
+import { ArrowLeft, Edit, Mail, Shield, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Edit, Mail, Shield, User } from 'lucide-react';
 
 interface Role {
     id: number;
@@ -29,10 +29,6 @@ const breadcrumbs = (user: UserDetail): BreadcrumbItem[] => [
     { title: 'Users', href: '/users' },
     { title: user.name, href: `/users/${user.id}` },
 ];
-
-function fmt(n: number) {
-    return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
-}
 
 export default function ShowUser({ user }: Props) {
     return (

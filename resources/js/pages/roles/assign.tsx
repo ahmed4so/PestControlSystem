@@ -1,4 +1,15 @@
+import { Head, router, usePage } from '@inertiajs/react';
+import { Check, ChevronsUpDown, Shield, UserCircle } from 'lucide-react';
+import { useState } from 'react';
 import AlertSuccess from '@/components/alert-success';
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/command';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -10,24 +21,13 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from '@/components/command';
-import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type Role, type User } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
-import { Check, ChevronsUpDown, Shield, UserCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { type BreadcrumbItem, type Role, type User } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -59,17 +59,10 @@ export default function AssignRoles({ users, roles }: AssignRolesProps) {
     const { flash } = usePage<{ flash: { success?: string; error?: string } }>()
         .props;
 
-    // Load roles when user is selected
-    useEffect(() => {
-        if (selectedUser && selectedUser.roles) {
-            setSelectedRoles(selectedUser.roles.map((r) => r.id));
-        } else {
-            setSelectedRoles([]);
-        }
-    }, [selectedUser]);
-
     const handleUserSelect = (user: UserWithRoles) => {
         setSelectedUser(user);
+        // Load the user's current roles
+        setSelectedRoles(user.roles?.map((r) => r.id) ?? []);
         setOpen(false);
     };
 
