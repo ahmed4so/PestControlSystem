@@ -1245,6 +1245,114 @@ Entry format:
 
 ---
 
+## Phase 0 Implementation Decisions (Proposed, Claude Code)
+
+## D-148: Spatie role names and actor codes
+- Date: 2026-10-29
+- Status: Proposed
+- Source: Claude Code
+- Decision: The spatie role names are the D-023 role names (`System Administrator`, `Pesticide Registrar`, `Technical Reviewer`, `Inspector`, `Departmental Director`, `Payment Officer`, `Director General`). The workflow actor codes from 04 §3 (`REGISTRAR`, `TECHNICAL_REVIEWER`, …) map to them through the `StaffRole` enum. The System Administrator has no actor code.
+- Reason: 02 §4.7 says `actor_role` is the spatie role name, while 04 uses actor codes; one mapping keeps both.
+- Affects: StaffRole enum, roles seeder, workflow definitions (Phase 3)
+
+## D-149: Permission names
+- Date: 2026-10-29
+- Status: Proposed
+- Source: Claude Code
+- Decision: Permissions outside the transition matrix (03 §11.1): System Administrator: view/create/update user, `suspend user` (deactivate and reactivate, per 01 §6 item 8), view/create/update/delete role, assign role, assign permissions, manage reference data, manage fee schedule, manage restricted ingredients, manage system settings, handle account recovery, release national id, reset two factor, unlock account, view security audit log. Registrar: view applications, verify products, request enforcement. Technical Reviewer and Inspector: view assigned applications. Departmental Director: view applications, request enforcement, view audit log. Payment Officer: view applications. Director General: view applications, approve enforcement, manage delegations, view audit log. `delete user` is removed. Workflow transitions are authorised by the stage role in the workflow engine, not by permissions.
+- Reason: 03 §11.1 lists capabilities but no permission names.
+- Affects: RolesAndPermissionsSeeder, Admin Portal
+
+## D-150: Designed roles are fixed
+- Date: 2026-10-29
+- Status: Proposed
+- Source: Claude Code
+- Decision: The seeder removes the old `Super Admin` role. The seven designed roles cannot be renamed or deleted in the Admin Portal; other roles can still be created there. The System Administrator role cannot be combined with a workflow role when roles are assigned (D-086).
+- Reason: Keeps "only the System Administrator and the D-023 roles" true while leaving the existing role screens in place.
+- Affects: RoleController, AssignRoleRequest, UpdateRoleRequest
+
+## D-151: Staff deactivation details
+- Date: 2026-10-29
+- Status: Proposed
+- Source: Claude Code
+- Decision: Deactivating a staff user sets `status = INACTIVE` and deletes the user's rows in the `sessions` table, so all sessions end at once; `EnsureUserIsActive` also logs them out on the next request. A user cannot deactivate their own account. Reactivation uses the same `suspend user` permission.
+- Reason: 03 §5.2 says sessions end immediately; the details were not specified.
+- Affects: UserController, DeactivateStaffUser
+
+## D-152: Number year in Mogadishu time
+- Date: 2026-10-29
+- Status: Proposed
+- Source: Claude Code
+- Decision: Yearly numbers (D-011, D-075) follow the calendar year in Africa/Mogadishu, not UTC.
+- Reason: Between 00:00 and 03:00 on 1 January local time, UTC is still in the previous year.
+- Affects: NumberSequencer
+
+## D-153: Audit thresholds
+- Date: 2026-10-29
+- Status: Proposed
+- Source: Claude Code
+- Decision: `composer run check` audits the lock file (`composer audit --locked`) and ignores the low-severity advisory PKSA-zk1n-qbm6-d3rq in web-auth/webauthn-lib, which laravel/fortify pulls in through laravel/passkeys at a pinned version; passkeys are not used. `npm audit --omit=dev` fails on moderate and above; the remaining low advisories come from deepmerge inside @heroui/alert (kept by D-111) and have no fix.
+- Reason: D-114 requires passing audits; these advisories cannot be fixed without removing approved packages.
+- Affects: composer.json, composer run check
+
+## D-154: Somali placeholders
+- Date: 2026-10-29
+- Status: Proposed
+- Source: Claude Code
+- Decision: Until SARIS supplies the Somali text, `lang/so.json` holds the English text for every key, so the missing-key test passes and the UI never shows a raw key. SARIS replaces the values before go-live (D-116).
+- Reason: The Somali wording must come from SARIS.
+- Affects: lang/so.json
+
+## D-155: Password policy in tests
+- Date: 2026-10-29
+- Status: Proposed
+- Source: Claude Code
+- Decision: Automated tests keep Laravel's minimal password default; the D-082 policy is tested directly through `PasswordPolicy::rule()`. Every other environment, including local development, uses the full policy with the breached-password check.
+- Reason: D-082 says "all environments except tests".
+- Affects: PasswordPolicy, AppServiceProvider
+
+## D-156: Passport tables removed by a new migration
+- Date: 2026-10-29
+- Status: Proposed
+- Source: Claude Code
+- Decision: The original `oauth_*` migrations are kept unchanged and a new migration drops the five OAuth tables (D-049).
+- Reason: 08 §4.2 rule 6: merged migrations are never edited.
+- Affects: database/migrations
+
+## D-157: CSP details
+- Date: 2026-10-29
+- Status: Proposed
+- Source: Claude Code
+- Decision: The CSP allows `https://fonts.bunny.net` for fonts (the font host already used by the layout) and inline style attributes (`style-src-attr 'unsafe-inline'`), because server-rendered React pages use them; scripts and style elements need the nonce. Permissions-Policy turns off camera and geolocation until the upload and inspection pages open them (03 §12.3).
+- Reason: 03 §12.3 does not list sources.
+- Affects: SarisPolicy, SecurityHeaders
+
+## D-158: Page and URL moves wait for Phase 1
+- Date: 2026-10-29
+- Status: Proposed
+- Source: Claude Code
+- Decision: Staff pages stay in `resources/js/pages/{users,roles,settings}` and keep their current URLs until Phase 1 adds the `/admin` prefix, the admin, portal and public layouts, and the per-area Fortify routes. Phase 0 moved only the controllers and form requests into the Admin namespace.
+- Reason: Moving pages without the Phase 1 layouts and routes would be done twice.
+- Affects: resources/js/pages, routes
+
+## D-159: Stored file keys
+- Date: 2026-10-29
+- Status: Proposed
+- Source: Claude Code
+- Decision: Stored files use the key `{purpose-slug}/{YYYY}/{MM}/{40 random characters}`, for example `receipt/2026/10/k3j…`. The original name is kept only as metadata.
+- Reason: D-056 asks for random keys; the layout was not specified.
+- Affects: FileStorage
+
+## D-160: Database privileges for audit triggers
+- Date: 2026-10-29
+- Status: Proposed
+- Source: Claude Code
+- Decision: The production database user needs the TRIGGER privilege for the D-091 migration. With binary logging on (MySQL 8 default), creating the triggers also needs SUPER or `log_bin_trust_function_creators = 1`. This goes in the Phase 5 server set-up guide.
+- Reason: The append-only triggers are created by a migration.
+- Affects: Deployment (Phase 5), docs/ops
+
+---
+
 ## Open Questions
 
 1. Fee schedule per service and category (F1).
