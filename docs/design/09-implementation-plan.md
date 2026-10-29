@@ -75,7 +75,7 @@ tests but not waiting time for SARIS inputs.
 | Staff `status` enum; deactivate instead of delete; soft deletes; remove self-delete; `first_login = true` on creation | D-053 |
 | Strong password policy everywhere, including staff forms | D-082 |
 | `app/Domain/<Module>` structure; controllers split into Admin, Portal, Public | D-061 |
-| Audit log package with masked attributes; MySQL triggers blocking UPDATE/DELETE on audit rows | D-055, D-091 |
+| Audit log package with masked attributes; audit model refuses UPDATE/DELETE (no database triggers) | D-055, D-091, D-160 |
 | `lang/en.json`, `lang/so.json`, `t()` helper shared through Inertia; missing-key test | D-054, D-116 |
 | Security headers and nonce CSP | D-090 |
 | R2 disks (`r2`, `r2_backups`), StoredFile model and Documents module storage service | D-056 |

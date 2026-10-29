@@ -773,7 +773,7 @@ Entry format:
 
 ## D-091: Append-only audit log
 - Date: 2026-10-28
-- Status: Confirmed
+- Status: Amended by D-160 (no database triggers; enforced in the application)
 - Source: Claude.ai design chat
 - Decision: Audit rows are never updated or deleted; MySQL triggers reject UPDATE and DELETE. Staff views and downloads of company documents are logged.
 - Reason: Tamper-evident records kept forever.
@@ -1242,6 +1242,114 @@ Entry format:
 - Decision: Admin register of all licenses and permits with filters and CSV export; exports are audit-logged.
 - Reason: Procedure 6.13 register.
 - Affects: Admin Portal, Licensing
+
+---
+
+## Phase 0 Decisions (confirmed 2026-10-29)
+
+## D-148: Role names and actor codes
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed by stakeholder)
+- Decision: spatie role names are the D-023 role names, mapped to the workflow actor codes (REGISTRAR, etc.) in one enum.
+- Reason: Exact names in one place.
+- Affects: Roles, Workflow
+
+## D-149: Permission names
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed)
+- Decision: Permission names for the 03 §11.1 capabilities; `suspend user` is used for deactivation; `delete user` is removed.
+- Reason: Implements D-053 and 03 §11.1.
+- Affects: Roles and permissions
+
+## D-150: Designed roles locked
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed)
+- Decision: The 7 designed roles cannot be renamed or deleted, and the System Administrator cannot also hold a workflow role.
+- Reason: Enforces D-023 and D-086.
+- Affects: Roles
+
+## D-151: Deactivation effects
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed)
+- Decision: Deactivation ends all of the user's sessions immediately; nobody can deactivate their own account.
+- Reason: Safe account control.
+- Affects: Identity
+
+## D-152: Numbering year
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed)
+- Decision: Yearly number sequences follow the calendar year in Africa/Mogadishu time, not UTC.
+- Reason: Correct year at the year boundary.
+- Affects: NumberSequence
+
+## D-153: Ignored advisories
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed with condition)
+- Decision: The audit steps ignore two low-severity advisories with no fix (a passkeys library pulled in by Fortify, unused; and @heroui/alert, kept by D-111). Each is listed by advisory ID with a reason in the configuration, re-checked monthly, and removed as soon as a fix exists.
+- Reason: No fix available; risk low.
+- Affects: composer.json / npm audit configuration
+
+## D-154: Somali placeholders and translation report
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed with addition)
+- Decision: lang/so.json holds the English text as a placeholder until the Somali wording is ready. A translation report lists every Somali entry still identical to the English; zero untranslated entries is a go-live requirement (Phase 5). Somali text is drafted in the design Project and reviewed by the IT Advisor or SARIS staff.
+- Reason: Missing-key test alone cannot detect untranslated text.
+- Affects: lang files, tests, Phase 5
+
+## D-155: Password rule in tests
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed)
+- Decision: Automated tests use Laravel's minimal password rule; the full policy (D-082) is tested directly.
+- Reason: Fast tests without weakening the policy.
+- Affects: Tests
+
+## D-156: Dropping Passport tables
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed)
+- Decision: A new migration drops the Passport tables; old migrations stay unchanged.
+- Reason: Never edit merged migrations.
+- Affects: Migrations
+
+## D-157: CSP and fonts
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed with change)
+- Decision: The CSP allows inline style attributes (needed by the UI libraries); scripts require the nonce. The fonts are self-hosted in Phase 1, after which the CSP allows no external font host.
+- Reason: Faster pages on slow connections; no outside dependency.
+- Affects: CSP, frontend, Phase 1
+
+## D-158: Staff URLs to /admin in Phase 1
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed)
+- Decision: Staff pages and URLs move to /admin in Phase 1; Phase 0 moved only the controllers.
+- Reason: Matches the Phase 1 plan.
+- Affects: Routes
+
+## D-159: Stored file keys
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed)
+- Decision: Stored file keys use `purpose/YYYY/MM/random`.
+- Reason: Organised, still random and never reused (D-056).
+- Affects: Documents module
+
+## D-160: No database lock on the audit log
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Stakeholder (amends D-091)
+- Decision: The audit log is append-only by application rule only: the audit model refuses updates and deletes, and no code path changes audit rows. There are no MySQL triggers, and the portal uses a single database account with normal privileges. The trigger migration is removed from the unmerged Phase 0 branch.
+- Reason: Stakeholder decision; the server is considered adequately protected.
+- Affects: Audit module, migrations, 03 §13, deployment
 
 ---
 
