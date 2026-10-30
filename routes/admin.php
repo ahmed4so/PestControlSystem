@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 use App\Domain\Identity\Enums\AuthArea;
 use App\Domain\Identity\Support\FortifyRoutes;
+use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FailedEmailController;
+use App\Http\Controllers\Admin\FileController;
+use App\Http\Controllers\Admin\NationalIdReleaseController;
+use App\Http\Controllers\Admin\ReferenceData\FederalMemberStateController;
+use App\Http\Controllers\Admin\ReferenceData\RegionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\Settings\PasswordController;
 use App\Http\Controllers\Admin\Settings\ProfileController;
@@ -58,6 +63,26 @@ Route::middleware(['auth:web', 'active', 'session.timeouts', 'password.current',
 
         Route::resource('roles', RoleController::class)->except(['show'])->middleware('throttle:10,1');
     });
+
+    // Company directory and files, read-only (D-177, D-181).
+    Route::get('companies', [CompanyController::class, 'index'])->name('companies.index');
+    Route::get('companies/{company}', [CompanyController::class, 'show'])->name('companies.show');
+    Route::get('files/documents/{document}', [FileController::class, 'document'])->name('files.document');
+    Route::get('files/photos/{photo}', [FileController::class, 'photo'])->name('files.photo');
+
+    // National-ID release by the System Administrator (D-066, D-095).
+    Route::middleware('password.confirm:admin.password.confirm')->group(function (): void {
+        Route::get('national-ids', [NationalIdReleaseController::class, 'show'])->name('national-ids.show');
+        Route::post('national-ids/search', [NationalIdReleaseController::class, 'find'])->middleware('throttle:30,1')->name('national-ids.find');
+        Route::post('national-ids/release', [NationalIdReleaseController::class, 'release'])->middleware('throttle:10,1')->name('national-ids.release');
+    });
+
+    // Reference data lists (D-065).
+    Route::get('reference-data/fms', [FederalMemberStateController::class, 'index'])->name('reference-data.fms.index');
+    Route::post('reference-data/fms', [FederalMemberStateController::class, 'store'])->name('reference-data.fms.store');
+    Route::put('reference-data/fms/{fms}', [FederalMemberStateController::class, 'update'])->name('reference-data.fms.update');
+    Route::post('reference-data/regions', [RegionController::class, 'store'])->name('reference-data.regions.store');
+    Route::put('reference-data/regions/{region}', [RegionController::class, 'update'])->name('reference-data.regions.update');
 
     // Emails that could not be delivered (D-129).
     Route::get('failed-emails', [FailedEmailController::class, 'index'])->name('failed-emails.index');

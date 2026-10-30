@@ -2,6 +2,7 @@
 
 use App\Domain\Identity\Enums\AuthArea;
 use App\Http\Middleware\EnforceSessionTimeouts;
+use App\Http\Middleware\EnsureCompanyProfileExists;
 use App\Http\Middleware\EnsurePasswordIsCurrent;
 use App\Http\Middleware\EnsureTwoFactorEnabled;
 use App\Http\Middleware\EnsureUserIsActive;
@@ -66,6 +67,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'password.current' => EnsurePasswordIsCurrent::class,
             'two-factor.enforced' => EnsureTwoFactorEnabled::class,
             'session.timeouts' => EnforceSessionTimeouts::class,
+            'company.profile' => EnsureCompanyProfileExists::class,
         ]);
 
         $middleware->redirectGuestsTo(

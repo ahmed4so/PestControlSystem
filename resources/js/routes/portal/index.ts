@@ -7,6 +7,11 @@ import temporaryPasswordC41443 from './temporary-password'
 import email from './email'
 import profile from './profile'
 import userPassword from './user-password'
+import company from './company'
+import persons from './persons'
+import premises from './premises'
+import documents from './documents'
+import files from './files'
 /**
 * @see \Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::login
 * @see vendor/laravel/fortify/src/Http/Controllers/AuthenticatedSessionController.php:47
@@ -308,7 +313,7 @@ temporaryPassword.form = temporaryPasswordForm
 
 /**
 * @see \App\Http\Controllers\Portal\DashboardController::__invoke
-* @see app/Http/Controllers/Portal/DashboardController.php:16
+* @see app/Http/Controllers/Portal/DashboardController.php:21
 * @route '/portal'
 */
 export const dashboard = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -323,7 +328,7 @@ dashboard.definition = {
 
 /**
 * @see \App\Http\Controllers\Portal\DashboardController::__invoke
-* @see app/Http/Controllers/Portal/DashboardController.php:16
+* @see app/Http/Controllers/Portal/DashboardController.php:21
 * @route '/portal'
 */
 dashboard.url = (options?: RouteQueryOptions) => {
@@ -332,7 +337,7 @@ dashboard.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Portal\DashboardController::__invoke
-* @see app/Http/Controllers/Portal/DashboardController.php:16
+* @see app/Http/Controllers/Portal/DashboardController.php:21
 * @route '/portal'
 */
 dashboard.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -342,7 +347,7 @@ dashboard.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\Portal\DashboardController::__invoke
-* @see app/Http/Controllers/Portal/DashboardController.php:16
+* @see app/Http/Controllers/Portal/DashboardController.php:21
 * @route '/portal'
 */
 dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -352,7 +357,7 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\Portal\DashboardController::__invoke
-* @see app/Http/Controllers/Portal/DashboardController.php:16
+* @see app/Http/Controllers/Portal/DashboardController.php:21
 * @route '/portal'
 */
 const dashboardForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -362,7 +367,7 @@ const dashboardForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> 
 
 /**
 * @see \App\Http\Controllers\Portal\DashboardController::__invoke
-* @see app/Http/Controllers/Portal/DashboardController.php:16
+* @see app/Http/Controllers/Portal/DashboardController.php:21
 * @route '/portal'
 */
 dashboardForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -372,7 +377,7 @@ dashboardForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> =>
 
 /**
 * @see \App\Http\Controllers\Portal\DashboardController::__invoke
-* @see app/Http/Controllers/Portal/DashboardController.php:16
+* @see app/Http/Controllers/Portal/DashboardController.php:21
 * @route '/portal'
 */
 dashboardForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -600,6 +605,11 @@ const portal = {
     settings: Object.assign(settings, settings),
     profile: Object.assign(profile, profile),
     userPassword: Object.assign(userPassword, userPassword),
+    company: Object.assign(company, company),
+    persons: Object.assign(persons, persons),
+    premises: Object.assign(premises, premises),
+    documents: Object.assign(documents, documents),
+    files: Object.assign(files, files),
 }
 
 export default portal

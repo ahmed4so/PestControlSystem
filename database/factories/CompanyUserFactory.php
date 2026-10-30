@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Domain\Identity\Enums\AccountStatus;
+use App\Models\Company;
 use App\Models\CompanyUser;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -53,6 +54,18 @@ class CompanyUserFactory extends Factory
             'last_login_at' => null,
             'password_changed_at' => null,
         ]);
+    }
+
+    /**
+     * With its own company (02 §4.4).
+     */
+    public function withCompany(): static
+    {
+        return $this->afterCreating(function (CompanyUser $account): void {
+            if ($account->company_id === null) {
+                $account->forceFill(['company_id' => Company::factory()->create()->id])->saveQuietly();
+            }
+        });
     }
 
     public function inactive(): static

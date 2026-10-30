@@ -65,7 +65,7 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * @return array{id: int, name: string, email: string, two_factor_enabled: bool}|null
+     * @return array{id: int, name: string, email: string, two_factor_enabled: bool, has_company: bool}|null
      */
     private function account(Request $request): ?array
     {
@@ -80,6 +80,7 @@ class HandleInertiaRequests extends Middleware
             'name' => $user->displayName(),
             'email' => $user->email,
             'two_factor_enabled' => $user->two_factor_confirmed_at !== null,
+            'has_company' => $user instanceof CompanyUser && $user->company_id !== null,
         ];
     }
 }

@@ -7,6 +7,10 @@ import userPassword from './user-password'
 import appearance from './appearance'
 import users from './users'
 import roles from './roles'
+import companies from './companies'
+import files from './files'
+import nationalIds from './national-ids'
+import referenceData from './reference-data'
 import failedEmails from './failed-emails'
 /**
 * @see \Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::login
@@ -439,6 +443,10 @@ const admin = {
     appearance: Object.assign(appearance, appearance),
     users: Object.assign(users, users),
     roles: Object.assign(roles, roles),
+    companies: Object.assign(companies, companies),
+    files: Object.assign(files, files),
+    nationalIds: Object.assign(nationalIds, nationalIds),
+    referenceData: Object.assign(referenceData, referenceData),
     failedEmails: Object.assign(failedEmails, failedEmails),
 }
 

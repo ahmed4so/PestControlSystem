@@ -61,6 +61,9 @@ return [
     // Public form protection (03 §4, §14; D-080).
     'honeypot_seconds' => 3,
 
+    // HMAC key for national-ID lookups and uniqueness (D-088, D-117).
+    'nid_hash_key' => env('NID_HASH_KEY'),
+
     // Email footer until system_settings exists (07 §1, D-170).
     'contact' => [
         'email' => 'info@saris.gov.so',

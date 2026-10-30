@@ -12,6 +12,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use LogicException;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * The only way to write or read files (D-056, 08 §4.2 rule 3). Every file gets
@@ -21,8 +22,6 @@ use LogicException;
  */
 class FileStorage
 {
-    public const DISK = 'r2';
-
     public const SIGNED_URL_MINUTES = 5;
 
     public function store(UploadedFile $file, string $purpose, ?Model $uploadedBy = null): StoredFile
@@ -44,7 +43,7 @@ class FileStorage
         }
 
         return StoredFile::query()->create([
-            'disk' => self::DISK,
+            'disk' => $this->diskName(),
             'path' => $path,
             'original_name' => $originalName,
             'mime_type' => (string) (new \finfo(FILEINFO_MIME_TYPE))->buffer($contents),
@@ -78,6 +77,25 @@ class FileStorage
         ]);
     }
 
+    /**
+     * A download response for a stored file: a redirect to a 5-minute
+     * signed URL on R2, or a direct attachment on a disk without signed
+     * URLs (local development, D-180). Always an attachment with the stored
+     * MIME type (03 §12.2).
+     */
+    public function download(StoredFile $file): Response
+    {
+        if ($this->disk()->providesTemporaryUrls()) {
+            return redirect()->away($this->temporaryUrl($file));
+        }
+
+        return response($this->contents($file), 200, [
+            'Content-Type' => $file->mime_type,
+            'Content-Disposition' => 'attachment; filename="'.addcslashes($file->original_name, '"\\').'"',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
     private function newPath(string $purpose): string
     {
         do {
@@ -89,6 +107,15 @@ class FileStorage
 
     private function disk(): Filesystem
     {
-        return Storage::disk(self::DISK);
+        return Storage::disk($this->diskName());
+    }
+
+    /**
+     * R2 in production and staging (D-056); configurable for local work
+     * (D-180).
+     */
+    private function diskName(): string
+    {
+        return (string) config('documents.disk', 'r2');
     }
 }

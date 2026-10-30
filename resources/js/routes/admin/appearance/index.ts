@@ -1,6 +1,6 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../wayfinder'
 /**
-* @see routes/admin.php:37
+* @see routes/admin.php:42
 * @route '/admin/settings/appearance'
 */
 export const edit = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -14,7 +14,7 @@ edit.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
-* @see routes/admin.php:37
+* @see routes/admin.php:42
 * @route '/admin/settings/appearance'
 */
 edit.url = (options?: RouteQueryOptions) => {
@@ -22,7 +22,7 @@ edit.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see routes/admin.php:37
+* @see routes/admin.php:42
 * @route '/admin/settings/appearance'
 */
 edit.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -31,7 +31,7 @@ edit.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 
 /**
-* @see routes/admin.php:37
+* @see routes/admin.php:42
 * @route '/admin/settings/appearance'
 */
 edit.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -40,7 +40,7 @@ edit.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
 /**
-* @see routes/admin.php:37
+* @see routes/admin.php:42
 * @route '/admin/settings/appearance'
 */
 const editForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -49,7 +49,7 @@ const editForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 })
 
 /**
-* @see routes/admin.php:37
+* @see routes/admin.php:42
 * @route '/admin/settings/appearance'
 */
 editForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -58,7 +58,7 @@ editForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 })
 
 /**
-* @see routes/admin.php:37
+* @see routes/admin.php:42
 * @route '/admin/settings/appearance'
 */
 editForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

@@ -43,11 +43,16 @@ function systemAdministrator(): User
 }
 
 /**
+ * A company account with its own company (Phase 2); pass false for an
+ * account that has not set up its profile yet.
+ *
  * @param  array<string, mixed>  $attributes
  */
-function companyUser(array $attributes = []): CompanyUser
+function companyUser(array $attributes = [], bool $withCompany = true): CompanyUser
 {
-    return CompanyUser::factory()->create($attributes);
+    $factory = CompanyUser::factory();
+
+    return ($withCompany ? $factory->withCompany() : $factory)->create($attributes)->fresh();
 }
 
 /**

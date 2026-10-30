@@ -27,7 +27,7 @@ function emailedPassword(string $mailable): string
     return (string) $password;
 }
 
-it('lets a company sign up, log in with the temporary password, set a password and reach an empty dashboard', function () {
+it('lets a company sign up, log in with the temporary password, set a password and reach the profile set-up', function () {
     $this->post(route('portal.signup.store'), [
         'full_name' => 'Amina Hassan',
         'email' => 'amina@example.com',
@@ -48,9 +48,11 @@ it('lets a company sign up, log in with the temporary password, set a password a
         'password_confirmation' => 'Amina-Own-Pass-1!',
     ])->assertSessionHasNoErrors()->assertRedirect(route('portal.dashboard'));
 
-    $this->get(route('portal.dashboard'))
+    // Phase 2: the next step is the company profile set-up (03 §4).
+    $this->get(route('portal.dashboard'))->assertRedirect(route('portal.company.create'));
+    $this->get(route('portal.company.create'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('portal/dashboard')->where('auth.user.email', 'amina@example.com'));
+        ->assertInertia(fn ($page) => $page->component('portal/company/setup')->where('auth.user.email', 'amina@example.com'));
 });
 
 it('lets a staff member get a temporary password, set a password, enrol 2FA and reach the admin dashboard', function () {

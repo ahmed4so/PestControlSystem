@@ -9,7 +9,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
-    Storage::fake(FileStorage::DISK);
+    Storage::fake('r2');
 });
 
 // Phase 0 "Done when": a file can be stored to and read from R2 through the Documents module.
@@ -19,7 +19,7 @@ it('stores a file in R2 and reads it back', function () {
 
     $stored = app(FileStorage::class)->store($upload, 'RECEIPT', $user);
 
-    Storage::disk(FileStorage::DISK)->assertExists($stored->path);
+    Storage::disk('r2')->assertExists($stored->path);
 
     expect(app(FileStorage::class)->contents($stored))->toBe('%PDF-1.4 test receipt')
         ->and($stored->original_name)->toBe('receipt.pdf')
@@ -58,7 +58,7 @@ it('keeps stored file rows immutable', function () {
 
 it('refuses to return a file whose contents were changed', function () {
     $stored = app(FileStorage::class)->storeContents('original', 'a.pdf', 'RECEIPT');
-    Storage::disk(FileStorage::DISK)->put($stored->path, 'tampered');
+    Storage::disk('r2')->put($stored->path, 'tampered');
 
     expect(fn () => app(FileStorage::class)->contents($stored))->toThrow(LogicException::class);
 });
@@ -66,7 +66,7 @@ it('refuses to return a file whose contents were changed', function () {
 it('issues signed download URLs that expire after 5 minutes', function () {
     $stored = app(FileStorage::class)->storeContents('x', 'a.pdf', 'RECEIPT');
     $expiries = [];
-    Storage::disk(FileStorage::DISK)->buildTemporaryUrlsUsing(function (string $path, DateTimeInterface $expiration) use (&$expiries) {
+    Storage::disk('r2')->buildTemporaryUrlsUsing(function (string $path, DateTimeInterface $expiration) use (&$expiries) {
         $expiries[] = $expiration;
 
         return "https://r2.test/{$path}?signed";

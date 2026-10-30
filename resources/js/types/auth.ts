@@ -8,6 +8,7 @@ export type User = {
     email: string;
     avatar?: string;
     two_factor_enabled: boolean;
+    has_company: boolean;
 };
 
 export type Auth = {

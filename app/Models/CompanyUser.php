@@ -12,6 +12,7 @@ use App\Domain\Notifications\Enums\NotificationCode;
 use Carbon\CarbonImmutable;
 use Database\Factories\CompanyUserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -91,6 +92,14 @@ class CompanyUser extends Authenticatable
             'pending_email_expires_at' => 'datetime',
             'terms_accepted_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo<Company, $this>
+     */
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
     }
 
     public function displayName(): string
