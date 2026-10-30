@@ -1,8 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
+use App\Domain\Identity\Enums\AuthArea;
 use App\Domain\Identity\Support\Translations;
+use App\Models\CompanyUser;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -40,9 +45,11 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'csrf_token' => csrf_token(),
+            // Only the current area's account is ever shared (D-048).
+            'area' => AuthArea::current($request)?->value,
             'auth' => [
-                'user' => $request->user(),
-                'permissions' => fn () => $request->user()
+                'user' => fn () => $this->account($request),
+                'permissions' => fn () => $request->user() instanceof User
                     ? $request->user()->getAllPermissions()->pluck('name')
                     : [],
             ],
@@ -54,6 +61,25 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
             ],
+        ];
+    }
+
+    /**
+     * @return array{id: int, name: string, email: string, two_factor_enabled: bool}|null
+     */
+    private function account(Request $request): ?array
+    {
+        $user = $request->user();
+
+        if (! $user instanceof User && ! $user instanceof CompanyUser) {
+            return null;
+        }
+
+        return [
+            'id' => $user->id,
+            'name' => $user->displayName(),
+            'email' => $user->email,
+            'two_factor_enabled' => $user->two_factor_confirmed_at !== null,
         ];
     }
 }

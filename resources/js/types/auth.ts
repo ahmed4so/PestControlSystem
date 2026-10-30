@@ -1,17 +1,17 @@
+/**
+ * The logged-in account of the current area, as shared by
+ * HandleInertiaRequests (staff user or company account).
+ */
 export type User = {
     id: number;
     name: string;
     email: string;
     avatar?: string;
-    email_verified_at: string | null;
-    two_factor_enabled?: boolean;
-    created_at: string;
-    updated_at: string;
-    [key: string]: unknown;
+    two_factor_enabled: boolean;
 };
 
 export type Auth = {
-    user: User;
+    user: User | null;
     permissions: string[];
 };
 

@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use App\Domain\Identity\Support\PasswordPolicy;
+use App\Http\Requests\Admin\Settings\PasswordUpdateRequest;
 use App\Http\Requests\Admin\StoreUserRequest;
+use App\Models\CompanyUser;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
@@ -32,11 +35,16 @@ it('checks breached passwords outside tests', function () {
         ->and(PasswordPolicy::rule(checkBreached: false)->appliedRules()['uncompromised'])->toBeFalse();
 });
 
-it('applies the policy to staff passwords set by the System Administrator', function () {
+it('never lets the System Administrator set a staff password (D-083)', function () {
+    expect((new StoreUserRequest)->rules())->not->toHaveKey('password');
+});
+
+it('applies the policy to every new password, in both portals', function (string $requestClass, string $model) {
     $this->app->detectEnvironment(fn () => 'production');
     expect(app()->runningUnitTests())->toBeFalse();
 
-    $rules = (new StoreUserRequest)->rules()['password'];
+    $request = (new $requestClass)->setUserResolver(fn () => $model::factory()->make());
+    $rules = $request->rules()['password'];
     $passwordRule = collect($rules)->first(fn ($rule) => $rule instanceof Password);
 
     expect($passwordRule->appliedRules())->toMatchArray([
@@ -46,4 +54,7 @@ it('applies the policy to staff passwords set by the System Administrator', func
         'symbols' => true,
         'uncompromised' => true,
     ]);
-});
+})->with([
+    'staff' => [PasswordUpdateRequest::class, User::class],
+    'company' => [App\Http\Requests\Portal\Settings\PasswordUpdateRequest::class, CompanyUser::class],
+]);

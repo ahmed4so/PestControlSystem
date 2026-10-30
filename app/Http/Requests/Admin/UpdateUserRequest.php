@@ -1,57 +1,55 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
+use App\Domain\ReferenceData\Support\FieldFormats;
+use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 
+/**
+ * Staff user details (05 §3.3). Roles change on the role assignment page;
+ * passwords are never set here (D-083).
+ */
 class UpdateUserRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
+    protected function prepareForValidation(): void
     {
-        return true;
+        $this->merge([
+            'name' => FieldFormats::normaliseText($this->input('name')),
+            'email' => FieldFormats::normaliseEmail($this->input('email')),
+            'phone' => FieldFormats::normalisePhone($this->input('phone')),
+        ]);
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
+        /** @var User $user */
         $user = $this->route('user');
 
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                Rule::unique('users', 'email')->ignore($user->id),
-            ],
-            'password' => ['nullable', 'string', Password::defaults(), 'confirmed'],
+            'name' => ['required', ...FieldFormats::name()],
+            'email' => ['required', ...FieldFormats::email(), Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => ['nullable', ...FieldFormats::phone()],
+            'preferred_locale' => ['required', 'in:en,so'],
         ];
     }
 
     /**
-     * Get custom error messages for validation rules.
-     *
      * @return array<string, string>
      */
     public function messages(): array
     {
         return [
-            'name.required' => 'The name is required.',
-            'email.required' => 'The email address is required.',
-            'email.email' => 'Please provide a valid email address.',
-            'email.unique' => 'This email is already registered.',
-            'password.confirmed' => 'The password confirmation does not match.',
+            'email.unique' => __('This email is already used by a staff account.'),
+            'name.regex' => __('Use letters, spaces, apostrophes, hyphens and full stops only.'),
+            'phone.regex' => __('Enter the phone number in international format, for example +252612345678.'),
         ];
     }
 }

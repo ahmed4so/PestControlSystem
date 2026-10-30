@@ -73,6 +73,7 @@ abstract class NotificationMail extends Mailable implements ShouldBeEncrypted, S
             view: 'mail.layout',
             text: 'mail.layout-text',
             with: [
+                'locales' => $this->locales(),
                 'sections' => $this->sections($this->code()->view()),
                 'textSections' => $this->sections($this->code()->textView()),
                 'footers' => $this->sections('mail.footer'),

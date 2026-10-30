@@ -1,90 +1,147 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
-use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Domain\Identity\Enums\AuthArea;
+use App\Domain\Identity\Listeners\RecordSuccessfulLogin;
+use App\Domain\Identity\Listeners\RecordTwoFactorChange;
+use App\Domain\Identity\Login\AuthenticateAccount;
+use App\Domain\Identity\Login\DisableRememberMe;
+use App\Domain\Identity\Login\RedirectToAreaTwoFactorChallenge;
+use App\Http\Responses\Auth\FailedTwoFactorLoginResponse;
+use App\Http\Responses\Auth\PasswordResetLinkRequestedResponse;
+use App\Http\Responses\Auth\PasswordResetResponse;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use Laravel\Fortify\Features;
+use Laravel\Fortify\Actions\AttemptToAuthenticate;
+use Laravel\Fortify\Actions\CanonicalizeUsername;
+use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
+use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse;
+use Laravel\Fortify\Contracts\FailedTwoFactorLoginResponse as FailedTwoFactorLoginResponseContract;
+use Laravel\Fortify\Contracts\PasswordResetResponse as PasswordResetResponseContract;
+use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
+use Laravel\Fortify\Events\RecoveryCodeReplaced;
+use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
+use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
 use Laravel\Fortify\Fortify;
+use Spatie\Honeypot\Honeypot;
 
+/**
+ * Fortify for both portals (03 §3, D-062, D-079): SetAuthArea chooses the
+ * guard and broker per request; this provider supplies the area's pages,
+ * the login pipeline with lockout, and area-aware responses.
+ */
 class FortifyServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
+        Fortify::ignoreRoutes();
+
+        // Fortify's controllers receive the guard when they are built, which
+        // is before SetAuthArea runs; take it from the route's area instead.
+        $this->app->bind(StatefulGuard::class, function (): StatefulGuard {
+            $request = request();
+            $area = AuthArea::current($request) ?? AuthArea::forRoute($request->route());
+
+            /** @var StatefulGuard */
+            return Auth::guard($area?->guard() ?? config('fortify.guard'));
+        });
+
+        $this->app->singleton(FailedTwoFactorLoginResponseContract::class, FailedTwoFactorLoginResponse::class);
+        $this->app->bind(PasswordResetResponseContract::class, PasswordResetResponse::class);
+        $this->app->singleton(SuccessfulPasswordResetLinkRequestResponse::class, PasswordResetLinkRequestedResponse::class);
+        $this->app->singleton(FailedPasswordResetLinkRequestResponse::class, PasswordResetLinkRequestedResponse::class);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+        $this->configureEvents();
     }
 
-    /**
-     * Configure Fortify actions.
-     */
     private function configureActions(): void
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
-        Fortify::createUsersUsing(CreateNewUser::class);
+
+        Fortify::authenticateUsing(fn (Request $request) => app(AuthenticateAccount::class)($request));
+
+        Fortify::authenticateThrough(fn (Request $request): array => [
+            DisableRememberMe::class,
+            CanonicalizeUsername::class,
+            RedirectToAreaTwoFactorChallenge::class,
+            AttemptToAuthenticate::class,
+            PrepareAuthenticatedSession::class,
+        ]);
     }
 
-    /**
-     * Configure Fortify views.
-     */
     private function configureViews(): void
     {
-        Fortify::loginView(fn (Request $request) => Inertia::render('auth/login', [
-            'canResetPassword' => Features::enabled(Features::resetPasswords()),
-            'canRegister' => Features::enabled(Features::registration()),
+        Fortify::loginView(fn (Request $request) => Inertia::render($this->page($request, 'auth/login'), [
             'status' => $request->session()->get('status'),
-            'loginError' => $request->session()->get('login_error'),
         ]));
 
-        Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/reset-password', [
-            'email' => $request->email,
+        Fortify::resetPasswordView(fn (Request $request) => Inertia::render($this->page($request, 'auth/reset-password'), [
+            'email' => $request->query('email'),
             'token' => $request->route('token'),
         ]));
 
-        Fortify::requestPasswordResetLinkView(fn (Request $request) => Inertia::render('auth/forgot-password', [
+        Fortify::requestPasswordResetLinkView(fn (Request $request) => Inertia::render($this->page($request, 'auth/forgot-password'), [
             'status' => $request->session()->get('status'),
+            'honeypot' => app(Honeypot::class)->toArray(),
         ]));
 
-        Fortify::verifyEmailView(fn (Request $request) => Inertia::render('auth/verify-email', [
-            'status' => $request->session()->get('status'),
-        ]));
+        Fortify::twoFactorChallengeView(fn (Request $request) => Inertia::render($this->page($request, 'auth/two-factor-challenge')));
 
-        Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/two-factor-challenge'));
-
-        Fortify::confirmPasswordView(fn () => Inertia::render('auth/confirm-password'));
+        Fortify::confirmPasswordView(fn (Request $request) => Inertia::render($this->page($request, 'auth/confirm-password')));
     }
 
     /**
-     * Configure rate limiting.
+     * Limits per area, so attempts on one portal never affect the other
+     * (03 §3 step 5, §14).
      */
     private function configureRateLimiting(): void
     {
-        RateLimiter::for('two-factor', function (Request $request) {
-            return Limit::perMinute(5)->by($request->session()->get('login.id'));
-        });
+        $area = fn (Request $request): string => (AuthArea::current($request) ?? AuthArea::Company)->value;
+        $email = fn (Request $request): string => Str::transliterate(Str::lower((string) $request->input('email')));
 
-        RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
+        RateLimiter::for('login', fn (Request $request) => Limit::perMinute(5)
+            ->by($area($request).'|'.$email($request).'|'.$request->ip()));
 
-            return Limit::perMinute(5)->by($throttleKey);
-        });
+        RateLimiter::for('two-factor', fn (Request $request) => Limit::perMinute(5)
+            ->by($area($request).'|'.($request->session()->get('login.id') ?? $request->user()?->getAuthIdentifier() ?? $request->ip())));
+
+        RateLimiter::for('signup', fn (Request $request) => Limit::perHour(3)->by('signup|'.$request->ip()));
+
+        RateLimiter::for('temporary-password', fn (Request $request) => Limit::perHour(3)
+            ->by('temporary-password|'.$email($request)));
+
+        RateLimiter::for('forgot-password', fn (Request $request) => Limit::perHour(3)
+            ->by($area($request).'|forgot-password|'.$email($request)));
+    }
+
+    private function configureEvents(): void
+    {
+        Event::listen(Login::class, RecordSuccessfulLogin::class);
+        Event::listen(TwoFactorAuthenticationConfirmed::class, [RecordTwoFactorChange::class, 'enabled']);
+        Event::listen(TwoFactorAuthenticationDisabled::class, [RecordTwoFactorChange::class, 'disabled']);
+        Event::listen(RecoveryCodeReplaced::class, [RecordTwoFactorChange::class, 'recoveryCodeUsed']);
+    }
+
+    private function page(Request $request, string $page): string
+    {
+        return (AuthArea::current($request) ?? AuthArea::Company)->pages().'/'.$page;
     }
 }

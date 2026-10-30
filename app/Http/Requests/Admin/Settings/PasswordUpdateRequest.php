@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin\Settings;
 
 use App\Concerns\PasswordValidationRules;
+use App\Domain\Identity\Rules\NotRecentPassword;
+use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -11,15 +15,18 @@ class PasswordUpdateRequest extends FormRequest
     use PasswordValidationRules;
 
     /**
-     * Get the validation rules that apply to the request.
+     * New password: policy and not one of the last 5 (05 §3.2, D-082).
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
+        /** @var User $user */
+        $user = $this->user();
+
         return [
             'current_password' => $this->currentPasswordRules(),
-            'password' => $this->passwordRules(),
+            'password' => [...$this->passwordRules(), new NotRecentPassword($user)],
         ];
     }
 }

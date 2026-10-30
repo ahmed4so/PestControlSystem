@@ -28,6 +28,9 @@
         "typescript-eslint": "^8.23.0"
     },
     "dependencies": {
+        "@fontsource/dm-sans": "^5.3.0",
+        "@fontsource/fraunces": "^5.3.0",
+        "@fontsource/instrument-sans": "^5.3.0",
         "@headlessui/react": "^2.2.0",
         "@heroui/alert": "^2.2.30",
         "@inertiajs/react": "^2.3.7",

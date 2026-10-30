@@ -7,6 +7,7 @@ namespace App\Domain\Identity\Enums;
 use App\Models\CompanyUser;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 
 /**
  * The two identity realms (03-auth-security §2, D-048). Each area has its
@@ -26,6 +27,22 @@ enum AuthArea: string
         $area = $request->attributes->get(self::REQUEST_ATTRIBUTE);
 
         return $area instanceof self ? $area : null;
+    }
+
+    /**
+     * The area named by a route's `area:` middleware. Laravel builds the
+     * controller before route middleware runs, so code that resolves a
+     * guard at that moment reads it from the route (D-079).
+     */
+    public static function forRoute(?Route $route): ?self
+    {
+        foreach ((array) $route?->middleware() as $middleware) {
+            if (is_string($middleware) && str_starts_with($middleware, 'area:')) {
+                return self::tryFrom(substr($middleware, 5));
+            }
+        }
+
+        return null;
     }
 
     public static function forAccount(User|CompanyUser $account): self

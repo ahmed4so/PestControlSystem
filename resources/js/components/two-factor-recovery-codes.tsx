@@ -9,7 +9,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { regenerateRecoveryCodes } from '@/routes/two-factor';
+import { useArea } from '@/lib/area';
 import AlertError from './alert-error';
 
 type Props = {
@@ -23,6 +23,7 @@ export default function TwoFactorRecoveryCodes({
     fetchRecoveryCodes,
     errors,
 }: Props) {
+    const { routes } = useArea();
     const [codesAreVisible, setCodesAreVisible] = useState<boolean>(false);
     const codesSectionRef = useRef<HTMLDivElement | null>(null);
     const canRegenerateCodes = recoveryCodesList.length > 0 && codesAreVisible;
@@ -81,7 +82,7 @@ export default function TwoFactorRecoveryCodes({
 
                     {canRegenerateCodes && (
                         <Form
-                            {...regenerateRecoveryCodes.form()}
+                            {...routes.twoFactorRegenerateRecoveryCodes.form()}
                             options={{ preserveScroll: true }}
                             onSuccess={fetchRecoveryCodes}
                         >

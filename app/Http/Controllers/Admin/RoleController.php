@@ -35,12 +35,12 @@ class RoleController extends Controller implements HasMiddleware
     {
         $roles = Role::all();
 
-        return Inertia::render('roles/index', compact('roles'));
+        return Inertia::render('admin/roles/index', compact('roles'));
     }
 
     public function create(): Response
     {
-        return Inertia::render('roles/create');
+        return Inertia::render('admin/roles/create');
     }
 
     public function store(StoreRoleRequest $request)
@@ -52,12 +52,12 @@ class RoleController extends Controller implements HasMiddleware
             ]
         );
 
-        return redirect()->route('roles.index')->with('success', 'Role created successfully');
+        return redirect()->route('admin.roles.index')->with('success', 'Role created successfully');
     }
 
     public function edit(Role $role): Response
     {
-        return Inertia::render('roles/edit', [
+        return Inertia::render('admin/roles/edit', [
             'role' => $role,
         ]);
     }
@@ -71,19 +71,19 @@ class RoleController extends Controller implements HasMiddleware
             ]
         );
 
-        return redirect()->route('roles.index')->with('success', 'Role updated successfully');
+        return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully');
     }
 
     public function destroy(Role $role): RedirectResponse
     {
         // The designed staff roles cannot be deleted (D-023, D-051).
         if (StaffRole::tryFrom($role->name) !== null) {
-            return redirect()->route('roles.index')->with('error', 'This role is part of the approved design and cannot be deleted.');
+            return redirect()->route('admin.roles.index')->with('error', 'This role is part of the approved design and cannot be deleted.');
         }
 
         $role->delete();
 
-        return redirect()->route('roles.index')->with('success', 'Role deleted successfully');
+        return redirect()->route('admin.roles.index')->with('success', 'Role deleted successfully');
     }
 
     public function permissions(): Response
@@ -96,7 +96,7 @@ class RoleController extends Controller implements HasMiddleware
             return count($parts) > 1 ? end($parts) : 'other';
         });
 
-        return Inertia::render('roles/permissions', [
+        return Inertia::render('admin/roles/permissions', [
             'roles' => $roles,
             'permissions' => $permissions,
         ]);
@@ -117,7 +117,7 @@ class RoleController extends Controller implements HasMiddleware
             ->withProperties(['old' => ['permissions' => $before], 'attributes' => ['permissions' => $role->permissions()->pluck('name')->all()]])
             ->log('permissions_changed');
 
-        return redirect()->route('roles.permissions')->with('success', 'Permissions assigned successfully');
+        return redirect()->route('admin.roles.permissions')->with('success', 'Permissions assigned successfully');
     }
 
     public function assignRolesPage(): Response
@@ -125,7 +125,7 @@ class RoleController extends Controller implements HasMiddleware
         $users = User::with('roles')->get();
         $roles = Role::all();
 
-        return Inertia::render('roles/assign', [
+        return Inertia::render('admin/roles/assign', [
             'users' => $users,
             'roles' => $roles,
         ]);
@@ -147,6 +147,6 @@ class RoleController extends Controller implements HasMiddleware
             ->withProperties(['old' => ['roles' => $before], 'attributes' => ['roles' => $user->getRoleNames()->all()]])
             ->log('roles_changed');
 
-        return redirect()->route('roles.assign')->with('success', 'Roles assigned successfully to '.$user->name);
+        return redirect()->route('admin.roles.assign')->with('success', 'Roles assigned successfully to '.$user->name);
     }
 }

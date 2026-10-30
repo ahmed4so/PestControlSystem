@@ -86,11 +86,11 @@ it('masks sensitive attributes', function () {
 
 it('logs role changes with the roles before and after', function () {
     $this->seed(RolesAndPermissionsSeeder::class);
-    $admin = tap(User::factory()->create())->assignRole(StaffRole::SystemAdministrator->value);
+    $admin = tap(User::factory()->withTwoFactor()->create())->assignRole(StaffRole::SystemAdministrator->value);
     $staff = User::factory()->create();
     $registrar = Role::findByName(StaffRole::PesticideRegistrar->value);
 
-    $this->actingAs($admin)->post(route('roles.assign.store'), ['user_id' => $staff->id, 'role_ids' => [$registrar->id]]);
+    $this->actingAs($admin)->withSession(passwordConfirmed())->post(route('admin.roles.assign.store'), ['user_id' => $staff->id, 'role_ids' => [$registrar->id]]);
 
     $entry = AuditActivity::query()->where('event', 'roles_changed')->firstOrFail();
 

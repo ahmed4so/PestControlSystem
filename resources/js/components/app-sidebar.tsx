@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Building2, Home, Shield, Users } from 'lucide-react';
+import { Building2, Home, MailWarning, Shield, Users } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -13,8 +13,10 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useTranslation } from '@/lib/i18n';
-import { dashboard } from '@/routes';
-import { index as users } from '@/routes/users';
+import { dashboard } from '@/routes/admin';
+import { index as failedEmails } from '@/routes/admin/failed-emails';
+import { index as roles, permissions } from '@/routes/admin/roles';
+import { index as users } from '@/routes/admin/users';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 
@@ -33,13 +35,16 @@ export function AppSidebar() {
             ? [
                   {
                       title: t('Permissions'),
-                      href: '/roles/permissions',
+                      href: permissions(),
                       icon: Shield,
                   },
               ]
             : []),
         ...(can('view role')
-            ? [{ title: t('Roles'), href: '/roles', icon: Building2 }]
+            ? [{ title: t('Roles'), href: roles(), icon: Building2 }]
+            : []),
+        ...(can('manage system settings')
+            ? [{ title: t('Failed emails'), href: failedEmails(), icon: MailWarning }]
             : []),
     ];
 

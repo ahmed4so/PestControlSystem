@@ -4,56 +4,51 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
+import { useArea } from '@/lib/area';
+import { useTranslation } from '@/lib/i18n';
 import { cn, toUrl } from '@/lib/utils';
-import { edit as editAppearance } from '@/routes/appearance';
-import { edit } from '@/routes/profile';
-import { show } from '@/routes/two-factor';
-import { edit as editPassword } from '@/routes/user-password';
+import { edit as editAppearance } from '@/routes/admin/appearance';
+import { edit as editLoginEmail } from '@/routes/portal/email';
 import type { NavItem } from '@/types';
 
-const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Profile',
-        href: edit(),
-        icon: null,
-    },
-    {
-        title: 'Password',
-        href: editPassword(),
-        icon: null,
-    },
-    {
-        title: 'Two-Factor Auth',
-        href: show(),
-        icon: null,
-    },
-    {
-        title: 'Appearance',
-        href: editAppearance(),
-        icon: null,
-    },
-];
-
+/**
+ * Account settings for either portal: staff can't change their own login
+ * email (D-172); companies change it through a confirmation link (D-093).
+ */
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentUrl } = useCurrentUrl();
+    const { area, routes } = useArea();
+    const { t } = useTranslation();
 
     // When server-side rendering, we only render the layout on the client...
     if (typeof window === 'undefined') {
         return null;
     }
 
+    const sidebarNavItems: NavItem[] = [
+        { title: t('Profile'), href: routes.profileEdit(), icon: null },
+        ...(area === 'company'
+            ? [{ title: t('Login email'), href: editLoginEmail(), icon: null }]
+            : []),
+        { title: t('Password'), href: routes.userPasswordEdit(), icon: null },
+        { title: t('Two-factor authentication'), href: routes.twoFactorShow(), icon: null },
+        ...(area === 'admin'
+            ? [{ title: t('Appearance'), href: editAppearance(), icon: null }]
+            : []),
+    ];
+
     return (
         <div className="px-4 py-6">
             <Heading
-                title="Settings"
-                description="Manage your profile and account settings"
+                title={t('Settings')}
+                description={t('Manage your profile and account settings')}
             />
 
             <div className="flex flex-col lg:flex-row lg:space-x-12">
                 <aside className="w-full max-w-xl lg:w-48">
                     <nav
                         className="flex flex-col space-y-1 space-x-0"
-                        aria-label="Settings"
+                        aria-label={t('Settings')}
                     >
                         {sidebarNavItems.map((item, index) => (
                             <Button
@@ -65,12 +60,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                     'bg-muted': isCurrentUrl(item.href),
                                 })}
                             >
-                                <Link href={item.href}>
-                                    {item.icon && (
-                                        <item.icon className="h-4 w-4" />
-                                    )}
-                                    {item.title}
-                                </Link>
+                                <Link href={item.href}>{item.title}</Link>
                             </Button>
                         ))}
                     </nav>

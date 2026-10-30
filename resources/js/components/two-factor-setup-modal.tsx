@@ -19,7 +19,7 @@ import {
 import { useAppearance } from '@/hooks/use-appearance';
 import { useClipboard } from '@/hooks/use-clipboard';
 import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth';
-import { confirm } from '@/routes/two-factor';
+import { useArea } from '@/lib/area';
 import AlertError from './alert-error';
 import { Spinner } from './ui/spinner';
 
@@ -145,6 +145,7 @@ function TwoFactorVerificationStep({
     onClose: () => void;
     onBack: () => void;
 }) {
+    const { routes } = useArea();
     const [code, setCode] = useState<string>('');
     const pinInputContainerRef = useRef<HTMLDivElement>(null);
 
@@ -156,7 +157,7 @@ function TwoFactorVerificationStep({
 
     return (
         <Form
-            {...confirm.form()}
+            {...routes.twoFactorConfirm.form()}
             onSuccess={() => onClose()}
             resetOnError
             resetOnSuccess
