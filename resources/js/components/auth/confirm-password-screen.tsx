@@ -18,11 +18,16 @@ export default function ConfirmPasswordScreen() {
     return (
         <AuthLayout
             title={t('Confirm your password')}
-            description={t('This is a secure area. Please confirm your password before continuing.')}
+            description={t(
+                'This is a secure area. Please confirm your password before continuing.',
+            )}
         >
             <Head title={t('Confirm password')} />
 
-            <Form {...routes.passwordConfirmStore.form()} resetOnSuccess={['password']}>
+            <Form
+                {...routes.passwordConfirmStore.form()}
+                resetOnSuccess={['password']}
+            >
                 {({ processing, errors }) => (
                     <div className="space-y-6">
                         <div className="grid gap-2">
@@ -37,7 +42,11 @@ export default function ConfirmPasswordScreen() {
                             <InputError message={errors.password} />
                         </div>
 
-                        <Button className="w-full" disabled={processing} data-test="confirm-password-button">
+                        <Button
+                            className="w-full"
+                            disabled={processing}
+                            data-test="confirm-password-button"
+                        >
                             {processing && <Spinner />}
                             {t('Confirm password')}
                         </Button>

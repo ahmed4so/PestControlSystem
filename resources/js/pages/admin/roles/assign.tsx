@@ -54,7 +54,7 @@ interface AssignRolesProps {
 export default function AssignRoles({ users, roles }: AssignRolesProps) {
     const [open, setOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<UserWithRoles | null>(
-        null
+        null,
     );
     const [selectedRoles, setSelectedRoles] = useState<number[]>([]);
     const [processing, setProcessing] = useState(false);
@@ -72,14 +72,14 @@ export default function AssignRoles({ users, roles }: AssignRolesProps) {
         setSelectedRoles((prev) =>
             prev.includes(roleId)
                 ? prev.filter((id) => id !== roleId)
-                : [...prev, roleId]
+                : [...prev, roleId],
         );
     };
 
     const handleSelectAll = () => {
         const allRoleIds = roles.map((r) => r.id);
         const allSelected = allRoleIds.every((id) =>
-            selectedRoles.includes(id)
+            selectedRoles.includes(id),
         );
 
         if (allSelected) {
@@ -114,7 +114,7 @@ export default function AssignRoles({ users, roles }: AssignRolesProps) {
                 onError: () => {
                     setProcessing(false);
                 },
-            }
+            },
         );
     };
 
@@ -165,8 +165,10 @@ export default function AssignRoles({ users, roles }: AssignRolesProps) {
                                                     <UserCircle className="size-4" />
                                                     <span>
                                                         {selectedUser.name}
-                                                        <span className="ml-2 text-muted-foreground text-sm">
-                                                            ({selectedUser.email})
+                                                        <span className="ml-2 text-sm text-muted-foreground">
+                                                            (
+                                                            {selectedUser.email}
+                                                            )
                                                         </span>
                                                     </span>
                                                 </span>
@@ -190,7 +192,7 @@ export default function AssignRoles({ users, roles }: AssignRolesProps) {
                                                             value={`${user.name} ${user.email}`}
                                                             onSelect={() =>
                                                                 handleUserSelect(
-                                                                    user
+                                                                    user,
                                                                 )
                                                             }
                                                         >
@@ -200,7 +202,7 @@ export default function AssignRoles({ users, roles }: AssignRolesProps) {
                                                                     selectedUser?.id ===
                                                                         user.id
                                                                         ? 'opacity-100'
-                                                                        : 'opacity-0'
+                                                                        : 'opacity-0',
                                                                 )}
                                                             />
                                                             <UserCircle className="mr-2 size-4" />
@@ -262,16 +264,16 @@ export default function AssignRoles({ users, roles }: AssignRolesProps) {
                                                 {roles.map((role) => (
                                                     <div
                                                         key={role.id}
-                                                        className="flex items-center gap-3 rounded-lg border p-3 hover:bg-accent/50 transition-colors"
+                                                        className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent/50"
                                                     >
                                                         <Checkbox
                                                             id={`role-${role.id}`}
                                                             checked={selectedRoles.includes(
-                                                                role.id
+                                                                role.id,
                                                             )}
                                                             onCheckedChange={() =>
                                                                 handleRoleToggle(
-                                                                    role.id
+                                                                    role.id,
                                                                 )
                                                             }
                                                         />
@@ -335,4 +337,3 @@ export default function AssignRoles({ users, roles }: AssignRolesProps) {
         </AdminLayout>
     );
 }
-

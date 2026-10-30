@@ -23,9 +23,6 @@ import { create, destroy, edit, index } from '@/routes/admin/roles';
 import { type BreadcrumbItem } from '@/types';
 import { type Role } from '@/types';
 
-
-
-
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Roles',
@@ -35,7 +32,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function RoleIndex({ roles }: { roles: Role[] }) {
     const [deletingRole, setDeletingRole] = useState<Role | null>(null);
-    const { flash } = usePage<{ flash: { success?: string; error?: string } }>().props;
+    const { flash } = usePage<{ flash: { success?: string; error?: string } }>()
+        .props;
 
     const handleDelete = () => {
         if (deletingRole) {
@@ -68,7 +66,9 @@ export default function RoleIndex({ roles }: { roles: Role[] }) {
                     </Button>
                 </div>
 
-                {flash?.success && <Alert color="success" title={flash.success} />}
+                {flash?.success && (
+                    <Alert color="success" title={flash.success} />
+                )}
 
                 {roles.length === 0 ? (
                     <Card>
@@ -82,9 +82,7 @@ export default function RoleIndex({ roles }: { roles: Role[] }) {
                                 location.
                             </p>
                             <Button asChild>
-                                <Link href={create()}>
-                                        Create Role
-                                </Link>
+                                <Link href={create()}>Create Role</Link>
                             </Button>
                         </CardContent>
                     </Card>
@@ -98,8 +96,7 @@ export default function RoleIndex({ roles }: { roles: Role[] }) {
                                             <CardTitle className="flex items-center gap-2">
                                                 {role.name}
                                             </CardTitle>
-                                            <CardDescription className="mt-1 flex items-center gap-1">
-                                            </CardDescription>
+                                            <CardDescription className="mt-1 flex items-center gap-1"></CardDescription>
                                         </div>
                                     </div>
                                 </CardHeader>
@@ -123,9 +120,7 @@ export default function RoleIndex({ roles }: { roles: Role[] }) {
                                             className="flex-1"
                                             asChild
                                         >
-                                            <Link
-                                                href={edit(role.id)}
-                                            >
+                                            <Link href={edit(role.id)}>
                                                 <Edit />
                                                 Edit
                                             </Link>
@@ -134,7 +129,7 @@ export default function RoleIndex({ roles }: { roles: Role[] }) {
                                             variant="destructive"
                                             size="sm"
                                             onClick={() =>
-                                                    setDeletingRole(role)
+                                                setDeletingRole(role)
                                             }
                                         >
                                             <Trash2 />
@@ -178,4 +173,3 @@ export default function RoleIndex({ roles }: { roles: Role[] }) {
         </AdminLayout>
     );
 }
-

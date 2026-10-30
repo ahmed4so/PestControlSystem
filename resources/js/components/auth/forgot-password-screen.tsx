@@ -1,5 +1,7 @@
 import { Form, Head } from '@inertiajs/react';
-import HoneypotFields, { type Honeypot } from '@/components/auth/honeypot-fields';
+import HoneypotFields, {
+    type Honeypot,
+} from '@/components/auth/honeypot-fields';
 import StatusMessage from '@/components/auth/status-message';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -40,7 +42,9 @@ export default function ForgotPasswordScreen({
                         <>
                             <HoneypotFields honeypot={honeypot} />
                             <div className="grid gap-2">
-                                <Label htmlFor="email">{t('Email address')}</Label>
+                                <Label htmlFor="email">
+                                    {t('Email address')}
+                                </Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -62,7 +66,9 @@ export default function ForgotPasswordScreen({
                 </Form>
 
                 <div className="text-center text-sm text-muted-foreground">
-                    <TextLink href={routes.login()}>{t('Back to log in')}</TextLink>
+                    <TextLink href={routes.login()}>
+                        {t('Back to log in')}
+                    </TextLink>
                 </div>
             </div>
         </AuthLayout>

@@ -8,7 +8,9 @@ export default function PasswordRules() {
 
     return (
         <p className="text-xs text-muted-foreground">
-            {t('At least 12 characters, with upper and lower case letters, a number and a symbol. Do not reuse one of your last 5 passwords.')}
+            {t(
+                'At least 12 characters, with upper and lower case letters, a number and a symbol. Do not reuse one of your last 5 passwords.',
+            )}
         </p>
     );
 }

@@ -1,5 +1,7 @@
 import { Head } from '@inertiajs/react';
-import PasswordForm, { type PasswordPageProps } from '@/components/settings/password-form';
+import PasswordForm, {
+    type PasswordPageProps,
+} from '@/components/settings/password-form';
 import PortalLayout from '@/layouts/portal-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { useTranslation } from '@/lib/i18n';

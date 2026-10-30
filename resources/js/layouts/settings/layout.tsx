@@ -31,7 +31,11 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
             ? [{ title: t('Login email'), href: editLoginEmail(), icon: null }]
             : []),
         { title: t('Password'), href: routes.userPasswordEdit(), icon: null },
-        { title: t('Two-factor authentication'), href: routes.twoFactorShow(), icon: null },
+        {
+            title: t('Two-factor authentication'),
+            href: routes.twoFactorShow(),
+            icon: null,
+        },
         ...(area === 'admin'
             ? [{ title: t('Appearance'), href: editAppearance(), icon: null }]
             : []),

@@ -26,7 +26,8 @@ export default function LoginScreen({
 }) {
     const { t } = useTranslation();
     const { routes } = useArea();
-    const { flash } = usePage<{ flash: { success?: string; error?: string } }>().props;
+    const { flash } = usePage<{ flash: { success?: string; error?: string } }>()
+        .props;
 
     return (
         <AuthLayout title={title} description={description}>
@@ -44,7 +45,9 @@ export default function LoginScreen({
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="email">{t('Email address')}</Label>
+                                <Label htmlFor="email">
+                                    {t('Email address')}
+                                </Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -59,7 +62,9 @@ export default function LoginScreen({
 
                             <div className="grid gap-2">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">{t('Password')}</Label>
+                                    <Label htmlFor="password">
+                                        {t('Password')}
+                                    </Label>
                                     <TextLink
                                         href={routes.passwordRequest()}
                                         className="ml-auto text-sm"

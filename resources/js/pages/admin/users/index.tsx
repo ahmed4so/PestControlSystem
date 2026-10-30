@@ -20,7 +20,14 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import AdminLayout from '@/layouts/admin-layout';
-import { activate, create, deactivate, edit, index, show } from '@/routes/admin/users';
+import {
+    activate,
+    create,
+    deactivate,
+    edit,
+    index,
+    show,
+} from '@/routes/admin/users';
 import { type BreadcrumbItem } from '@/types';
 
 interface User {
@@ -41,17 +48,20 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function UserIndex({ users }: { users: User[] }) {
     // Staff users are deactivated, never deleted (D-053).
-    const [deactivatingUser, setDeactivatingUser] = useState<User | null>(
-        null,
-    );
-    const { flash } = usePage<{ flash: { success?: string; error?: string } }>().props;
+    const [deactivatingUser, setDeactivatingUser] = useState<User | null>(null);
+    const { flash } = usePage<{ flash: { success?: string; error?: string } }>()
+        .props;
 
     const handleDeactivate = () => {
         if (deactivatingUser) {
-            router.post(deactivate.url(deactivatingUser.id), {}, {
-                preserveScroll: true,
-                onSuccess: () => setDeactivatingUser(null),
-            });
+            router.post(
+                deactivate.url(deactivatingUser.id),
+                {},
+                {
+                    preserveScroll: true,
+                    onSuccess: () => setDeactivatingUser(null),
+                },
+            );
         }
     };
 
@@ -81,7 +91,9 @@ export default function UserIndex({ users }: { users: User[] }) {
                     </Button>
                 </div>
 
-                {flash?.success && <Alert color="success" title={flash.success} />}
+                {flash?.success && (
+                    <Alert color="success" title={flash.success} />
+                )}
                 {flash?.error && <Alert color="danger" title={flash.error} />}
 
                 {users.length === 0 ? (
@@ -199,7 +211,10 @@ export default function UserIndex({ users }: { users: User[] }) {
                         >
                             Cancel
                         </Button>
-                        <Button variant="destructive" onClick={handleDeactivate}>
+                        <Button
+                            variant="destructive"
+                            onClick={handleDeactivate}
+                        >
                             Deactivate
                         </Button>
                     </DialogFooter>
@@ -208,4 +223,3 @@ export default function UserIndex({ users }: { users: User[] }) {
         </AdminLayout>
     );
 }
-

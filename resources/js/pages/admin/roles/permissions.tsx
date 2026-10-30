@@ -58,7 +58,7 @@ export default function RolePermissions({
     const [open, setOpen] = useState(false);
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
     const [selectedPermissions, setSelectedPermissions] = useState<number[]>(
-        []
+        [],
     );
     const [processing, setProcessing] = useState(false);
     const { flash } = usePage<{ flash: { success?: string; error?: string } }>()
@@ -75,20 +75,20 @@ export default function RolePermissions({
         setSelectedPermissions((prev) =>
             prev.includes(permissionId)
                 ? prev.filter((id) => id !== permissionId)
-                : [...prev, permissionId]
+                : [...prev, permissionId],
         );
     };
 
     const handleSelectAll = (modulePermissions: Permission[]) => {
         const modulePermissionIds = modulePermissions.map((p) => p.id);
         const allSelected = modulePermissionIds.every((id) =>
-            selectedPermissions.includes(id)
+            selectedPermissions.includes(id),
         );
 
         if (allSelected) {
             // Deselect all
             setSelectedPermissions((prev) =>
-                prev.filter((id) => !modulePermissionIds.includes(id))
+                prev.filter((id) => !modulePermissionIds.includes(id)),
             );
         } else {
             // Select all
@@ -121,7 +121,7 @@ export default function RolePermissions({
                 onError: () => {
                     setProcessing(false);
                 },
-            }
+            },
         );
     };
 
@@ -132,9 +132,11 @@ export default function RolePermissions({
             .join(' ');
     };
 
-    const isModuleFullySelected = (modulePermissions: Permission[]): boolean => {
+    const isModuleFullySelected = (
+        modulePermissions: Permission[],
+    ): boolean => {
         return modulePermissions.every((p) =>
-            selectedPermissions.includes(p.id)
+            selectedPermissions.includes(p.id),
         );
     };
 
@@ -201,7 +203,7 @@ export default function RolePermissions({
                                                             value={role.name}
                                                             onSelect={() =>
                                                                 handleRoleSelect(
-                                                                    role
+                                                                    role,
                                                                 )
                                                             }
                                                         >
@@ -211,7 +213,7 @@ export default function RolePermissions({
                                                                     selectedRole?.id ===
                                                                         role.id
                                                                         ? 'opacity-100'
-                                                                        : 'opacity-0'
+                                                                        : 'opacity-0',
                                                                 )}
                                                             />
                                                             <Shield className="mr-2 size-4" />
@@ -233,9 +235,11 @@ export default function RolePermissions({
                                         </Label>
                                         <p className="text-sm text-muted-foreground">
                                             {selectedPermissions.length} of{' '}
-                                            {Object.values(permissions)
-                                                .flat()
-                                                .length}{' '}
+                                            {
+                                                Object.values(
+                                                    permissions,
+                                                ).flat().length
+                                            }{' '}
                                             selected
                                         </p>
                                     </div>
@@ -248,7 +252,7 @@ export default function RolePermissions({
                                                         <div className="flex items-center justify-between">
                                                             <CardTitle className="text-base">
                                                                 {getModuleName(
-                                                                    module
+                                                                    module,
                                                                 )}
                                                             </CardTitle>
                                                             <Button
@@ -257,13 +261,13 @@ export default function RolePermissions({
                                                                 size="sm"
                                                                 onClick={() =>
                                                                     handleSelectAll(
-                                                                        modulePermissions
+                                                                        modulePermissions,
                                                                     )
                                                                 }
                                                                 className="h-auto p-1 text-xs"
                                                             >
                                                                 {isModuleFullySelected(
-                                                                    modulePermissions
+                                                                    modulePermissions,
                                                                 )
                                                                     ? 'Deselect All'
                                                                     : 'Select All'}
@@ -282,11 +286,11 @@ export default function RolePermissions({
                                                                     <Checkbox
                                                                         id={`permission-${permission.id}`}
                                                                         checked={selectedPermissions.includes(
-                                                                            permission.id
+                                                                            permission.id,
                                                                         )}
                                                                         onCheckedChange={() =>
                                                                             handlePermissionToggle(
-                                                                                permission.id
+                                                                                permission.id,
                                                                             )
                                                                         }
                                                                     />
@@ -299,11 +303,11 @@ export default function RolePermissions({
                                                                         }
                                                                     </Label>
                                                                 </div>
-                                                            )
+                                                            ),
                                                         )}
                                                     </CardContent>
                                                 </Card>
-                                            )
+                                            ),
                                         )}
                                     </div>
 
@@ -348,4 +352,3 @@ export default function RolePermissions({
         </AdminLayout>
     );
 }
-

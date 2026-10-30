@@ -1,5 +1,7 @@
 import { Form, Head } from '@inertiajs/react';
-import HoneypotFields, { type Honeypot } from '@/components/auth/honeypot-fields';
+import HoneypotFields, {
+    type Honeypot,
+} from '@/components/auth/honeypot-fields';
 import StatusMessage from '@/components/auth/status-message';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -43,32 +45,72 @@ export default function SignUp({
                             <HoneypotFields honeypot={honeypot} />
 
                             <div className="grid gap-2">
-                                <Label htmlFor="full_name">{t('Full name')}</Label>
-                                <Input id="full_name" name="full_name" required autoFocus autoComplete="name" maxLength={150} />
+                                <Label htmlFor="full_name">
+                                    {t('Full name')}
+                                </Label>
+                                <Input
+                                    id="full_name"
+                                    name="full_name"
+                                    required
+                                    autoFocus
+                                    autoComplete="name"
+                                    maxLength={150}
+                                />
                                 <InputError message={errors.full_name} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">{t('Email address')}</Label>
-                                <Input id="email" type="email" name="email" required autoComplete="email" maxLength={190} placeholder="email@example.com" />
+                                <Label htmlFor="email">
+                                    {t('Email address')}
+                                </Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    name="email"
+                                    required
+                                    autoComplete="email"
+                                    maxLength={190}
+                                    placeholder="email@example.com"
+                                />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
                                 <Label htmlFor="phone">{t('Phone')}</Label>
-                                <Input id="phone" type="tel" name="phone" required autoComplete="tel" placeholder="+252 61 234 5678" />
+                                <Input
+                                    id="phone"
+                                    type="tel"
+                                    name="phone"
+                                    required
+                                    autoComplete="tel"
+                                    placeholder="+252 61 234 5678"
+                                />
                                 <InputError message={errors.phone} />
                             </div>
 
                             <div className="flex items-start gap-3">
-                                <Checkbox id="consent" name="consent" value="1" required />
-                                <Label htmlFor="consent" className="text-sm leading-snug font-normal">
-                                    {t('I agree that SARIS stores and uses my details to process my applications, as described in the privacy notice.')}
+                                <Checkbox
+                                    id="consent"
+                                    name="consent"
+                                    value="1"
+                                    required
+                                />
+                                <Label
+                                    htmlFor="consent"
+                                    className="text-sm leading-snug font-normal"
+                                >
+                                    {t(
+                                        'I agree that SARIS stores and uses my details to process my applications, as described in the privacy notice.',
+                                    )}
                                 </Label>
                             </div>
                             <InputError message={errors.consent} />
 
-                            <Button type="submit" className="w-full" disabled={processing}>
+                            <Button
+                                type="submit"
+                                className="w-full"
+                                disabled={processing}
+                            >
                                 {processing && <Spinner />}
                                 {t('Create account')}
                             </Button>

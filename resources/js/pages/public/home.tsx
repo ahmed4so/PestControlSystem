@@ -18,10 +18,14 @@ export default function Home() {
             <div className="mx-auto max-w-2xl space-y-8">
                 <div className="space-y-3">
                     <h1 className="text-2xl font-semibold">
-                        {t('Somali Agricultural Regulatory & Inspection Service')}
+                        {t(
+                            'Somali Agricultural Regulatory & Inspection Service',
+                        )}
                     </h1>
                     <p className="text-muted-foreground">
-                        {t('Apply online for pest control product licenses and import permits.')}
+                        {t(
+                            'Apply online for pest control product licenses and import permits.',
+                        )}
                     </p>
                 </div>
 
@@ -29,14 +33,18 @@ export default function Home() {
                     <div className="space-y-3 rounded-lg border p-5">
                         <h2 className="font-medium">{t('Companies')}</h2>
                         <p className="text-sm text-muted-foreground">
-                            {t('Create an account or log in to the Company Portal.')}
+                            {t(
+                                'Create an account or log in to the Company Portal.',
+                            )}
                         </p>
                         <div className="flex flex-wrap gap-2">
                             <Button asChild>
                                 <Link href={login()}>{t('Log in')}</Link>
                             </Button>
                             <Button asChild variant="outline">
-                                <Link href={signup()}>{t('Create an account')}</Link>
+                                <Link href={signup()}>
+                                    {t('Create an account')}
+                                </Link>
                             </Button>
                         </div>
                     </div>

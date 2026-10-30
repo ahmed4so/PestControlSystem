@@ -18,7 +18,9 @@ export default function Dashboard() {
                     {t('Welcome, :name', { name: auth.user?.name ?? '' })}
                 </h1>
                 <p className="text-muted-foreground">
-                    {t('Your company dashboard. Your company profile and applications will appear here.')}
+                    {t(
+                        'Your company dashboard. Your company profile and applications will appear here.',
+                    )}
                 </p>
             </div>
         </PortalLayout>

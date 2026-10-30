@@ -8,10 +8,14 @@ export default function Dashboard() {
     const { flash } = usePage<{ flash: { success?: string } }>().props;
 
     return (
-        <AdminLayout breadcrumbs={[{ title: t('Dashboard'), href: dashboard().url }]}>
+        <AdminLayout
+            breadcrumbs={[{ title: t('Dashboard'), href: dashboard().url }]}
+        >
             <Head title={t('Dashboard')} />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                {flash?.success && <p className="text-sm text-green-700">{flash.success}</p>}
+                {flash?.success && (
+                    <p className="text-sm text-green-700">{flash.success}</p>
+                )}
                 <h1 className="text-2xl font-semibold">{t('Dashboard')}</h1>
             </div>
         </AdminLayout>

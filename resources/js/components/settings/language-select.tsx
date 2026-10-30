@@ -4,7 +4,11 @@ import { useTranslation } from '@/lib/i18n';
  * Preferred language: the UI language and the order of email languages
  * (D-032, D-125).
  */
-export default function LanguageSelect({ defaultValue }: { defaultValue: string }) {
+export default function LanguageSelect({
+    defaultValue,
+}: {
+    defaultValue: string;
+}) {
     const { t } = useTranslation();
 
     return (

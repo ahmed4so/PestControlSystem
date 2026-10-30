@@ -25,7 +25,9 @@ export default function AuthSimpleLayout({
                                 <div className="mb-1 flex h-9 w-9 items-center justify-center rounded-md">
                                     <AppLogoIcon className="size-9 text-[var(--foreground)] dark:text-white" />
                                 </div>
-                                <span className="text-sm font-semibold tracking-wide">SARIS</span>
+                                <span className="text-sm font-semibold tracking-wide">
+                                    SARIS
+                                </span>
                             </Link>
 
                             <div className="space-y-2 text-center">

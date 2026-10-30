@@ -12,7 +12,12 @@ import { useTranslation } from '@/lib/i18n';
 import { edit } from '@/routes/admin/profile';
 
 type Props = {
-    account: { name: string; email: string; phone: string | null; preferred_locale: string };
+    account: {
+        name: string;
+        email: string;
+        phone: string | null;
+        preferred_locale: string;
+    };
 };
 
 /**
@@ -28,36 +33,79 @@ export default function Profile({ account }: Props) {
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <Heading variant="small" title={t('Profile information')} description={t('Update your name, phone and language')} />
+                    <Heading
+                        variant="small"
+                        title={t('Profile information')}
+                        description={t('Update your name, phone and language')}
+                    />
 
-                    <Form {...ProfileController.update.form()} options={{ preserveScroll: true }} className="space-y-6">
+                    <Form
+                        {...ProfileController.update.form()}
+                        options={{ preserveScroll: true }}
+                        className="space-y-6"
+                    >
                         {({ processing, errors }) => (
                             <>
                                 <div className="grid gap-2">
                                     <Label htmlFor="name">{t('Name')}</Label>
-                                    <Input id="name" name="name" defaultValue={account.name} required autoComplete="name" />
+                                    <Input
+                                        id="name"
+                                        name="name"
+                                        defaultValue={account.name}
+                                        required
+                                        autoComplete="name"
+                                    />
                                     <InputError message={errors.name} />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="email">{t('Email address')}</Label>
-                                    <Input id="email" type="email" value={account.email} readOnly disabled />
-                                    <p className="text-xs text-muted-foreground">{t('Ask the System Administrator to change your login email.')}</p>
+                                    <Label htmlFor="email">
+                                        {t('Email address')}
+                                    </Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        value={account.email}
+                                        readOnly
+                                        disabled
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        {t(
+                                            'Ask the System Administrator to change your login email.',
+                                        )}
+                                    </p>
                                 </div>
 
                                 <div className="grid gap-2">
                                     <Label htmlFor="phone">{t('Phone')}</Label>
-                                    <Input id="phone" type="tel" name="phone" defaultValue={account.phone ?? ''} autoComplete="tel" />
+                                    <Input
+                                        id="phone"
+                                        type="tel"
+                                        name="phone"
+                                        defaultValue={account.phone ?? ''}
+                                        autoComplete="tel"
+                                    />
                                     <InputError message={errors.phone} />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="preferred_locale">{t('Preferred language')}</Label>
-                                    <LanguageSelect defaultValue={account.preferred_locale} />
-                                    <InputError message={errors.preferred_locale} />
+                                    <Label htmlFor="preferred_locale">
+                                        {t('Preferred language')}
+                                    </Label>
+                                    <LanguageSelect
+                                        defaultValue={account.preferred_locale}
+                                    />
+                                    <InputError
+                                        message={errors.preferred_locale}
+                                    />
                                 </div>
 
-                                <Button disabled={processing} data-test="update-profile-button">{t('Save')}</Button>
+                                <Button
+                                    disabled={processing}
+                                    data-test="update-profile-button"
+                                >
+                                    {t('Save')}
+                                </Button>
                             </>
                         )}
                     </Form>

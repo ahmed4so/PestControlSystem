@@ -1,5 +1,7 @@
 import { Form, Head } from '@inertiajs/react';
-import HoneypotFields, { type Honeypot } from '@/components/auth/honeypot-fields';
+import HoneypotFields, {
+    type Honeypot,
+} from '@/components/auth/honeypot-fields';
 import StatusMessage from '@/components/auth/status-message';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -28,7 +30,9 @@ export default function TemporaryPassword({
     return (
         <AuthLayout
             title={t('Send me a new temporary password')}
-            description={t('For accounts that have not logged in yet. The new password is valid for 1 hour.')}
+            description={t(
+                'For accounts that have not logged in yet. The new password is valid for 1 hour.',
+            )}
         >
             <Head title={t('Send me a new temporary password')} />
 
@@ -40,12 +44,26 @@ export default function TemporaryPassword({
                         <>
                             <HoneypotFields honeypot={honeypot} />
                             <div className="grid gap-2">
-                                <Label htmlFor="email">{t('Email address')}</Label>
-                                <Input id="email" type="email" name="email" required autoFocus autoComplete="email" placeholder="email@example.com" />
+                                <Label htmlFor="email">
+                                    {t('Email address')}
+                                </Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    name="email"
+                                    required
+                                    autoFocus
+                                    autoComplete="email"
+                                    placeholder="email@example.com"
+                                />
                                 <InputError message={errors.email} />
                             </div>
 
-                            <Button type="submit" className="w-full" disabled={processing}>
+                            <Button
+                                type="submit"
+                                className="w-full"
+                                disabled={processing}
+                            >
                                 {processing && <Spinner />}
                                 {t('Send')}
                             </Button>

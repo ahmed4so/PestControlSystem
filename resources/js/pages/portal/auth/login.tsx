@@ -18,7 +18,9 @@ export default function Login({ status }: { status?: string }) {
                 <div className="space-y-2 text-center text-sm text-muted-foreground">
                     <p>
                         {t('New to SARIS?')}{' '}
-                        <TextLink href={signup()}>{t('Create an account')}</TextLink>
+                        <TextLink href={signup()}>
+                            {t('Create an account')}
+                        </TextLink>
                     </p>
                     <p>
                         <TextLink href={temporaryPassword()}>

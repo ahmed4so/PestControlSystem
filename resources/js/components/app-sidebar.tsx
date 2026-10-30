@@ -44,7 +44,13 @@ export function AppSidebar() {
             ? [{ title: t('Roles'), href: roles(), icon: Building2 }]
             : []),
         ...(can('manage system settings')
-            ? [{ title: t('Failed emails'), href: failedEmails(), icon: MailWarning }]
+            ? [
+                  {
+                      title: t('Failed emails'),
+                      href: failedEmails(),
+                      icon: MailWarning,
+                  },
+              ]
             : []),
     ];
 

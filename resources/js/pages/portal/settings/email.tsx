@@ -13,7 +13,13 @@ import { store } from '@/routes/portal/email';
  * Change the login email (D-093): a link goes to the new address, a notice
  * to the old one, and the email changes only when the link is used.
  */
-export default function LoginEmail({ email, pendingEmail }: { email: string; pendingEmail: string | null }) {
+export default function LoginEmail({
+    email,
+    pendingEmail,
+}: {
+    email: string;
+    pendingEmail: string | null;
+}) {
     const { t } = useTranslation();
 
     return (
@@ -25,25 +31,44 @@ export default function LoginEmail({ email, pendingEmail }: { email: string; pen
                     <Heading
                         variant="small"
                         title={t('Change login email')}
-                        description={t('Your current login email is :email', { email })}
+                        description={t('Your current login email is :email', {
+                            email,
+                        })}
                     />
 
                     {pendingEmail && (
                         <p className="text-sm text-muted-foreground">
-                            {t('Waiting for confirmation of :email. Open the link we sent to that address.', { email: pendingEmail })}
+                            {t(
+                                'Waiting for confirmation of :email. Open the link we sent to that address.',
+                                { email: pendingEmail },
+                            )}
                         </p>
                     )}
 
-                    <Form {...store.form()} resetOnSuccess className="space-y-6">
+                    <Form
+                        {...store.form()}
+                        resetOnSuccess
+                        className="space-y-6"
+                    >
                         {({ processing, errors }) => (
                             <>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="email">{t('New login email')}</Label>
-                                    <Input id="email" type="email" name="email" required autoComplete="email" />
+                                    <Label htmlFor="email">
+                                        {t('New login email')}
+                                    </Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        name="email"
+                                        required
+                                        autoComplete="email"
+                                    />
                                     <InputError message={errors.email} />
                                 </div>
 
-                                <Button disabled={processing}>{t('Send confirmation link')}</Button>
+                                <Button disabled={processing}>
+                                    {t('Send confirmation link')}
+                                </Button>
                             </>
                         )}
                     </Form>

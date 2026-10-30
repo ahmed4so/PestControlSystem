@@ -21,7 +21,10 @@ export type PasswordPageProps = {
  * Change password for either portal. On first login and after the 90-day
  * expiry the account must set a new password before anything else (D-082).
  */
-export default function PasswordForm({ mustChange, firstLogin }: PasswordPageProps) {
+export default function PasswordForm({
+    mustChange,
+    firstLogin,
+}: PasswordPageProps) {
     const { t } = useTranslation();
     const { routes } = useArea();
     const passwordInput = useRef<HTMLInputElement>(null);
@@ -32,7 +35,9 @@ export default function PasswordForm({ mustChange, firstLogin }: PasswordPagePro
             <Heading
                 variant="small"
                 title={t('Update password')}
-                description={t('Use a long password that you do not use anywhere else')}
+                description={t(
+                    'Use a long password that you do not use anywhere else',
+                )}
             />
 
             {mustChange && (
@@ -40,8 +45,12 @@ export default function PasswordForm({ mustChange, firstLogin }: PasswordPagePro
                     tone="error"
                     status={
                         firstLogin
-                            ? t('Choose your own password to continue. Enter the temporary password from the email as the current password.')
-                            : t('Your password has expired. Choose a new password to continue.')
+                            ? t(
+                                  'Choose your own password to continue. Enter the temporary password from the email as the current password.',
+                              )
+                            : t(
+                                  'Your password has expired. Choose a new password to continue.',
+                              )
                     }
                 />
             )}
@@ -49,7 +58,11 @@ export default function PasswordForm({ mustChange, firstLogin }: PasswordPagePro
             <Form
                 {...routes.userPasswordUpdate.form()}
                 options={{ preserveScroll: true }}
-                resetOnError={['password', 'password_confirmation', 'current_password']}
+                resetOnError={[
+                    'password',
+                    'password_confirmation',
+                    'current_password',
+                ]}
                 resetOnSuccess
                 onError={(errors) => {
                     if (errors.password) {
@@ -66,7 +79,9 @@ export default function PasswordForm({ mustChange, firstLogin }: PasswordPagePro
                     <>
                         <div className="grid gap-2">
                             <Label htmlFor="current_password">
-                                {firstLogin ? t('Temporary password') : t('Current password')}
+                                {firstLogin
+                                    ? t('Temporary password')
+                                    : t('Current password')}
                             </Label>
                             <Input
                                 id="current_password"
@@ -79,7 +94,9 @@ export default function PasswordForm({ mustChange, firstLogin }: PasswordPagePro
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password">{t('New password')}</Label>
+                            <Label htmlFor="password">
+                                {t('New password')}
+                            </Label>
                             <Input
                                 id="password"
                                 ref={passwordInput}
@@ -92,18 +109,25 @@ export default function PasswordForm({ mustChange, firstLogin }: PasswordPagePro
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password_confirmation">{t('Confirm password')}</Label>
+                            <Label htmlFor="password_confirmation">
+                                {t('Confirm password')}
+                            </Label>
                             <Input
                                 id="password_confirmation"
                                 name="password_confirmation"
                                 type="password"
                                 autoComplete="new-password"
                             />
-                            <InputError message={errors.password_confirmation} />
+                            <InputError
+                                message={errors.password_confirmation}
+                            />
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <Button disabled={processing} data-test="update-password-button">
+                            <Button
+                                disabled={processing}
+                                data-test="update-password-button"
+                            >
                                 {t('Save password')}
                             </Button>
 
@@ -114,7 +138,9 @@ export default function PasswordForm({ mustChange, firstLogin }: PasswordPagePro
                                 leave="transition ease-in-out"
                                 leaveTo="opacity-0"
                             >
-                                <p className="text-sm text-neutral-600">{t('Saved')}</p>
+                                <p className="text-sm text-neutral-600">
+                                    {t('Saved')}
+                                </p>
                             </Transition>
                         </div>
                     </>

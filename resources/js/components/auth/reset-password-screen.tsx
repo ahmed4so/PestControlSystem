@@ -35,12 +35,20 @@ export default function ResetPasswordScreen({
                     <div className="grid gap-6">
                         <div className="grid gap-2">
                             <Label htmlFor="email">{t('Email address')}</Label>
-                            <Input id="email" type="email" name="email" value={email} readOnly />
+                            <Input
+                                id="email"
+                                type="email"
+                                name="email"
+                                value={email}
+                                readOnly
+                            />
                             <InputError message={errors.email} />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password">{t('New password')}</Label>
+                            <Label htmlFor="password">
+                                {t('New password')}
+                            </Label>
                             <Input
                                 id="password"
                                 type="password"
@@ -53,17 +61,25 @@ export default function ResetPasswordScreen({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password_confirmation">{t('Confirm password')}</Label>
+                            <Label htmlFor="password_confirmation">
+                                {t('Confirm password')}
+                            </Label>
                             <Input
                                 id="password_confirmation"
                                 type="password"
                                 name="password_confirmation"
                                 autoComplete="new-password"
                             />
-                            <InputError message={errors.password_confirmation} />
+                            <InputError
+                                message={errors.password_confirmation}
+                            />
                         </div>
 
-                        <Button type="submit" className="w-full" disabled={processing}>
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            disabled={processing}
+                        >
                             {processing && <Spinner />}
                             {t('Reset password')}
                         </Button>

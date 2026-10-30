@@ -40,7 +40,8 @@ const routes = {
         twoFactorQrCode: adminTwoFactor.qrCode,
         twoFactorSecretKey: adminTwoFactor.secretKey,
         twoFactorRecoveryCodes: adminTwoFactor.recoveryCodes,
-        twoFactorRegenerateRecoveryCodes: adminTwoFactor.regenerateRecoveryCodes,
+        twoFactorRegenerateRecoveryCodes:
+            adminTwoFactor.regenerateRecoveryCodes,
         profileEdit: adminProfile.edit,
         userPasswordEdit: adminUserPassword.edit,
         userPasswordUpdate: adminUserPassword.update,
@@ -62,7 +63,8 @@ const routes = {
         twoFactorQrCode: portalTwoFactor.qrCode,
         twoFactorSecretKey: portalTwoFactor.secretKey,
         twoFactorRecoveryCodes: portalTwoFactor.recoveryCodes,
-        twoFactorRegenerateRecoveryCodes: portalTwoFactor.regenerateRecoveryCodes,
+        twoFactorRegenerateRecoveryCodes:
+            portalTwoFactor.regenerateRecoveryCodes,
         profileEdit: portalProfile.edit,
         userPasswordEdit: portalUserPassword.edit,
         userPasswordUpdate: portalUserPassword.update,

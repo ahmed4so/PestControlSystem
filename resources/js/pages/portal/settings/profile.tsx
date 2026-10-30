@@ -31,36 +31,80 @@ export default function Profile({ account }: Props) {
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <Heading variant="small" title={t('Your details')} description={t('Update your name, phone and language')} />
+                    <Heading
+                        variant="small"
+                        title={t('Your details')}
+                        description={t('Update your name, phone and language')}
+                    />
 
-                    <Form {...update.form()} options={{ preserveScroll: true }} className="space-y-6">
+                    <Form
+                        {...update.form()}
+                        options={{ preserveScroll: true }}
+                        className="space-y-6"
+                    >
                         {({ processing, errors }) => (
                             <>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="full_name">{t('Full name')}</Label>
-                                    <Input id="full_name" name="full_name" defaultValue={account.full_name} required autoComplete="name" />
+                                    <Label htmlFor="full_name">
+                                        {t('Full name')}
+                                    </Label>
+                                    <Input
+                                        id="full_name"
+                                        name="full_name"
+                                        defaultValue={account.full_name}
+                                        required
+                                        autoComplete="name"
+                                    />
                                     <InputError message={errors.full_name} />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="email">{t('Login email')}</Label>
-                                    <Input id="email" type="email" value={account.email} readOnly disabled />
-                                    <TextLink href={editEmail()} className="text-sm">{t('Change login email')}</TextLink>
+                                    <Label htmlFor="email">
+                                        {t('Login email')}
+                                    </Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        value={account.email}
+                                        readOnly
+                                        disabled
+                                    />
+                                    <TextLink
+                                        href={editEmail()}
+                                        className="text-sm"
+                                    >
+                                        {t('Change login email')}
+                                    </TextLink>
                                 </div>
 
                                 <div className="grid gap-2">
                                     <Label htmlFor="phone">{t('Phone')}</Label>
-                                    <Input id="phone" type="tel" name="phone" defaultValue={account.phone} required autoComplete="tel" />
+                                    <Input
+                                        id="phone"
+                                        type="tel"
+                                        name="phone"
+                                        defaultValue={account.phone}
+                                        required
+                                        autoComplete="tel"
+                                    />
                                     <InputError message={errors.phone} />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="preferred_locale">{t('Preferred language')}</Label>
-                                    <LanguageSelect defaultValue={account.preferred_locale} />
-                                    <InputError message={errors.preferred_locale} />
+                                    <Label htmlFor="preferred_locale">
+                                        {t('Preferred language')}
+                                    </Label>
+                                    <LanguageSelect
+                                        defaultValue={account.preferred_locale}
+                                    />
+                                    <InputError
+                                        message={errors.preferred_locale}
+                                    />
                                 </div>
 
-                                <Button disabled={processing}>{t('Save')}</Button>
+                                <Button disabled={processing}>
+                                    {t('Save')}
+                                </Button>
                             </>
                         )}
                     </Form>

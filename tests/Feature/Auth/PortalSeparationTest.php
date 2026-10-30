@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\CompanyUser;
 use App\Models\User;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 
 /*
@@ -176,4 +177,20 @@ it('sets no remember-me cookie, even when asked', function () {
     foreach ($response->headers->getCookies() as $cookie) {
         expect($cookie->getName())->not->toStartWith('remember_');
     }
+});
+
+it('stores each portal session in its own table with the database driver', function () {
+    $company = companyUser();
+
+    // Start from a fresh session store, as each real request does.
+    config(['session.driver' => 'database']);
+    app('session')->forgetDrivers();
+    app()->forgetInstance('session.store');
+    app('auth')->forgetGuards();
+
+    $this->post(route('portal.login.store'), ['email' => $company->email, 'password' => 'password'])
+        ->assertRedirect(route('portal.dashboard'));
+
+    expect(DB::table('company_sessions')->where('user_id', $company->id)->exists())->toBeTrue()
+        ->and(DB::table('sessions')->where('user_id', $company->id)->exists())->toBeFalse();
 });

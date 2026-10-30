@@ -69,11 +69,7 @@ export default function CreateRole() {
                                             />
                                             <InputError message={errors.name} />
                                         </div>
-
-          
                                     </div>
-
-                                   
 
                                     <div className="flex gap-2">
                                         <Button
@@ -101,4 +97,3 @@ export default function CreateRole() {
         </AdminLayout>
     );
 }
-

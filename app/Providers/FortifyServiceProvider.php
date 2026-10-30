@@ -11,6 +11,7 @@ use App\Domain\Identity\Listeners\RecordTwoFactorChange;
 use App\Domain\Identity\Login\AuthenticateAccount;
 use App\Domain\Identity\Login\DisableRememberMe;
 use App\Domain\Identity\Login\RedirectToAreaTwoFactorChallenge;
+use App\Domain\Identity\Support\ApplyAuthArea;
 use App\Http\Responses\Auth\FailedTwoFactorLoginResponse;
 use App\Http\Responses\Auth\PasswordResetLinkRequestedResponse;
 use App\Http\Responses\Auth\PasswordResetResponse;
@@ -18,6 +19,7 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
@@ -49,10 +51,9 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::ignoreRoutes();
 
         // Fortify's controllers receive the guard when they are built, which
-        // is before SetAuthArea runs; take it from the route's area instead.
+        // is before any route middleware runs (D-079).
         $this->app->bind(StatefulGuard::class, function (): StatefulGuard {
-            $request = request();
-            $area = AuthArea::current($request) ?? AuthArea::forRoute($request->route());
+            $area = AuthArea::current(request());
 
             /** @var StatefulGuard */
             return Auth::guard($area?->guard() ?? config('fortify.guard'));
@@ -134,6 +135,17 @@ class FortifyServiceProvider extends ServiceProvider
 
     private function configureEvents(): void
     {
+        // Apply the area as soon as the route is known: Laravel builds the
+        // controller (and with it the guard and session store) before the
+        // route middleware runs (D-079).
+        Event::listen(RouteMatched::class, function (RouteMatched $event): void {
+            $area = AuthArea::forRoute($event->route);
+
+            if ($area !== null) {
+                ApplyAuthArea::to($event->request, $area);
+            }
+        });
+
         Event::listen(Login::class, RecordSuccessfulLogin::class);
         Event::listen(TwoFactorAuthenticationConfirmed::class, [RecordTwoFactorChange::class, 'enabled']);
         Event::listen(TwoFactorAuthenticationDisabled::class, [RecordTwoFactorChange::class, 'disabled']);

@@ -1,5 +1,7 @@
 import { Head } from '@inertiajs/react';
-import TwoFactorPanel, { type TwoFactorPageProps } from '@/components/settings/two-factor-panel';
+import TwoFactorPanel, {
+    type TwoFactorPageProps,
+} from '@/components/settings/two-factor-panel';
 import PortalLayout from '@/layouts/portal-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { useTranslation } from '@/lib/i18n';

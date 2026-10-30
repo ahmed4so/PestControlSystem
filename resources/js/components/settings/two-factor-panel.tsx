@@ -47,15 +47,19 @@ export default function TwoFactorPanel({
             <Heading
                 variant="small"
                 title={t('Two-factor authentication')}
-                description={t('Manage your two-factor authentication settings')}
+                description={t(
+                    'Manage your two-factor authentication settings',
+                )}
             />
             <StatusMessage status={status} tone="error" />
             {twoFactorEnabled ? (
                 <div className="flex flex-col items-start justify-start space-y-4">
                     <Badge variant="default">{t('Enabled')}</Badge>
                     <p className="text-muted-foreground">
-                            {t('With two-factor authentication enabled, you will be asked for a code from the authenticator app on your phone when you log in.')}
-                        </p>
+                        {t(
+                            'With two-factor authentication enabled, you will be asked for a code from the authenticator app on your phone when you log in.',
+                        )}
+                    </p>
 
                     <TwoFactorRecoveryCodes
                         recoveryCodesList={recoveryCodesList}
@@ -64,48 +68,43 @@ export default function TwoFactorPanel({
                     />
 
                     {canDisable && routes.twoFactorDisable && (
-                            <div className="relative inline">
-                                <Form {...routes.twoFactorDisable.form()}>
-                            {({ processing }) => (
-                                <Button
-                                    variant="destructive"
-                                    type="submit"
-                                    disabled={processing}
-                                >
-                                    <ShieldBan /> {t('Disable 2FA')}
-                                </Button>
-                            )}
-                        </Form>
-                            </div>
-                        )}
+                        <div className="relative inline">
+                            <Form {...routes.twoFactorDisable.form()}>
+                                {({ processing }) => (
+                                    <Button
+                                        variant="destructive"
+                                        type="submit"
+                                        disabled={processing}
+                                    >
+                                        <ShieldBan /> {t('Disable 2FA')}
+                                    </Button>
+                                )}
+                            </Form>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div className="flex flex-col items-start justify-start space-y-4">
                     <Badge variant="destructive">{t('Disabled')}</Badge>
                     <p className="text-muted-foreground">
-                            {t('When you enable two-factor authentication, you will be asked for a code from an authenticator app on your phone when you log in.')}
-                        </p>
+                        {t(
+                            'When you enable two-factor authentication, you will be asked for a code from an authenticator app on your phone when you log in.',
+                        )}
+                    </p>
 
                     <div>
                         {hasSetupData ? (
-                            <Button
-                                onClick={() => setShowSetupModal(true)}
-                            >
+                            <Button onClick={() => setShowSetupModal(true)}>
                                 <ShieldCheck />
                                 {t('Continue setup')}
                             </Button>
                         ) : (
                             <Form
                                 {...routes.twoFactorEnable.form()}
-                                onSuccess={() =>
-                                    setShowSetupModal(true)
-                                }
+                                onSuccess={() => setShowSetupModal(true)}
                             >
                                 {({ processing }) => (
-                                    <Button
-                                        type="submit"
-                                        disabled={processing}
-                                    >
+                                    <Button type="submit" disabled={processing}>
                                         <ShieldCheck />
                                         {t('Enable 2FA')}
                                     </Button>
