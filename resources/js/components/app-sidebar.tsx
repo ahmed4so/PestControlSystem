@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Building2, Home, Shield, Users } from 'lucide-react';
+import { Building, Building2, Fingerprint, Home, MailWarning, MapPin, Shield, Users } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -13,8 +13,13 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useTranslation } from '@/lib/i18n';
-import { dashboard } from '@/routes';
-import { index as users } from '@/routes/users';
+import { dashboard } from '@/routes/admin';
+import { index as companies } from '@/routes/admin/companies';
+import { index as failedEmails } from '@/routes/admin/failed-emails';
+import { show as nationalIds } from '@/routes/admin/national-ids';
+import { index as fms } from '@/routes/admin/reference-data/fms';
+import { index as roles, permissions } from '@/routes/admin/roles';
+import { index as users } from '@/routes/admin/users';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 
@@ -33,13 +38,31 @@ export function AppSidebar() {
             ? [
                   {
                       title: t('Permissions'),
-                      href: '/roles/permissions',
+                      href: permissions(),
                       icon: Shield,
                   },
               ]
             : []),
         ...(can('view role')
-            ? [{ title: t('Roles'), href: '/roles', icon: Building2 }]
+            ? [{ title: t('Roles'), href: roles(), icon: Building2 }]
+            : []),
+        ...(can('view applications')
+            ? [{ title: t('Companies'), href: companies(), icon: Building }]
+            : []),
+        ...(can('release national id')
+            ? [{ title: t('National-ID release'), href: nationalIds(), icon: Fingerprint }]
+            : []),
+        ...(can('manage reference data')
+            ? [{ title: t('Reference data'), href: fms(), icon: MapPin }]
+            : []),
+        ...(can('manage system settings')
+            ? [
+                  {
+                      title: t('Failed emails'),
+                      href: failedEmails(),
+                      icon: MailWarning,
+                  },
+              ]
             : []),
     ];
 

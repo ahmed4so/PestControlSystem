@@ -37,6 +37,9 @@ class UserFactory extends Factory
             'two_factor_confirmed_at' => null,
             'status' => AccountStatus::Active,
             'first_login' => false,
+            'failed_login_attempts' => 0,
+            'password_changed_at' => now(),
+            'preferred_locale' => 'en',
         ];
     }
 
@@ -47,6 +50,20 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * A new staff account waiting for its first login (D-083).
+     */
+    public function pendingFirstLogin(?string $temporaryPassword = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'password' => $temporaryPassword === null ? $attributes['password'] : Hash::make($temporaryPassword),
+            'temp_password_expires_at' => now()->addDay(),
+            'first_login' => true,
+            'email_verified_at' => null,
+            'password_changed_at' => null,
         ]);
     }
 

@@ -757,7 +757,7 @@ Entry format:
 
 ## D-089: Upload security
 - Date: 2026-10-28
-- Status: Confirmed
+- Status: Confirmed (amended by D-183: antivirus moves to the backlog)
 - Source: Claude.ai design chat
 - Decision: Type detected from file content (PDF, JPG, PNG); size limits; images re-encoded on the server; PDFs with JavaScript or encryption rejected; random storage keys; downloads as attachments. Antivirus in Phase 2.
 - Reason: Safe handling of uploaded files.
@@ -1025,7 +1025,7 @@ Entry format:
 
 ## D-121: Phase process
 - Date: 2026-10-28
-- Status: Confirmed
+- Status: Confirmed (amended by D-163 for Phases 1 and 2)
 - Source: Claude.ai design chat
 - Decision: One branch per phase, one pull request per sub-feature, tests and `composer run check` passing, "Done when" checklist complete. Implementation decisions not covered by the design are logged as Proposed and confirmed in the design Project before the phase is merged to main.
 - Reason: Design and code stay consistent.
@@ -1373,6 +1373,194 @@ Entry format:
 
 ---
 
+## Phase 1 Decisions (confirmed 2026-10-29)
+
+## D-163: Phase 1 and Phase 2 delivered in one go
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: Phase 1 (authentication) and Phase 2 (company profile) are built on one branch and delivered as one pull request, with small commits per step. Each phase still has its own approved plan in `docs/plans/`. This replaces the "one pull request per row group" in 09 §3 for these two phases.
+- Reason: Stakeholder instruction (2026-10-29).
+- Affects: 09 §3, D-121
+
+## D-164: Staff temporary-password expiry column
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: `users` gets a `temp_password_expires_at` column, used to enforce the 24-hour staff temporary password (D-083). 02 §4.1 lists the column only for `company_users`.
+- Reason: D-083 needs a stored expiry.
+- Affects: 02 §4.1, users table
+
+## D-165: No Fortify registration or email verification
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: Fortify's `registration` and `emailVerification` features stay off for both portals. Company sign-up is the custom `/signup` flow. The email address counts as verified when the account first logs in with the emailed temporary password (D-063); staff follow the same rule. The `verified` middleware and the verification pages are removed.
+- Reason: 03 §4 replaces both features.
+- Affects: Fortify config, auth routes and pages
+
+## D-166: Public URLs
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: Company auth pages sit at the root (`/login`, `/signup`, `/temporary-password`, `/forgot-password`, `/reset-password/{token}`, `/two-factor-challenge`) and company app pages under `/portal`, as in 03 §2. `/` is a public landing page with links to the company login and the staff login.
+- Reason: 03 §2 gives the URLs; the landing page was not specified.
+- Affects: routes/public.php, routes/portal.php
+
+## D-167: Bilingual emails while Somali is a placeholder
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: While a Somali line still equals its English placeholder (D-154), an email shows that text once instead of twice. Once real Somali text exists, both languages are shown as D-125 requires.
+- Reason: Avoids every email repeating the same English text.
+- Affects: Notifications module
+
+## D-168: Self-hosted font packages
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: Fonts are self-hosted with the npm packages `@fontsource/dm-sans`, `@fontsource/fraunces` and `@fontsource/instrument-sans`. The CSP allows fonts from `'self'` only.
+- Reason: Implements D-157 with maintained packages.
+- Affects: package.json, app.css, SarisPolicy
+
+## D-169: Language switch
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: Guests choose the language through `/locale/{en,so}`, stored in a `locale` cookie. Logged-in users use their `preferred_locale`, which the language switch also updates.
+- Reason: D-032 lets the user switch; the mechanism was not specified.
+- Affects: SetLocale middleware, layouts
+
+## D-170: Email footer settings
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: The email footer contact details and "do not reply" text live in `config/identity.php` until `system_settings` exists (Phase 4B), then move there.
+- Reason: 07 assumes system settings; the table arrives later.
+- Affects: Notifications module, config/identity.php
+
+## D-171: Permissions for the new admin actions
+- Date: 2026-10-29
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-1-auth.md)
+- Decision: Unlocking uses `unlock account`, 2FA reset uses `reset two factor`, re-sending a staff temporary password uses `create user`, and the failed-emails page uses `manage system settings`. No new permissions are added.
+- Reason: Reuses the confirmed D-149 permissions.
+- Affects: Admin user controller, RolesAndPermissionsSeeder
+
+---
+
+## Phase 1 Implementation Decisions (confirmed 2026-10-30)
+
+## D-172: Staff login email changed only by the System Administrator
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed 2026-10-30; plan docs/plans/phase-1-auth.md)
+- Decision: A staff member edits their own name, phone and language in settings, but not their login email; the System Administrator changes it on the user page. (Companies change theirs through the confirmation link of D-093.)
+- Reason: Staff email verification is off (D-165), so a self-service change could not be confirmed; staff accounts are managed centrally (03 §5.2).
+- Affects: Admin settings profile, UpdateUserRequest
+
+## D-173: How the two portals are kept apart in code
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed 2026-10-30; plan docs/plans/phase-1-auth.md)
+- Decision: (1) Each portal has its own session table: `sessions` for staff and `company_sessions` for companies, so ending one realm's sessions never touches the other. (2) The staff session cookie has the path `/admin`, so it is never sent to company pages and the CSRF cookie of each portal stays separate. (3) The area settings are applied when the route is matched, as well as in SetAuthArea, because Laravel builds Fortify's controllers (and with them the guard and the session store) before route middleware runs.
+- Reason: Found while building D-079: without (3), company logins were stored in the staff session table; without (2), the two portals overwrote each other's CSRF cookie in the same browser.
+- Affects: routes, SetAuthArea, ApplyAuthArea, session tables
+
+## D-174: Session timeouts checked by middleware
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed 2026-10-30; plan docs/plans/phase-1-auth.md)
+- Decision: The idle timeouts (15 / 30 minutes) and the staff 12-hour limit are checked on every request by EnforceSessionTimeouts, in addition to the per-area session lifetime.
+- Reason: Makes the limits exact whatever the session driver, and testable.
+- Affects: EnforceSessionTimeouts middleware
+
+## D-175: Login-email confirmation link works without being logged in
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed 2026-10-30; plan docs/plans/phase-1-auth.md)
+- Decision: The D-093 confirmation link changes the email whether or not the account is logged in on that device; it is single use, valid 60 minutes, and only its SHA-256 hash is stored.
+- Reason: The link is often opened on another device (the new mailbox).
+- Affects: Company login-email change
+
+## D-176: Queued emails are encrypted
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed 2026-10-30; plan docs/plans/phase-1-auth.md)
+- Decision: Every queued email is encrypted in the `jobs` table (Laravel ShouldBeEncrypted), because some carry a temporary password.
+- Reason: No secret may be stored in plain text, even briefly (03 §12.1).
+- Affects: Notifications module
+
+---
+
+## Phase 2 Decisions (confirmed 2026-10-30)
+
+## D-177: Staff access to company files
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-2-company-profile.md)
+- Decision: The staff company directory and company file use the existing permission `view applications` (Pesticide Registrar, Departmental Director, Payment Officer, Director General). The System Administrator sees a person and company only on the national-ID release screen.
+- Reason: 03 §11.1 gives "view applications and company files" to these roles; no separate permission exists.
+- Affects: Admin company directory
+
+## D-178: Profile completeness
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-2-company-profile.md)
+- Decision: The profile saves with format checks only. `profile_completed_at` is set when all of these are present: the company fields of 05 §4.1 with the address; an Owner/MD with nationality, national ID, email, phone and address; current commerce and tax certificates with numbers and dates; the MD national-ID copy; the company profile document. Premises and technical persons are checked per application in Phase 4.
+- Reason: 05 marks profile fields "required at submit"; D-073 says edits are saved immediately.
+- Affects: CompanyRegistry ProfileCompleteness
+
+## D-179: Photo capture time
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-2-company-profile.md)
+- Decision: A checklist photo's `captured_at` is the file's last-modified time sent by the browser, or null when unknown.
+- Reason: Phone compression removes EXIF before upload.
+- Affects: Facility checklist photos
+
+## D-180: Configurable documents disk
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-2-company-profile.md)
+- Decision: The documents disk is configurable (`DOCUMENTS_DISK`, default `r2`). Local development may use the private `local` disk; production and staging use R2 (D-056).
+- Reason: Developers have no R2 keys locally.
+- Affects: config/documents.php, FileStorage
+
+## D-181: Masked national IDs for staff
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-2-company-profile.md)
+- Decision: Staff see national IDs masked (`****1234`) everywhere except the release screen, where the System Administrator types the full ID.
+- Reason: Least privilege (03 §12.1).
+- Affects: Admin company file, release screen
+
+## D-182: Duplicate business registration number
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-2-company-profile.md)
+- Decision: A business registration number that already exists is refused at profile set-up with "This business registration number is already registered. Please contact SARIS." until account recovery exists (Phase 5).
+- Reason: 02 §6.2 directs these cases to account recovery, which is Phase 5.
+- Affects: Company profile set-up
+
+## D-183: Antivirus in the backlog
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Stakeholder (amends D-089; resolves the conflict with 03 §12.2)
+- Decision: Antivirus scanning of uploads is not part of Phase 2. It stays in the backlog after Release 2, as 09 §6 says. All other upload checks of D-089 apply from Phase 2.
+- Reason: Stakeholder decision; follows the implementation plan (09).
+- Affects: Documents module, 03 §12.2
+
+## D-184: Draft FMS and region list
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: Until SARIS provides the official list (open question 12), a draft list of FMS and regions is seeded for development and testing, clearly marked as a draft. It is replaced by the official list, through the seeder or the admin screens, before go-live.
+- Reason: Phase 2 needs the lists; the official list is pending.
+- Affects: ReferenceDataSeeder, go-live checklist
+
+---
+
 ## Open Questions
 
 1. Fee schedule per service and category (F1).
@@ -1394,3 +1582,5 @@ Entry format:
 17. Release 1 go-live date: not fixed yet; set when Phase 5 is near.
 18. SARIS to approve the template wording corrections (06-documents §6) and provide the Somali wording for the Wholesale and Retailer declarations.
 19. SARIS to provide the DG signature image, the stamp image, the final .docx templates and a permission-to-pay letter template.
+20. Some UI libraries already in the repo (`input-otp`, Radix scroll lock) add `<style>` tags without the CSP nonce, so the browser blocks those styles (small visual effects only). Fix by passing the nonce to them or allowing their style hashes? Not changed in Phase 1.
+21. May a company soft-delete a person or premises it added by mistake, before any submission? The design defines no deletion; Phase 2 has none.

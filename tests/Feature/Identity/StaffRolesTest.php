@@ -11,11 +11,6 @@ beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
 });
 
-function systemAdministrator(): User
-{
-    return tap(User::factory()->create())->assignRole(StaffRole::SystemAdministrator->value);
-}
-
 it('seeds only the System Administrator and the D-023 roles', function () {
     expect(Role::query()->pluck('name')->sort()->values()->all())
         ->toBe(collect(StaffRole::cases())->map->value->sort()->values()->all());
@@ -54,7 +49,8 @@ it('refuses to combine the System Administrator role with a workflow role', func
         ->all();
 
     $this->actingAs(systemAdministrator())
-        ->post(route('roles.assign.store'), ['user_id' => $staff->id, 'role_ids' => $roleIds])
+        ->withSession(passwordConfirmed())
+        ->post(route('admin.roles.assign.store'), ['user_id' => $staff->id, 'role_ids' => $roleIds])
         ->assertSessionHasErrors('role_ids');
 
     expect($staff->fresh()->roles)->toBeEmpty();
@@ -63,12 +59,16 @@ it('refuses to combine the System Administrator role with a workflow role', func
 it('does not let the designed roles be deleted or renamed', function () {
     $registrar = Role::findByName(StaffRole::PesticideRegistrar->value);
 
-    $this->actingAs(systemAdministrator())
-        ->delete(route('roles.destroy', $registrar))
-        ->assertRedirect(route('roles.index'));
+    $admin = systemAdministrator();
 
-    $this->actingAs(systemAdministrator())
-        ->put(route('roles.update', $registrar), ['name' => 'Registrar'])
+    $this->actingAs($admin)
+        ->withSession(passwordConfirmed())
+        ->delete(route('admin.roles.destroy', $registrar))
+        ->assertRedirect(route('admin.roles.index'));
+
+    $this->actingAs($admin)
+        ->withSession(passwordConfirmed())
+        ->put(route('admin.roles.update', $registrar), ['name' => 'Registrar'])
         ->assertSessionHasErrors('name');
 
     expect(Role::query()->where('name', StaffRole::PesticideRegistrar->value)->exists())->toBeTrue();

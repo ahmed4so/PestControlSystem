@@ -37,12 +37,6 @@
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link
-            href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700|fraunces:500,600,700|instrument-sans:400,500,600&display=swap"
-            rel="stylesheet"
-        />
-
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
         @inertiaHead

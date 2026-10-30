@@ -1,50 +1,80 @@
 <?php
 
+use App\Domain\Identity\Enums\StaffRole;
+use App\Models\CompanyUser;
+use App\Models\User;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Honeypot\EncryptedTime;
 use Tests\TestCase;
-
-/*
-|--------------------------------------------------------------------------
-| Test Case
-|--------------------------------------------------------------------------
-|
-| The closure you provide to your test functions is always bound to a specific PHPUnit test
-| case class. By default, that class is "PHPUnit\Framework\TestCase". Of course, you may
-| need to change it using the "pest()" function to bind a different classes or traits.
-|
-*/
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
 
 /*
-|--------------------------------------------------------------------------
-| Expectations
-|--------------------------------------------------------------------------
-|
-| When you're writing tests, you often need to check that values meet certain conditions. The
-| "expect()" function gives you access to a set of "expectations" methods that you can use
-| to assert different things. Of course, you may extend the Expectation API at any time.
-|
+| Helpers
 */
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
-
-/*
-|--------------------------------------------------------------------------
-| Functions
-|--------------------------------------------------------------------------
-|
-| While Pest is very powerful out-of-the-box, you may have some testing code specific to your
-| project that you don't want to repeat in every file. Here you can also expose helpers as
-| global functions to help you to reduce the number of lines of code in your test files.
-|
-*/
-
-function something()
+/**
+ * A staff user ready to work: password set, 2FA confirmed (D-052).
+ *
+ * @param  list<string>  $roles
+ * @param  array<string, mixed>  $attributes
+ */
+function staffUser(array $roles = [], array $attributes = []): User
 {
-    // ..
+    if ($roles !== []) {
+        test()->seed(RolesAndPermissionsSeeder::class);
+    }
+
+    $user = User::factory()->withTwoFactor()->create($attributes);
+
+    if ($roles !== []) {
+        $user->syncRoles($roles);
+    }
+
+    return $user;
+}
+
+function systemAdministrator(): User
+{
+    return staffUser([StaffRole::SystemAdministrator->value]);
+}
+
+/**
+ * A company account with its own company (Phase 2); pass false for an
+ * account that has not set up its profile yet.
+ *
+ * @param  array<string, mixed>  $attributes
+ */
+function companyUser(array $attributes = [], bool $withCompany = true): CompanyUser
+{
+    $factory = CompanyUser::factory();
+
+    return ($withCompany ? $factory->withCompany() : $factory)->create($attributes)->fresh();
+}
+
+/**
+ * Valid honeypot fields: hidden field empty, form opened long enough ago
+ * (D-080).
+ *
+ * @return array<string, string>
+ */
+function honeypotFields(int $openedSecondsAgo = 10): array
+{
+    return [
+        config('honeypot.name_field_name').'_abc123' => '',
+        config('honeypot.valid_from_field_name') => EncryptedTime::create(now()->subSeconds($openedSecondsAgo - (int) config('honeypot.amount_of_seconds')))->__toString(),
+    ];
+}
+
+/**
+ * Session values marking the password as just confirmed (D-085).
+ *
+ * @return array<string, int>
+ */
+function passwordConfirmed(): array
+{
+    return ['auth.password_confirmed_at' => time()];
 }

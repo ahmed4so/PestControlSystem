@@ -1,12 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
+use App\Domain\Identity\Enums\AuthArea;
+use App\Models\CompanyUser;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Logs out an account whose status is no longer ACTIVE, on its next
+ * request (D-053, 03 §9).
+ */
 class EnsureUserIsActive
 {
     /**
@@ -16,17 +25,23 @@ class EnsureUserIsActive
     {
         $user = $request->user();
 
-        if ($user === null || $user->isActive()) {
+        if (! $user instanceof User && ! $user instanceof CompanyUser) {
             return $next($request);
         }
 
-        Auth::logout();
+        if ($user->isActive()) {
+            return $next($request);
+        }
+
+        $area = AuthArea::current($request) ?? $user->area();
+
+        Auth::guard($area->guard())->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with(
-            'login_error',
-            'Your account is not active. Please contact an administrator.',
+        return redirect()->route($area->route('login'))->with(
+            'status',
+            __('Your account is not active. Please contact SARIS.'),
         );
     }
 }
