@@ -1583,3 +1583,4 @@ Entry format:
 18. SARIS to approve the template wording corrections (06-documents §6) and provide the Somali wording for the Wholesale and Retailer declarations.
 19. SARIS to provide the DG signature image, the stamp image, the final .docx templates and a permission-to-pay letter template.
 20. Some UI libraries already in the repo (`input-otp`, Radix scroll lock) add `<style>` tags without the CSP nonce, so the browser blocks those styles (small visual effects only). Fix by passing the nonce to them or allowing their style hashes? Not changed in Phase 1.
+21. May a company soft-delete a person or premises it added by mistake, before any submission? The design defines no deletion; Phase 2 has none.

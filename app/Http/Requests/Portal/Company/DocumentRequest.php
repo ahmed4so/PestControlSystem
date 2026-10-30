@@ -38,14 +38,12 @@ class DocumentRequest extends FormRequest
         return [
             'document_type' => ['required', Rule::enum(DocumentType::class)],
             'file' => ['required', 'file', 'max:'.config('documents.max_upload_kb')],
-            'document_number' => [$certificate ? 'required' : 'prohibited', ...FieldFormats::regNo()],
-            'issued_on' => [$certificate ? 'required' : 'prohibited', 'date', 'before_or_equal:today'],
-            'expires_on' => [$certificate ? 'required' : 'prohibited', 'date', 'after:issued_on'],
-            'person_id' => [
-                $personDocument ? 'required' : 'prohibited',
-                'integer',
-                Rule::exists('persons', 'id')->where('company_id', $account->company_id ?? 0)->whereNull('released_at')->whereNull('deleted_at'),
-            ],
+            'document_number' => $certificate ? ['required', ...FieldFormats::regNo()] : ['prohibited'],
+            'issued_on' => $certificate ? ['required', 'date', 'before_or_equal:today'] : ['prohibited'],
+            'expires_on' => $certificate ? ['required', 'date', 'after:issued_on'] : ['prohibited'],
+            'person_id' => $personDocument
+                ? ['required', 'integer', Rule::exists('persons', 'id')->where('company_id', $account->company_id ?? 0)->whereNull('released_at')->whereNull('deleted_at')]
+                : ['prohibited'],
         ];
     }
 

@@ -81,6 +81,8 @@ class Person extends Model
     protected function casts(): array
     {
         return [
+            'address_fms_id' => 'integer',
+            'address_region_id' => 'integer',
             'national_id_no' => 'encrypted',
             'years_of_experience' => 'integer',
             'released_at' => 'datetime',

@@ -23,9 +23,11 @@ final readonly class Address
 
     public static function fromModel(Model $model): self
     {
+        $id = fn (mixed $value): ?int => is_numeric($value) ? (int) $value : null;
+
         return new self(
-            $model->getAttribute('address_fms_id'),
-            $model->getAttribute('address_region_id'),
+            $id($model->getAttribute('address_fms_id')),
+            $id($model->getAttribute('address_region_id')),
             $model->getAttribute('address_district'),
             $model->getAttribute('address_town_or_market'),
             $model->getAttribute('address_street'),

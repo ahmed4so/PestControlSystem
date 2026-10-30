@@ -55,6 +55,8 @@ class Premises extends Model
     protected function casts(): array
     {
         return [
+            'address_fms_id' => 'integer',
+            'address_region_id' => 'integer',
             'premises_type' => PremisesType::class,
             'gps_lat' => 'decimal:7',
             'gps_lng' => 'decimal:7',

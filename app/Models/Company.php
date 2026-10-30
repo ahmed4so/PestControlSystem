@@ -60,6 +60,9 @@ class Company extends Model
     protected function casts(): array
     {
         return [
+            'address_fms_id' => 'integer',
+            'address_region_id' => 'integer',
+            'owner_person_id' => 'integer',
             'profile_completed_at' => 'datetime',
             'amendment_required_at' => 'datetime',
         ];

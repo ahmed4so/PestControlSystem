@@ -23,7 +23,7 @@ Key business rules:
 - Sign-up: Full Name, Email, Phone → emailed temporary password (1 hour) → login → forced password change → company profile (D-063).
 - Shared data (company profile, persons, premises, products) is entered once and referenced by applications. Submissions and issued licenses keep **immutable snapshots** (D-006, D-042).
 
-**Current state:** Phase 0 (foundations) and Phase 1 (authentication for both portals, `docs/plans/phase-1-auth.md`) are done; `docs/design/00-current-state.md` describes the code before Phase 0. Next is Phase 2 (company profile). The **Architecture** section below describes the code as it is today.
+**Current state:** Phase 0 (foundations), Phase 1 (authentication for both portals, `docs/plans/phase-1-auth.md`) and Phase 2 (company profile and reference data, `docs/plans/phase-2-company-profile.md`) are done; `docs/design/00-current-state.md` describes the code before Phase 0. Next is Phase 3 (workflow engine). The **Architecture** section below describes the code as it is today.
 
 ## Sources of truth (priority order)
 
@@ -86,7 +86,7 @@ Pest. Inertia SSR kept as in the repo. Emails from noreply@saris.gov.so. Full de
 
 > **Notes:** `php artisan workflows:load` arrives with the workflow engine (Phase 3). `php artisan identity:password-expiry-reminders` runs daily from the scheduler (D-082). `php artisan security:npm-audit` is the npm step of the check; it fails on any advisory not listed in `config/security.php` and on any list entry past its monthly `review_by` date (D-153). `php artisan translations:report` lists Somali entries still equal to the English (`--fail` is the Phase 5 go-live check, D-154). For a quick loop, run `vendor/bin/pint --dirty`, `npm run lint`, `npm run types` and `php artisan test --compact <file or --filter>`. After route changes run `php artisan wayfinder:generate --with-form`; run `npm run build` if the UI throws "Unable to locate file in Vite manifest".
 
-## Architecture (current code, after Phase 1)
+## Architecture (current code, after Phase 2)
 
 - **Two portals, one app** (D-048, D-079, D-173):
   - `routes/admin.php`: staff, `/admin/*`, route names `admin.*`, guard `web`, broker `users`, cookie `saris_admin_session` (path `/admin`), table `sessions`.
@@ -105,10 +105,13 @@ Pest. Inertia SSR kept as in the repo. Emails from noreply@saris.gov.so. Full de
   - `Identity`: enums `StaffRole`, `AccountStatus`, `AuthArea`; actions `RegisterCompanyUser`, `IssueTemporaryPassword`, `CreateStaffUser`, `ChangePassword`, `UnlockAccount`, `ResetTwoFactor`, `RequestLoginEmailChange`, `ConfirmLoginEmailChange`, `DeactivateStaffUser`; rule `NotRecentPassword` (last 5); `HasSecurityState` on both account models; `AccountSessions::end()`; `PasswordPolicy`, `TemporaryPassword`, `PublicFormMessages`, `Translations`.
   - `Notifications`: `SendNotification` is the only way to send email. It logs to `notification_logs` (no body) and queues one Mailable per `NotificationCode` (`Mail/*`), after commit, 3 tries, encrypted. Templates are `resources/views/mail/{CODE}.blade.php` and `{CODE}-text.blade.php` for one language; the layout shows both, preferred first (D-125, D-167). Failed sends are listed at `/admin/failed-emails`.
   - `Audit`: `Audited` trait, plus `AuditLog::record()` for security events (logins, lockouts, temporary passwords, 2FA, email change).
-  - `Documents`: `FileStorage`, the only way to read and write files (R2 disk `r2`).
-  - `ReferenceData`: `NumberPrefix`, `NumberSequencer`, `FieldFormats` (05 §2 rules and normalisation).
+  - `CompanyRegistry`: enums `PremisesType`, `ChecklistItem` (9 items, max 5 photos), `DocumentType`; `Data/Address` and the `HasAddress` trait (`address_*` columns, D-065); `BelongsToCompany` (global scope: on the Company Portal every query is limited to the account's company, so other IDs give 404); actions `CreateCompany`, `UpdateCompanyProfile`, `SavePerson` (national ID unique system-wide, D-066), `SavePremises`, `AddChecklistPhoto`, `UploadDocument` (replacement history, D-067; renewed certificates notify Registrars), `ReleaseNationalId`; `NationalIdHasher` (HMAC with `NID_HASH_KEY`, D-117); `ProfileCompleteness` (D-178); `CompanyEditLock` with the `SubmissionState` contract (Phase 2 binds `NothingSubmittedYet`; Phase 4 binds the real state, D-073).
+  - `Documents`: `FileStorage` (disk from `config('documents.disk')`, R2 in production, D-180; `download()` = 5-minute signed URL or attachment) and `SafeUploads` (`UploadInspector`: type from content, 5 MB, PDFs with JavaScript or encryption refused; `ImageReencoder`: GD re-encode, EXIF removed). Company files go only through `SafeUploads`. Antivirus is in the backlog (D-183).
+  - `ReferenceData`: `NumberPrefix`, `NumberSequencer`, `FieldFormats` (05 §2 rules and normalisation), `AddressRules`, `AddressOptions`, `Countries` (PHP intl). `ReferenceDataSeeder` loads `database/seeders/data/fms-regions.php`, a DRAFT list until SARIS sends the official one (D-184).
   - The other modules are empty folders.
-- **Models**: `User` (staff) and `CompanyUser` (company accounts) never share a table, guard or session; `PasswordHistory`, `NotificationLog`.
+- **Models**: `User` (staff) and `CompanyUser` (company accounts) never share a table, guard or session; `PasswordHistory`, `NotificationLog`; `FederalMemberState`, `Region`, `Company`, `Person` (encrypted national ID, generated unique `active_nid_key`), `Premises`, `FacilityChecklistItem`, `FacilityChecklistPhoto`, `Document`.
+- **Company Portal pages** (`/portal`, middleware `company.profile` sends accounts without a company to set-up): company, persons, premises with checklist and photos, documents, own-file downloads. Policies (`app/Policies`) apply ownership and the edit lock.
+- **Admin company pages**: `/admin/companies` (read-only, `view applications`, IDs masked, every file view audited), `/admin/national-ids` (release, `release national id` + password confirmation), `/admin/reference-data/fms` (`manage reference data`).
 - **Authorization**:
   - Controllers declare `permission:<name>` middleware through `HasMiddleware`.
   - `RolesAndPermissionsSeeder` is authoritative: it seeds the System Administrator and the D-023 roles with their permissions, deletes any permission not listed, and removes `Super Admin`. There is no `Gate::before` bypass.
@@ -118,7 +121,7 @@ Pest. Inertia SSR kept as in the repo. Emails from noreply@saris.gov.so. Full de
 - **Public forms**: sign-up, temporary-password and forgot-password use `spatie/laravel-honeypot` (`config/honeypot.php`, 3-second minimum) and always give the same answer (`PublicFormMessages`, `SameAnswerSpamResponder`).
 - **Frontend shared props** (`HandleInertiaRequests`): `area`, `auth.user` (current area's account only: id, name, email, two_factor_enabled), `auth.permissions` (staff only), `flash.success` / `flash.error`, `sidebarOpen`, `locale` and `translations`. Use `useTranslation()` from `@/lib/i18n` and `t('English text')`; add every key to both `lang/en.json` and `lang/so.json` (also for `__()` in PHP and mail views).
 - **Frontend layout**: pages in `resources/js/pages/{admin,portal,public}`; layouts `admin-layout`, `portal-layout`, `public-layout`, `auth-layout`. Shared auth and settings screens live in `components/auth` and `components/settings` and pick their routes through `useArea()` (`@/lib/area`). Import backend routes from `@/routes/...` or `@/actions/...` (Wayfinder) instead of hard-coding URLs. Those directories are generated, so don't edit them by hand.
-- **Tests**: helpers in `tests/Pest.php`: `staffUser()`, `systemAdministrator()`, `companyUser()`, `honeypotFields()`, `passwordConfirmed()`.
+- **Tests**: helpers in `tests/Pest.php`: `staffUser()`, `systemAdministrator()`, `companyUser($attributes, withCompany: true)`, `honeypotFields()`, `passwordConfirmed()`. After a company request the test stays in the company area, so query company models with `withoutGlobalScopes()` and pass the guard to `actingAs()`.
 
 ## Coding conventions
 - Business logic in app/Domain/<Module>/Actions; controllers thin; Form Requests validate; Policies authorize.

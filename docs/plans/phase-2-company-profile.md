@@ -274,3 +274,18 @@ New in the `Documents` module:
 
 1. Antivirus follows 09: backlog after Release 2, not Phase 2 (D-183, amends D-089).
 2. A draft FMS and region list is seeded for development and testing until SARIS sends the official list (D-184).
+
+## 11. Implementation notes (2026-10-30)
+
+Where the code differs from, or adds detail to, the plan above. None changes the scope.
+
+| Plan said | Code does | Why |
+|---|---|---|
+| Profile saves with format checks only | Also true for the company and persons; a **premises** needs its address on every save | 05 §4.3 makes the address required, and a premises is created one at a time |
+| `FileStorage::download()` gives a signed URL | It also serves a direct attachment when the disk has no signed URLs (local development) | Part of D-180 |
+| — | Persons and premises have no delete in Phase 2 | The design defines no deletion for them; released persons stay as history (open question below) |
+| — | Browser forms send IDs as strings; the address IDs are cast to integers | Found in the phone check; a test now posts strings |
+
+**Result:** 264 tests pass. Pint, ESLint, TypeScript, both audits and both builds pass; Larastan runs in CI only (open question 16). A browser check at phone width (360 px) took a company from login through profile set-up, a person, company details, a premises with a photo (compressed on the phone, re-encoded on the server) and the four documents, to "Your company profile is complete", with no page errors and no horizontal scrolling.
+
+**Open question:** may a company delete (soft-delete) a person or premises it added by mistake, before any submission? The design does not say. Nothing deletes them for now.
