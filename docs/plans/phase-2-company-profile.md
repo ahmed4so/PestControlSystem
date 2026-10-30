@@ -1,6 +1,6 @@
 # Plan: Phase 2 — Company profile and reference data
 
-- Status: Draft, waiting for approval
+- Status: Approved (2026-10-30)
 - Branch: `claude/funny-franklin-ikvmdt` (same branch and pull request as Phase 1, D-163)
 - Date: 2026-10-30
 - Depends on: Phase 1 (company accounts, both portals, notifications)
@@ -259,7 +259,7 @@ New in the `Documents` module:
 4. **The FMS and region list isn't official yet.** Using a draft list risks wrong values in early data; it is clearly marked and replaceable through the admin screens.
 5. **Larastan** still runs only in CI.
 
-## 9. Proposed decisions (to confirm)
+## 9. Decisions (confirmed 2026-10-30)
 
 | ID | Proposal | Why |
 |---|---|---|
@@ -270,16 +270,7 @@ New in the `Documents` module:
 | D-181 | Staff see national IDs masked (`****1234`) everywhere except the release screen, where the System Administrator types the full ID. | Least privilege (03 §12.1). |
 | D-182 | A business registration number that already exists is refused at profile set-up with "This business registration number is already registered. Please contact SARIS." until account recovery exists (Phase 5). | 02 §6.2 directs these cases to account recovery, which is Phase 5. |
 
-## 10. Open questions (your answer changes the plan)
+## 10. Answered questions
 
-1. **Antivirus: conflict in the design.**
-   - D-089 says "Antivirus in Phase 2", and 03 §12.2 says "Antivirus deferred to Phase 2 (ClamAV in the queue)".
-   - But 09 §6 puts "Antivirus scanning of uploads" in the backlog after Release 2.
-   - Which one applies? If Phase 2, it needs ClamAV on the server and a new package, which needs a decision.
-   - The plan currently follows 09 (not in Phase 2).
-2. **FMS and region list.** SARIS hasn't sent the official list (open question 12 in the log). May I seed a draft list for development and testing, clearly marked, to be replaced by the official one? The draft would be:
-   - Banadir;
-   - the Federal Member States Galmudug, Hirshabelle, Jubaland, Puntland and South West;
-   - the regions under each.
-
-   Or do you want to provide the list before I start?
+1. Antivirus follows 09: backlog after Release 2, not Phase 2 (D-183, amends D-089).
+2. A draft FMS and region list is seeded for development and testing until SARIS sends the official list (D-184).

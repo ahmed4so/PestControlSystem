@@ -757,7 +757,7 @@ Entry format:
 
 ## D-089: Upload security
 - Date: 2026-10-28
-- Status: Confirmed
+- Status: Confirmed (amended by D-183: antivirus moves to the backlog)
 - Source: Claude.ai design chat
 - Decision: Type detected from file content (PDF, JPG, PNG); size limits; images re-encoded on the server; PDFs with JavaScript or encryption rejected; random storage keys; downloads as attachments. Antivirus in Phase 2.
 - Reason: Safe handling of uploaded files.
@@ -1449,47 +1449,115 @@ Entry format:
 
 ---
 
-## Phase 1 Implementation Decisions (proposed, waiting for confirmation)
+## Phase 1 Implementation Decisions (confirmed 2026-10-30)
 
 ## D-172: Staff login email changed only by the System Administrator
 - Date: 2026-10-30
-- Status: Proposed
-- Source: Claude Code
+- Status: Confirmed
+- Source: Claude Code (confirmed 2026-10-30; plan docs/plans/phase-1-auth.md)
 - Decision: A staff member edits their own name, phone and language in settings, but not their login email; the System Administrator changes it on the user page. (Companies change theirs through the confirmation link of D-093.)
 - Reason: Staff email verification is off (D-165), so a self-service change could not be confirmed; staff accounts are managed centrally (03 §5.2).
 - Affects: Admin settings profile, UpdateUserRequest
 
 ## D-173: How the two portals are kept apart in code
 - Date: 2026-10-30
-- Status: Proposed
-- Source: Claude Code
+- Status: Confirmed
+- Source: Claude Code (confirmed 2026-10-30; plan docs/plans/phase-1-auth.md)
 - Decision: (1) Each portal has its own session table: `sessions` for staff and `company_sessions` for companies, so ending one realm's sessions never touches the other. (2) The staff session cookie has the path `/admin`, so it is never sent to company pages and the CSRF cookie of each portal stays separate. (3) The area settings are applied when the route is matched, as well as in SetAuthArea, because Laravel builds Fortify's controllers (and with them the guard and the session store) before route middleware runs.
 - Reason: Found while building D-079: without (3), company logins were stored in the staff session table; without (2), the two portals overwrote each other's CSRF cookie in the same browser.
 - Affects: routes, SetAuthArea, ApplyAuthArea, session tables
 
 ## D-174: Session timeouts checked by middleware
 - Date: 2026-10-30
-- Status: Proposed
-- Source: Claude Code
+- Status: Confirmed
+- Source: Claude Code (confirmed 2026-10-30; plan docs/plans/phase-1-auth.md)
 - Decision: The idle timeouts (15 / 30 minutes) and the staff 12-hour limit are checked on every request by EnforceSessionTimeouts, in addition to the per-area session lifetime.
 - Reason: Makes the limits exact whatever the session driver, and testable.
 - Affects: EnforceSessionTimeouts middleware
 
 ## D-175: Login-email confirmation link works without being logged in
 - Date: 2026-10-30
-- Status: Proposed
-- Source: Claude Code
+- Status: Confirmed
+- Source: Claude Code (confirmed 2026-10-30; plan docs/plans/phase-1-auth.md)
 - Decision: The D-093 confirmation link changes the email whether or not the account is logged in on that device; it is single use, valid 60 minutes, and only its SHA-256 hash is stored.
 - Reason: The link is often opened on another device (the new mailbox).
 - Affects: Company login-email change
 
 ## D-176: Queued emails are encrypted
 - Date: 2026-10-30
-- Status: Proposed
-- Source: Claude Code
+- Status: Confirmed
+- Source: Claude Code (confirmed 2026-10-30; plan docs/plans/phase-1-auth.md)
 - Decision: Every queued email is encrypted in the `jobs` table (Laravel ShouldBeEncrypted), because some carry a temporary password.
 - Reason: No secret may be stored in plain text, even briefly (03 §12.1).
 - Affects: Notifications module
+
+---
+
+## Phase 2 Decisions (confirmed 2026-10-30)
+
+## D-177: Staff access to company files
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-2-company-profile.md)
+- Decision: The staff company directory and company file use the existing permission `view applications` (Pesticide Registrar, Departmental Director, Payment Officer, Director General). The System Administrator sees a person and company only on the national-ID release screen.
+- Reason: 03 §11.1 gives "view applications and company files" to these roles; no separate permission exists.
+- Affects: Admin company directory
+
+## D-178: Profile completeness
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-2-company-profile.md)
+- Decision: The profile saves with format checks only. `profile_completed_at` is set when all of these are present: the company fields of 05 §4.1 with the address; an Owner/MD with nationality, national ID, email, phone and address; current commerce and tax certificates with numbers and dates; the MD national-ID copy; the company profile document. Premises and technical persons are checked per application in Phase 4.
+- Reason: 05 marks profile fields "required at submit"; D-073 says edits are saved immediately.
+- Affects: CompanyRegistry ProfileCompleteness
+
+## D-179: Photo capture time
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-2-company-profile.md)
+- Decision: A checklist photo's `captured_at` is the file's last-modified time sent by the browser, or null when unknown.
+- Reason: Phone compression removes EXIF before upload.
+- Affects: Facility checklist photos
+
+## D-180: Configurable documents disk
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-2-company-profile.md)
+- Decision: The documents disk is configurable (`DOCUMENTS_DISK`, default `r2`). Local development may use the private `local` disk; production and staging use R2 (D-056).
+- Reason: Developers have no R2 keys locally.
+- Affects: config/documents.php, FileStorage
+
+## D-181: Masked national IDs for staff
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-2-company-profile.md)
+- Decision: Staff see national IDs masked (`****1234`) everywhere except the release screen, where the System Administrator types the full ID.
+- Reason: Least privilege (03 §12.1).
+- Affects: Admin company file, release screen
+
+## D-182: Duplicate business registration number
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-2-company-profile.md)
+- Decision: A business registration number that already exists is refused at profile set-up with "This business registration number is already registered. Please contact SARIS." until account recovery exists (Phase 5).
+- Reason: 02 §6.2 directs these cases to account recovery, which is Phase 5.
+- Affects: Company profile set-up
+
+## D-183: Antivirus in the backlog
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Stakeholder (amends D-089; resolves the conflict with 03 §12.2)
+- Decision: Antivirus scanning of uploads is not part of Phase 2. It stays in the backlog after Release 2, as 09 §6 says. All other upload checks of D-089 apply from Phase 2.
+- Reason: Stakeholder decision; follows the implementation plan (09).
+- Affects: Documents module, 03 §12.2
+
+## D-184: Draft FMS and region list
+- Date: 2026-10-30
+- Status: Confirmed
+- Source: Stakeholder
+- Decision: Until SARIS provides the official list (open question 12), a draft list of FMS and regions is seeded for development and testing, clearly marked as a draft. It is replaced by the official list, through the seeder or the admin screens, before go-live.
+- Reason: Phase 2 needs the lists; the official list is pending.
+- Affects: ReferenceDataSeeder, go-live checklist
 
 ---
 
