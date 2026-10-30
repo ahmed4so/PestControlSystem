@@ -23,7 +23,7 @@ Key business rules:
 - Sign-up: Full Name, Email, Phone → emailed temporary password (1 hour) → login → forced password change → company profile (D-063).
 - Shared data (company profile, persons, premises, products) is entered once and referenced by applications. Submissions and issued licenses keep **immutable snapshots** (D-006, D-042).
 
-**Current state:** Phase 0 (clean-up and foundations, `docs/plans/phase-0-follow-up.md`, 09 §3) is done; `docs/design/00-current-state.md` describes the code before it. There are no SARIS domain features yet. The **Architecture** section below describes the code as it is today.
+**Current state:** Phase 0 (foundations) and Phase 1 (authentication for both portals, `docs/plans/phase-1-auth.md`) are done; `docs/design/00-current-state.md` describes the code before Phase 0. Next is Phase 2 (company profile). The **Architecture** section below describes the code as it is today.
 
 ## Sources of truth (priority order)
 
@@ -84,34 +84,41 @@ Pest. Inertia SSR kept as in the repo. Emails from noreply@saris.gov.so. Full de
 - Test: `php artisan test` (MySQL 8, database saris_portal_testing)
 - Check before every commit: `composer run check` (Pint, Larastan, ESLint, TypeScript, tests, audits, build)
 
-> **Notes:** `php artisan workflows:load` arrives with the workflow engine (Phase 3). `php artisan security:npm-audit` is the npm step of the check; it fails on any advisory not listed in `config/security.php` and on any list entry past its monthly `review_by` date (D-153). `php artisan translations:report` lists Somali entries still equal to the English (`--fail` is the Phase 5 go-live check, D-154). For a quick loop, run `vendor/bin/pint --dirty`, `npm run lint`, `npm run types` and `php artisan test --compact <file or --filter>`. After route changes run `php artisan wayfinder:generate --with-form`; run `npm run build` if the UI throws "Unable to locate file in Vite manifest".
+> **Notes:** `php artisan workflows:load` arrives with the workflow engine (Phase 3). `php artisan identity:password-expiry-reminders` runs daily from the scheduler (D-082). `php artisan security:npm-audit` is the npm step of the check; it fails on any advisory not listed in `config/security.php` and on any list entry past its monthly `review_by` date (D-153). `php artisan translations:report` lists Somali entries still equal to the English (`--fail` is the Phase 5 go-live check, D-154). For a quick loop, run `vendor/bin/pint --dirty`, `npm run lint`, `npm run types` and `php artisan test --compact <file or --filter>`. After route changes run `php artisan wayfinder:generate --with-form`; run `npm run build` if the UI throws "Unable to locate file in Vite manifest".
 
-## Architecture (current code, after Phase 0)
+## Architecture (current code, after Phase 1)
 
-- **Routes**:
-  - `routes/web.php` holds the dashboard, `users` and `roles` routes behind `auth` + `active` + `verified` + `ForcePasswordChange`. Users have no delete route; `users.deactivate` / `users.activate` replace it (D-053).
-  - `routes/settings.php` holds profile, password, appearance and 2FA (no self-delete).
-  - There is no API (Passport and Jetstream removed, D-049).
-  - Target for Phase 1: `routes/admin.php` (`/admin/*`), `routes/portal.php` (`/portal/*`) and public routes (D-048).
-- **Controllers and requests**: staff controllers in `app/Http/Controllers/Admin`, form requests in `app/Http/Requests/Admin`; `Portal/` and `Public/` are empty until Phase 1.
+- **Two portals, one app** (D-048, D-079, D-173):
+  - `routes/admin.php`: staff, `/admin/*`, route names `admin.*`, guard `web`, broker `users`, cookie `saris_admin_session` (path `/admin`), table `sessions`.
+  - `routes/portal.php`: companies, auth pages at the root (`/login`, `/signup`, `/temporary-password`, …) and app pages under `/portal`, route names `portal.*`, guard `company`, broker `company_users`, cookie `saris_portal_session`, table `company_sessions`.
+  - `routes/public.php`: `/` landing page and `POST /locale/{en,so}`. There is no API (D-049).
+  - Each group starts with the `area:admin` / `area:company` middleware (`SetAuthArea`). `ApplyAuthArea` sets the guard, broker, Fortify home, session cookie, table, path, lifetime and password-confirmation window. It also runs on `RouteMatched`, because Laravel builds controllers (and Fortify's guard) before route middleware runs. `AuthArea::current()` tells code which area it is in.
+- **Fortify for both areas** (D-062): `Fortify::ignoreRoutes()`; `FortifyRoutes::authentication()` / `::account()` register Fortify's controllers in each route file. `FortifyServiceProvider` renders `{admin,portal}/auth/*` pages, binds area-aware responses, sets the login pipeline and the per-area rate limiters. Registration and email verification are off (D-165).
+- **Login** (`app/Domain/Identity/Login`): `AuthenticateAccount` looks only in the area's table, counts failures and locks after 5 for 15 minutes (D-081), and refuses expired temporary passwords. `RecordSuccessfulLogin` resets the counter, sets `last_login_at` and `email_verified_at`, and starts the session clock. No "remember me" (D-084).
+- **Account middleware** (`app/Http/Middleware`):
+  - `active` logs out non-`ACTIVE` accounts.
+  - `session.timeouts` enforces 15 min staff / 30 min company idle time and the staff 12-hour limit.
+  - `password.current` (`EnsurePasswordIsCurrent`) sends first-login and expired (90-day) passwords to the password page.
+  - `two-factor.enforced` keeps staff without confirmed 2FA out of admin pages (D-052).
+  - `SetLocale` (preferred language, else the `locale` cookie), `SecurityHeaders` and spatie `AddCspHeaders` (`SarisPolicy`; fonts from `'self'` only, D-157).
 - **Domain modules** (`app/Domain/<Module>`, D-061):
-  - `Identity`: `StaffRole` and `AccountStatus` enums, `DeactivateStaffUser`, `PasswordPolicy`, `Translations`.
-  - `Audit`: `Audited` trait (logs before/after, never hidden attributes, masks `auditMaskedAttributes()`).
+  - `Identity`: enums `StaffRole`, `AccountStatus`, `AuthArea`; actions `RegisterCompanyUser`, `IssueTemporaryPassword`, `CreateStaffUser`, `ChangePassword`, `UnlockAccount`, `ResetTwoFactor`, `RequestLoginEmailChange`, `ConfirmLoginEmailChange`, `DeactivateStaffUser`; rule `NotRecentPassword` (last 5); `HasSecurityState` on both account models; `AccountSessions::end()`; `PasswordPolicy`, `TemporaryPassword`, `PublicFormMessages`, `Translations`.
+  - `Notifications`: `SendNotification` is the only way to send email. It logs to `notification_logs` (no body) and queues one Mailable per `NotificationCode` (`Mail/*`), after commit, 3 tries, encrypted. Templates are `resources/views/mail/{CODE}.blade.php` and `{CODE}-text.blade.php` for one language; the layout shows both, preferred first (D-125, D-167). Failed sends are listed at `/admin/failed-emails`.
+  - `Audit`: `Audited` trait, plus `AuditLog::record()` for security events (logins, lockouts, temporary passwords, 2FA, email change).
   - `Documents`: `FileStorage`, the only way to read and write files (R2 disk `r2`).
-  - `ReferenceData`: `NumberPrefix` and `NumberSequencer` (locked yearly numbers).
+  - `ReferenceData`: `NumberPrefix`, `NumberSequencer`, `FieldFormats` (05 §2 rules and normalisation).
   - The other modules are empty folders.
-- **Account gates** (`app/Http/Middleware`):
-  - `EnsureUserIsActive` (alias `active`) logs out users whose status isn't `ACTIVE`.
-  - `ForcePasswordChange` redirects users with `first_login = true` to the password page; new staff users get `first_login = true`.
-  - `SecurityHeaders` plus spatie `AddCspHeaders` (policy `App\Http\Csp\SarisPolicy`) on every web response.
+- **Models**: `User` (staff) and `CompanyUser` (company accounts) never share a table, guard or session; `PasswordHistory`, `NotificationLog`.
 - **Authorization**:
   - Controllers declare `permission:<name>` middleware through `HasMiddleware`.
   - `RolesAndPermissionsSeeder` is authoritative: it seeds the System Administrator and the D-023 roles with their permissions, deletes any permission not listed, and removes `Super Admin`. There is no `Gate::before` bypass.
   - Everything is seeded on the `web` guard, and `User::$guard_name = 'web'`.
-- **Audit log**: `activity_log` (model `App\Models\AuditActivity`) is append-only by application rule (D-160): the model refuses updates and deletes, and there are no database triggers. Never write code that changes audit rows, and never schedule `activitylog:clean`.
-- **Frontend shared props** (`HandleInertiaRequests`): `auth.user`, `auth.permissions`, `flash.success` / `flash.error`, `sidebarOpen`, `locale` and `translations`. Use `useTranslation()` from `@/lib/i18n` and `t('English text')`; add every key to both `lang/en.json` and `lang/so.json`.
-- **Frontend layout**: pages live in `resources/js/pages/<area>/` and are rendered with `Inertia::render('<area>/page')`. Import backend routes from `@/routes/...` or `@/actions/...` (Wayfinder) instead of hard-coding URLs. Those directories are generated, so don't edit them by hand.
-- **Target code organisation** (D-061): pages move to `resources/js/pages/{admin,portal,public}` in Phase 1.
+  - Staff user and role changes sit behind `password.confirm:admin.password.confirm` (D-085).
+- **Audit log**: `activity_log` (model `App\Models\AuditActivity`, fills `actor_role`, IP, user agent) is append-only by application rule (D-160): the model refuses updates and deletes, and there are no database triggers. Never write code that changes audit rows, and never schedule `activitylog:clean`.
+- **Public forms**: sign-up, temporary-password and forgot-password use `spatie/laravel-honeypot` (`config/honeypot.php`, 3-second minimum) and always give the same answer (`PublicFormMessages`, `SameAnswerSpamResponder`).
+- **Frontend shared props** (`HandleInertiaRequests`): `area`, `auth.user` (current area's account only: id, name, email, two_factor_enabled), `auth.permissions` (staff only), `flash.success` / `flash.error`, `sidebarOpen`, `locale` and `translations`. Use `useTranslation()` from `@/lib/i18n` and `t('English text')`; add every key to both `lang/en.json` and `lang/so.json` (also for `__()` in PHP and mail views).
+- **Frontend layout**: pages in `resources/js/pages/{admin,portal,public}`; layouts `admin-layout`, `portal-layout`, `public-layout`, `auth-layout`. Shared auth and settings screens live in `components/auth` and `components/settings` and pick their routes through `useArea()` (`@/lib/area`). Import backend routes from `@/routes/...` or `@/actions/...` (Wayfinder) instead of hard-coding URLs. Those directories are generated, so don't edit them by hand.
+- **Tests**: helpers in `tests/Pest.php`: `staffUser()`, `systemAdministrator()`, `companyUser()`, `honeypotFields()`, `passwordConfirmed()`.
 
 ## Coding conventions
 - Business logic in app/Domain/<Module>/Actions; controllers thin; Form Requests validate; Policies authorize.

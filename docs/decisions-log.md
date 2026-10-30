@@ -1449,6 +1449,50 @@ Entry format:
 
 ---
 
+## Phase 1 Implementation Decisions (proposed, waiting for confirmation)
+
+## D-172: Staff login email changed only by the System Administrator
+- Date: 2026-10-30
+- Status: Proposed
+- Source: Claude Code
+- Decision: A staff member edits their own name, phone and language in settings, but not their login email; the System Administrator changes it on the user page. (Companies change theirs through the confirmation link of D-093.)
+- Reason: Staff email verification is off (D-165), so a self-service change could not be confirmed; staff accounts are managed centrally (03 §5.2).
+- Affects: Admin settings profile, UpdateUserRequest
+
+## D-173: How the two portals are kept apart in code
+- Date: 2026-10-30
+- Status: Proposed
+- Source: Claude Code
+- Decision: (1) Each portal has its own session table: `sessions` for staff and `company_sessions` for companies, so ending one realm's sessions never touches the other. (2) The staff session cookie has the path `/admin`, so it is never sent to company pages and the CSRF cookie of each portal stays separate. (3) The area settings are applied when the route is matched, as well as in SetAuthArea, because Laravel builds Fortify's controllers (and with them the guard and the session store) before route middleware runs.
+- Reason: Found while building D-079: without (3), company logins were stored in the staff session table; without (2), the two portals overwrote each other's CSRF cookie in the same browser.
+- Affects: routes, SetAuthArea, ApplyAuthArea, session tables
+
+## D-174: Session timeouts checked by middleware
+- Date: 2026-10-30
+- Status: Proposed
+- Source: Claude Code
+- Decision: The idle timeouts (15 / 30 minutes) and the staff 12-hour limit are checked on every request by EnforceSessionTimeouts, in addition to the per-area session lifetime.
+- Reason: Makes the limits exact whatever the session driver, and testable.
+- Affects: EnforceSessionTimeouts middleware
+
+## D-175: Login-email confirmation link works without being logged in
+- Date: 2026-10-30
+- Status: Proposed
+- Source: Claude Code
+- Decision: The D-093 confirmation link changes the email whether or not the account is logged in on that device; it is single use, valid 60 minutes, and only its SHA-256 hash is stored.
+- Reason: The link is often opened on another device (the new mailbox).
+- Affects: Company login-email change
+
+## D-176: Queued emails are encrypted
+- Date: 2026-10-30
+- Status: Proposed
+- Source: Claude Code
+- Decision: Every queued email is encrypted in the `jobs` table (Laravel ShouldBeEncrypted), because some carry a temporary password.
+- Reason: No secret may be stored in plain text, even briefly (03 §12.1).
+- Affects: Notifications module
+
+---
+
 ## Open Questions
 
 1. Fee schedule per service and category (F1).
@@ -1470,3 +1514,4 @@ Entry format:
 17. Release 1 go-live date: not fixed yet; set when Phase 5 is near.
 18. SARIS to approve the template wording corrections (06-documents §6) and provide the Somali wording for the Wholesale and Retailer declarations.
 19. SARIS to provide the DG signature image, the stamp image, the final .docx templates and a permission-to-pay letter template.
+20. Some UI libraries already in the repo (`input-otp`, Radix scroll lock) add `<style>` tags without the CSP nonce, so the browser blocks those styles (small visual effects only). Fix by passing the nonce to them or allowing their style hashes? Not changed in Phase 1.

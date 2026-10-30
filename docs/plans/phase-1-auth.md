@@ -346,3 +346,19 @@ Each step is one or more commits on `feature/phase-1-auth`; the tests for a step
 
 1. Phase 2 (company profile) is delivered in the same go, under its own plan `docs/plans/phase-2-company-profile.md` (D-163).
 2. `/` is a landing page with links to both logins (D-166 confirmed).
+
+## 11. Implementation notes (2026-10-30)
+
+Where the code differs from the plan above. None changes the scope; the new choices are logged as Proposed (D-172 to D-176) and wait for your confirmation.
+
+| Plan said | Code does | Why |
+|---|---|---|
+| `EnforceAbsoluteSessionLimit` (`session.absolute`) | `EnforceSessionTimeouts` (`session.timeouts`) checks the idle timeout and the staff 12-hour limit | One middleware for both limits (D-174) |
+| Sessions separated by cookie | Also a second session table, `company_sessions`, and the staff cookie path `/admin` | D-173 |
+| `SetAuthArea` applies the area | `ApplyAuthArea` applies it when the route is matched and again in `SetAuthArea` | Fortify's controllers resolve the guard before route middleware (risk 1 in §8 happened; this is the fix, D-173) |
+| Staff profile edits the email | Staff cannot change their own login email | D-172 |
+| `/locale/{locale}` | `POST /locale/{en,so}` | A state change, so it is a POST with CSRF protection |
+| Old tests kept, with new URLs | `tests/Feature/Auth/*` and `tests/Feature/Settings/*` were rewritten for two portals; the three tests named in §7 were removed | Every old test targeted the single-portal routes |
+| — | Some UI libraries add `<style>` tags without the CSP nonce (open question 20) | Found in the browser check; not caused by Phase 1 |
+
+**Result:** 208 tests pass. Pint, ESLint, TypeScript, both audits and both builds pass; Larastan runs in CI only (open question 16). A browser check covered the company journey (sign-up, emailed temporary password, password change, empty dashboard) and confirmed that staff and company stay logged in side by side in one browser.
