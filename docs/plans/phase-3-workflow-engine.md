@@ -22,6 +22,8 @@
 Also included, because the rows depend on them:
 - **The `delegations` table** (02 §4.1). The delegation check (row D) needs it. The DG's delegation screens come later (Phase 4B).
 - **Recording review items** as a domain action, `RecordReviewItems` (04 §5.3). The review guards read them; the review screens come in Phase 4.
+- **D-192 clean-up of Phase 2** (Step 0): the company facility checklist and its photos are removed, because the checklist is now the Inspector's job.
+- **D-193 in the backend:** an unsubmitted draft holds its `open_key` from creation, so it blocks a second application of the same service and category. The domain action `DiscardStaleDraft` lets only the System Administrator discard (soft delete) a never-submitted draft untouched for 30 days. Its screen comes with the other application screens in Phase 4.
 
 **Out of scope (09 says later):**
 - All screens: no application forms, work queues or review pages (Phase 4).
@@ -33,7 +35,8 @@ Also included, because the rows depend on them:
 - 04-workflow-engine (all): §2 concepts, §3 actors, §4 how a transition runs, §5 Company License, §8–§10 checks, §11–§12 catalogues, §13 definition format, §16 tests
 - 02-data-model §4.1 (Delegation), §4.6 (Application, ApplicationVersion, ApplicationPremises, ApplicationPerson), §4.7 (workflow tables), §5 (status and action lists), §6.3 (snapshots), §6.5 (open key), §7 (references)
 - 09 §3 Phase 3 (table, "Done when", prompt)
-- Decisions D-022, D-024, D-027, D-042, D-043, D-044, D-045, D-069, D-070, D-071, D-072, D-075, D-085, D-086, D-096, D-097, D-098, D-099, D-101, D-102, D-103, D-106, D-187
+- Decisions D-022, D-024, D-027, D-042, D-043, D-044, D-045, D-069, D-070, D-071, D-072, D-075, D-085, D-086, D-096, D-097, D-098, D-099, D-101, D-102, D-103, D-106, D-187, D-192, D-193
+- Note: design documents 02 (§4.4 checklist tables, §6.1, §6.3), 04 (§5 discard note, §5.2 T1, §6, §11) and 05 (§4.3, §5.1–§5.2) still describe the company checklist and company-discarded drafts. D-192 and D-193 take precedence; the documents need updating to match.
 
 ## 3. How a transition will run (04 §4, D-096)
 
@@ -56,6 +59,14 @@ WorkflowEngine::perform(Application, WorkflowActionCode, WorkflowActor, expected
 Any exception before COMMIT rolls back the status, the history and every effect (04 §16 item 5).
 
 ## 4. Steps
+
+### Step 0: Remove the company facility checklist (D-192)
+- **Company Portal:** the premises page keeps label, type, address, GPS and waste disposal method. The checklist section, the photo upload and the three checklist routes are removed, along with `PremisesController::updateItem/storePhoto/destroyPhoto`, the `FileController::photo` download and their requests.
+- **CompanyRegistry:** `AddChecklistPhoto` is removed. `SavePremises` no longer creates checklist rows. The `ChecklistItem` enum moves to the inspection module's use (its 9 codes are the inspection items, 04 §6).
+- **Admin company file:** the per-premises checklist and photo links are removed; `admin.files.photo` is removed.
+- **Database:** a new migration drops `facility_checklist_photos` and `facility_checklist_items`. Merged migrations are never edited, and no production data exists yet. The stored photo files stay in the file store (StoredFile is immutable).
+- **Tests:** the checklist and photo tests are removed (approving this plan approves removing them). Premises tests stay; new tests check the checklist routes no longer exist.
+- **Docs:** CLAUDE.md is updated.
 
 ### Step 1: Enums and tables
 
@@ -80,7 +91,7 @@ Any exception before COMMIT rolls back the status, the history and every effect 
 - `Application` uses `BelongsToCompany`, so another company's application gives 404 on the Company Portal.
 
 ### Step 2: Definitions and `workflows:load` (row B)
-- **`config/workflows/company_license_v1.php`:** every stage of 04 §5.1 and every transition T1–T25 of §5.2, with guards, effects, the conditional target of T12, password flags, comment flags and the review items of §5.3.
+- **`config/workflows/company_license_v1.php`:** every stage of 04 §5.1 and every transition T1–T25 of §5.2, with guards, effects, the conditional target of T12, password flags, comment flags and the review items of §5.3. T1 and T25 do not have `ChecklistPhotos` (D-192). `SetOpenKey` happens when the draft is created, not at T1 (D-193).
 - **`DefinitionValidator`** checks (04 §13):
   - every stage is reachable from `DRAFT`;
   - every non-final stage can reach a final stage;
@@ -129,7 +140,7 @@ A registry maps names to classes; parameters use the `Name:param` form of 04 §1
 
 | Guards | Effects |
 |---|---|
-| ProfileComplete, CertificatesValid, RequiredDocuments, ChecklistPhotos, TechnicalPersonSelected, NoOtherOpenApplication, ReviewItemsAllCompliant, ReviewItemsHaveDeficiency, ReviewItemsRecorded, NoOpenAssignment, Segregation, ActiveDelegation | GenerateReference (CL/OL/IP-YYYY-NNNNN from `number_sequences`, D-075), CreateVersionSnapshot, SetOpenKey, ClearOpenKey, SetResumeStage, ClearResumeStage, CreateAssignment, EndAssignment, SetDecidedAt |
+| ProfileComplete, CertificatesValid, RequiredDocuments, TechnicalPersonSelected, NoOtherOpenApplication, ReviewItemsAllCompliant, ReviewItemsHaveDeficiency, ReviewItemsRecorded, NoOpenAssignment, Segregation, ActiveDelegation | GenerateReference (CL/OL/IP-YYYY-NNNNN from `number_sequences`, D-075), CreateVersionSnapshot, SetOpenKey, ClearOpenKey, SetResumeStage, ClearResumeStage, CreateAssignment, EndAssignment, SetDecidedAt |
 
 **Named now, built in their phase** (Proposed D-188): these exist as classes, so definitions validate, but they **refuse** (guards) or **throw** (effects) if they ever run, so nothing can slip through unbuilt:
 - InspectionsSigned and the inspection effects (Phase 4A).
@@ -145,7 +156,7 @@ A registry maps names to classes; parameters use the `Name:param` form of 04 §1
   - the company with its address;
   - the Owner/MD;
   - the selected technical person with qualifications and their current documents;
-  - the selected premises with the checklist answers and photo `stored_file_id`s;
+  - the selected premises (label, type, address, GPS, waste disposal method; no checklist, D-192);
   - the company's current documents (type, number, dates, `stored_file_id`);
   - the application fields (service, category, type).
 
@@ -173,7 +184,8 @@ A registry maps names to classes; parameters use the `Name:param` form of 04 §1
 - All new.
 - `applications.previous_license_id` gets its foreign key in Phase 4B (with `licenses`).
 - `application_versions`, `workflow_actions` and `review_items` keep their rows forever: no update, no delete (02 §4.6–§4.7, D-187).
-- `applications.deleted_at` exists in 02 ("discarded drafts only"); see open question 1.
+- `applications.deleted_at` is set only when the System Administrator discards a stale draft (D-193).
+- One migration drops `facility_checklist_photos` and `facility_checklist_items` (D-192, Step 0).
 
 ## 7. Tests
 
@@ -200,6 +212,8 @@ A registry maps names to classes; parameters use the `Name:param` form of 04 §1
 - The one-open-application database key is enforced.
 - WorkflowAction and ApplicationVersion rows refuse updates and deletes.
 - A company cannot open another company's application (404).
+- **D-193:** a draft blocks a second application of the same service and category. Only the System Administrator can discard a draft, and only once it is never-submitted and untouched for 30 days. A company can't discard, other staff can't, a submitted application can't be discarded, and discarding frees the slot.
+- **D-192:** the checklist and photo routes no longer exist; premises still save.
 
 ## 8. Risks
 1. **Concurrency test.** The test-database transaction hides rows from a second connection. The lock test uses its own committed data and cleans up after itself.
@@ -215,13 +229,11 @@ A registry maps names to classes; parameters use the `Name:param` form of 04 §1
 | D-189 | `workflows:load` never changes a loaded version: identical content is skipped, different content for the same code and version is refused (a change needs a new version file). The newest loaded version of a service is the active one for new applications; running applications keep theirs. | 04 §2: changing a definition creates a new version; running applications are not affected. |
 | D-190 | The snapshot hash is SHA-256 of canonical JSON: keys sorted at every level, UTF-8, unescaped slashes and Unicode, dates in ISO 8601 UTC, `schema_version` 1. | D-069 asks for a hash; rebuilding must give the same bytes. |
 | D-191 | `availableActions()` returns the transitions the user passes the actor checks for, each with its guard results and reasons; it changes nothing. | 04 §4 rule 5: buttons always match the rules, and the user sees why one is blocked. |
+| D-194 | The System Administrator's draft discarding (D-193) uses a new permission, `discard stale drafts`, given only to the System Administrator; the 30 days are `config('applications.stale_draft_days')`, counted from the draft's `updated_at`. Discarding is audit-logged. | D-193 names the role and the period, not the permission or where the period is kept. |
 
-## 10. Open questions (your answer may change the plan)
+## 10. Answered questions
 
-1. **Discarding a draft application vs D-187.** D-101 and 04 §5 say "unsubmitted drafts can be discarded", and 02 gives `applications.deleted_at` for "discarded drafts only". D-187 (2026-10-31) says companies cannot delete anything, in any form. Which applies to a draft that was never submitted?
-   - **a)** Drafts can still be discarded (soft delete, as in 02); or
-   - **b)** No discarding; a company finishes or leaves its draft. Note that an open draft blocks a new application of the same service and category (D-044).
-   This decides whether Phase 3 keeps `applications.deleted_at`.
-2. **Checklist photos vs D-187** (not Phase 3, but existing code). The Company Portal has a "remove photo" action on facility checklist photos. 02 §4.4 calls this replacement ("old rows are soft-deleted"). Under D-187, should it:
-   - **a)** become "replace photo" (upload the new one, the old one is kept as history, like documents); or
-   - **b)** be removed entirely, so photos can only be added (up to 5)?
+1. Discarding a draft application: only the System Administrator, after 30 days untouched; while kept it blocks per D-044 (D-193).
+2. Checklist photos: the facility checklist is the Inspector's job; the company checklist is removed (D-192, Step 0).
+
+Still open for a later phase (not Phase 3): where the Import Permit's Form 3 safety section comes from now that companies have no checklist (open question 22).

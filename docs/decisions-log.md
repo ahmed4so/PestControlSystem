@@ -165,7 +165,7 @@ Entry format:
 
 ## D-018: Persons, premises and facility photos
 - Date: 2026-10-27
-- Status: Superseded by D-066 for the person rule only (premises and photo rules remain)
+- Status: Superseded by D-066 for the person rule and by D-192 for the checklist photos (multiple premises per company remain)
 - Source: Stakeholder (B6, B7, B8)
 - Decision: A technical person may be linked to more than one company (flagged to staff). A company may register multiple premises; each application selects one or more. A photo is mandatory for each facilities and safety checklist item.
 - Reason: Single source of truth with evidence.
@@ -857,7 +857,7 @@ Entry format:
 
 ## D-101: No withdrawal
 - Date: 2026-10-28
-- Status: Confirmed
+- Status: Confirmed (amended by D-193: drafts are discarded only by the System Administrator, after 30 days)
 - Source: Stakeholder
 - Decision: Companies cannot withdraw a submitted application. There is no WITHDRAW action and no WITHDRAWN status. A submitted application ends only as ISSUED or REJECTED. Unsubmitted drafts can be discarded.
 - Reason: Stakeholder decision.
@@ -1584,6 +1584,22 @@ Entry format:
 - Reason: Stakeholder decision; keeps a complete record for snapshots, audits and later applications.
 - Affects: Company Portal routes and policies, CompanyRegistry module
 
+## D-192: Facility checklist is the Inspector's job
+- Date: 2026-10-31
+- Status: Confirmed
+- Source: Stakeholder (supersedes D-018 for the checklist and photos; amends 02 §4.4, 04 §5.2 T1 and §11, 05 §4.3)
+- Decision: Companies no longer fill in the facility and safety checklist or upload checklist photos. The Inspector records every checklist item and the photos in the inspection report (02 §4.8, D-077). The company still registers its premises (label, type, address, GPS, waste disposal method) and selects them in applications. The `ChecklistPhotos` submit guard is removed from the Company License (T1) and Operator License definitions. The Phase 2 company checklist (pages, routes, actions and the `facility_checklist_items` and `facility_checklist_photos` tables) is removed.
+- Reason: Stakeholder decision; checking the facilities is the Inspector's work.
+- Affects: Company Portal premises pages, CompanyRegistry module, workflow definitions, inspection report (Phase 4A). Design documents 02, 04 and 05 need updating to match.
+
+## D-193: Unsubmitted drafts kept 30 days, then discarded by the System Administrator
+- Date: 2026-10-31
+- Status: Confirmed
+- Source: Stakeholder (amends D-101 and 04 §5: companies can no longer discard drafts, consistent with D-187)
+- Decision: A company cannot discard a draft application. A draft that has never been submitted is kept at least 30 days after the company's last change; after that the System Administrator may discard it (soft delete, D-053). While it is kept, the draft counts as open and blocks another application of the same service and category (D-044); discarding it frees the slot.
+- Reason: Stakeholder decision.
+- Affects: applications table (`deleted_at`, `open_key` set when the draft is created), System Administrator screens, D-044
+
 ---
 
 ## Open Questions
@@ -1609,3 +1625,4 @@ Entry format:
 19. SARIS to provide the DG signature image, the stamp image, the final .docx templates and a permission-to-pay letter template.
 20. ~~Library styles without a CSP nonce~~ — answered by D-186 (keep blocking).
 21. ~~Deleting persons or premises~~ — answered by D-187 (no deletion of any kind).
+22. Import Permit Form 3 safety section: 02 §6.1 derives it from the selected premises' checklist, which companies no longer fill in (D-192), and Import Permits have no inspection (D-025). Where does the Form 3 safety information come from? Needed before the Import Permit phase.
