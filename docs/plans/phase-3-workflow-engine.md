@@ -231,6 +231,17 @@ A registry maps names to classes; parameters use the `Name:param` form of 04 §1
 | D-191 | `availableActions()` returns the transitions the user passes the actor checks for, each with its guard results and reasons; it changes nothing. | 04 §4 rule 5: buttons always match the rules, and the user sees why one is blocked. |
 | D-194 | The System Administrator's draft discarding (D-193) uses a new permission, `discard stale drafts`, given only to the System Administrator; the 30 days are `config('applications.stale_draft_days')`, counted from the draft's `updated_at`. Discarding is audit-logged. | D-193 names the role and the period, not the permission or where the period is kept. |
 
+**Proposed while coding (waiting for confirmation):**
+
+| ID | Proposal | Why |
+|---|---|---|
+| D-195 | A review-item result is recorded once per item, stage and version and never changed or deleted (§6 of this plan). Alternative: let the reviewer correct their own result while the application is still at the stage, audit-logged. | The design does not say whether a slip can be corrected before the stage is completed. |
+
+**Notes from coding:**
+- The definition's Somali stage names (`name_so`) are a first draft and need checking by SARIS, like the rest of `lang/so.json` (D-154).
+- `ClearAmendmentFlag` is a Phase 4B placeholder, as listed in Step 5; it only acts on amendments.
+- The Company License definition cannot run end to end yet: `Notify` and the inspection, payment and license effects throw until their phase (D-188). The engine tests use `tests/Fixtures/workflows/test_flow_v1.php`.
+
 ## 10. Answered questions
 
 1. Discarding a draft application: only the System Administrator, after 30 days untouched; while kept it blocks per D-044 (D-193).

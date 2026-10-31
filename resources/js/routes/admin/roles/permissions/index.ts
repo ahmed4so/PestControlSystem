@@ -1,9 +1,9 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Admin\RoleController::assign
-* @see app/Http/Controllers/Admin/RoleController.php:105
-* @route '/admin/roles/permissions'
-*/
+ * @see app/Http/Controllers/Admin/RoleController.php:105
+ * @route '/admin/roles/permissions'
+ */
 export const assign = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: assign.url(options),
     method: 'post',
@@ -16,45 +16,44 @@ assign.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\RoleController::assign
-* @see app/Http/Controllers/Admin/RoleController.php:105
-* @route '/admin/roles/permissions'
-*/
+ * @see app/Http/Controllers/Admin/RoleController.php:105
+ * @route '/admin/roles/permissions'
+ */
 assign.url = (options?: RouteQueryOptions) => {
     return assign.definition.url + queryParams(options)
 }
 
 /**
 * @see \App\Http\Controllers\Admin\RoleController::assign
-* @see app/Http/Controllers/Admin/RoleController.php:105
-* @route '/admin/roles/permissions'
-*/
+ * @see app/Http/Controllers/Admin/RoleController.php:105
+ * @route '/admin/roles/permissions'
+ */
 assign.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: assign.url(options),
     method: 'post',
 })
 
-/**
+    /**
 * @see \App\Http\Controllers\Admin\RoleController::assign
-* @see app/Http/Controllers/Admin/RoleController.php:105
-* @route '/admin/roles/permissions'
-*/
-const assignForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-    action: assign.url(options),
-    method: 'post',
-})
+ * @see app/Http/Controllers/Admin/RoleController.php:105
+ * @route '/admin/roles/permissions'
+ */
+    const assignForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: assign.url(options),
+        method: 'post',
+    })
 
-/**
+            /**
 * @see \App\Http\Controllers\Admin\RoleController::assign
-* @see app/Http/Controllers/Admin/RoleController.php:105
-* @route '/admin/roles/permissions'
-*/
-assignForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-    action: assign.url(options),
-    method: 'post',
-})
-
-assign.form = assignForm
-
+ * @see app/Http/Controllers/Admin/RoleController.php:105
+ * @route '/admin/roles/permissions'
+ */
+        assignForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: assign.url(options),
+            method: 'post',
+        })
+    
+    assign.form = assignForm
 const permissions = {
     assign: Object.assign(assign, assign),
 }

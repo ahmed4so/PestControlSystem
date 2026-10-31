@@ -8,6 +8,7 @@ use App\Domain\CompanyRegistry\Contracts\SubmissionState;
 use App\Domain\CompanyRegistry\Support\NothingSubmittedYet;
 use App\Domain\Identity\Support\PasswordPolicy;
 use App\Domain\Notifications\Listeners\MarkNotificationSent;
+use App\Domain\Workflow\Registry\WorkflowRegistry;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -25,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // No applications exist yet; Phase 4 binds the real state (D-073).
         $this->app->bind(SubmissionState::class, NothingSubmittedYet::class);
+
+        // One catalogue of guards and effects; later phases extend it (D-188).
+        $this->app->singleton(WorkflowRegistry::class);
     }
 
     public function boot(): void

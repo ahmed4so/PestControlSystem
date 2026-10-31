@@ -1644,6 +1644,17 @@ Entry format:
 
 ---
 
+## D-195: A recorded review-item result cannot be corrected
+- Date: 2026-10-31
+- Status: Proposed
+- Source: Claude Code (Phase 3)
+- Decision: A review-item result is recorded once per item, stage and version and is never changed or deleted, as the Phase 3 plan (§6) says for `review_items`. Recording the same item again on the same version is refused ("The result of :item is already recorded."). A new version (after resubmission) gets new results.
+- Reason: 02 §4.7 and the plan keep review history unchanged. The design does not say whether a reviewer may correct a slip before completing the stage.
+- Alternative: allow a reviewer to change their own result while the application is still at that stage, with the change audit-logged (the row stays, the audit log keeps the old value). This is a one-line change in `RecordReviewItems` and the `ReviewItem` model.
+- Affects: RecordReviewItems, ReviewItem
+
+---
+
 ## Open Questions
 
 1. Fee schedule per service and category (F1).

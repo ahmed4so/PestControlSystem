@@ -48,6 +48,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'reset two factor',
                 'unlock account',
                 'view security audit log',
+                'discard stale drafts',
             ],
             StaffRole::PesticideRegistrar->value => [
                 'view applications',
