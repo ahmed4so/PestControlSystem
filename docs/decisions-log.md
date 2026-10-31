@@ -1466,6 +1466,7 @@ Entry format:
 - Decision: (1) Each portal has its own session table: `sessions` for staff and `company_sessions` for companies, so ending one realm's sessions never touches the other. (2) The staff session cookie has the path `/admin`, so it is never sent to company pages and the CSRF cookie of each portal stays separate. (3) The area settings are applied when the route is matched, as well as in SetAuthArea, because Laravel builds Fortify's controllers (and with them the guard and the session store) before route middleware runs.
 - Reason: Found while building D-079: without (3), company logins were stored in the staff session table; without (2), the two portals overwrote each other's CSRF cookie in the same browser.
 - Affects: routes, SetAuthArea, ApplyAuthArea, session tables
+- Note (2026-10-31): (2) alone was not enough. Newer axios reads the CSRF cookie through the browser's `cookieStore` API, which may return the company portal's `XSRF-TOKEN` on admin pages, so staff logins failed with 419 "Page Expired". The frontend now also sends the page's own token in the `X-CSRF-TOKEN` header with every Inertia request (`resources/js/lib/csrf.ts`); Laravel checks that header before the cookie. This is a fix within D-173, not a new decision.
 
 ## D-174: Session timeouts checked by middleware
 - Date: 2026-10-30

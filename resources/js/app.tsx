@@ -15,6 +15,7 @@ import '@fontsource/instrument-sans/500.css';
 import '@fontsource/instrument-sans/600.css';
 import '../css/app.css';
 import { initializeTheme } from './hooks/use-appearance';
+import { sendCsrfTokenWithRequests } from './lib/csrf';
 
 const appName = import.meta.env.VITE_APP_NAME || 'SARIS';
 
@@ -26,6 +27,8 @@ createInertiaApp({
             import.meta.glob('./pages/**/*.tsx'),
         ),
     setup({ el, App, props }) {
+        sendCsrfTokenWithRequests(props.initialPage.props);
+
         const root = createRoot(el);
 
         root.render(
