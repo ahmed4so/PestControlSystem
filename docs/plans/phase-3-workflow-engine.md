@@ -1,6 +1,6 @@
 # Plan: Phase 3 — Workflow engine core
 
-- Status: Draft, waiting for approval
+- Status: Approved (2026-10-31)
 - Branch: `feature/phase-3-workflow` (09 §3), one pull request
 - Date: 2026-10-31
 - Depends on: Phases 0–2 (staff roles, company accounts, company profile, notifications)
@@ -221,7 +221,7 @@ A registry maps names to classes; parameters use the `Name:param` form of 04 §1
 3. **Snapshot content will grow** with products and permit details. `schema_version` lets old snapshots stay readable.
 4. **Larastan** still runs only in CI (open question 16).
 
-## 9. Proposed decisions (to confirm)
+## 9. Decisions (confirmed 2026-10-31)
 
 | ID | Proposal | Why |
 |---|---|---|

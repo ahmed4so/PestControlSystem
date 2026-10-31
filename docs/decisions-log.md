@@ -1600,6 +1600,48 @@ Entry format:
 - Reason: Stakeholder decision.
 - Affects: applications table (`deleted_at`, `open_key` set when the draft is created), System Administrator screens, D-044
 
+## Phase 3 Decisions (confirmed 2026-10-31)
+
+## D-188: Guards and effects for later phases
+- Date: 2026-10-31
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-3-workflow-engine.md)
+- Decision: Guards and effects whose data arrives in a later phase exist now as named classes. A guard refuses and an effect throws if it runs before its phase replaces it. Definitions referencing them load and validate.
+- Reason: 04 §13 requires every referenced guard and effect to exist; failing closed means nothing can pass an unbuilt rule.
+- Affects: Workflow module
+
+## D-189: Loaded workflow versions never change
+- Date: 2026-10-31
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-3-workflow-engine.md)
+- Decision: `workflows:load` never changes a loaded version: identical content is skipped, different content for the same code and version is refused (a change needs a new version file). The newest loaded version of a service is the active one for new applications; running applications keep theirs.
+- Reason: 04 §2: changing a definition creates a new version; running applications are not affected.
+- Affects: workflows:load, workflow_templates
+
+## D-190: Canonical snapshot hash
+- Date: 2026-10-31
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-3-workflow-engine.md)
+- Decision: The snapshot hash is SHA-256 of canonical JSON: keys sorted at every level, UTF-8, unescaped slashes and Unicode, dates in ISO 8601 UTC, `schema_version` 1.
+- Reason: D-069 asks for a hash; rebuilding must give the same bytes.
+- Affects: SnapshotBuilder, SnapshotHasher
+
+## D-191: availableActions with reasons
+- Date: 2026-10-31
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-3-workflow-engine.md)
+- Decision: `availableActions()` returns the transitions the user passes the actor checks for, each with its guard results and reasons; it changes nothing.
+- Reason: 04 §4 rule 5: buttons always match the rules, and the user sees why one is blocked.
+- Affects: WorkflowEngine
+
+## D-194: Permission and period for discarding drafts
+- Date: 2026-10-31
+- Status: Confirmed
+- Source: Claude Code (confirmed; plan docs/plans/phase-3-workflow-engine.md)
+- Decision: The System Administrator's draft discarding (D-193) uses a new permission, `discard stale drafts`, given only to the System Administrator. The 30 days are `config('applications.stale_draft_days')`, counted from the draft's `updated_at`. Discarding is audit-logged.
+- Reason: D-193 names the role and the period, not the permission or where the period is kept.
+- Affects: RolesAndPermissionsSeeder, DiscardStaleDraft
+
 ---
 
 ## Open Questions
