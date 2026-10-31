@@ -8,7 +8,6 @@ use App\Domain\Audit\Support\AuditLog;
 use App\Domain\Documents\Services\FileStorage;
 use App\Http\Controllers\Controller;
 use App\Models\Document;
-use App\Models\FacilityChecklistPhoto;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -36,12 +35,5 @@ class FileController extends Controller implements HasMiddleware
         ]);
 
         return $files->download($document->file);
-    }
-
-    public function photo(Request $request, FacilityChecklistPhoto $photo, FileStorage $files): Response
-    {
-        AuditLog::record('company_file_viewed', 'Staff opened a facility photo', $photo, $request->user());
-
-        return $files->download($photo->file);
     }
 }

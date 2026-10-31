@@ -67,23 +67,16 @@ Route::prefix('portal')->middleware(['auth:company', 'active', 'session.timeouts
 
     Route::resource('persons', PersonController::class)->only(['index', 'create', 'store', 'edit', 'update']);
 
+    // Nothing a company enters can be deleted (D-187); the facility
+    // checklist is the Inspector's job (D-192).
     Route::resource('premises', PremisesController::class)
         ->parameters(['premises' => 'premises'])
         ->only(['index', 'create', 'store', 'edit', 'update']);
-    Route::scopeBindings()->group(function (): void {
-        Route::put('premises/{premises}/checklist/{item}', [PremisesController::class, 'updateItem'])
-            ->name('premises.checklist.update');
-        Route::post('premises/{premises}/checklist/{item}/photos', [PremisesController::class, 'storePhoto'])
-            ->middleware('throttle:uploads')
-            ->name('premises.photos.store');
-        Route::delete('premises/{premises}/photos/{photo}', [PremisesController::class, 'destroyPhoto'])->name('premises.photos.destroy');
-    });
 
     Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');
     Route::post('documents', [DocumentController::class, 'store'])->middleware('throttle:uploads')->name('documents.store');
 
     Route::get('files/documents/{document}', [FileController::class, 'document'])->name('files.document');
-    Route::get('files/photos/{photo}', [FileController::class, 'photo'])->name('files.photo');
 
     // Login email change (D-093), after password confirmation.
     Route::middleware('password.confirm:portal.password.confirm')->group(function (): void {

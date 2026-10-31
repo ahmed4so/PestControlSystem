@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Domain\CompanyRegistry\Enums\ChecklistItem;
 use App\Domain\CompanyRegistry\Support\ProfileCompleteness;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\Document;
-use App\Models\FacilityChecklistItem;
-use App\Models\FacilityChecklistPhoto;
 use App\Models\Person;
 use App\Models\Premises;
 use Illuminate\Http\Request;
@@ -58,7 +55,7 @@ class CompanyController extends Controller implements HasMiddleware
 
     public function show(Company $company): Response
     {
-        $company->load(['addressFms', 'addressRegion', 'account', 'persons', 'premises.checklistItems.photos', 'documents.person']);
+        $company->load(['addressFms', 'addressRegion', 'account', 'persons', 'premises', 'documents.person']);
         $somali = app()->getLocale() === 'so';
 
         return Inertia::render('admin/companies/show', [
@@ -88,15 +85,7 @@ class CompanyController extends Controller implements HasMiddleware
                 'label' => $premises->label,
                 'type' => $premises->premises_type->label(),
                 'town' => $premises->address_town_or_market,
-                'checklist' => $premises->checklistItems
-                    ->sortBy(fn (FacilityChecklistItem $item) => array_search($item->item_code, ChecklistItem::cases(), true))
-                    ->values()
-                    ->map(fn (FacilityChecklistItem $item) => [
-                        'label' => $item->item_code->label(),
-                        'is_available' => $item->is_available,
-                        'notes' => $item->notes,
-                        'photos' => $item->photos->map(fn (FacilityChecklistPhoto $photo) => route('admin.files.photo', $photo))->values(),
-                    ]),
+                'waste_disposal_method' => $premises->waste_disposal_method,
             ])->values(),
             'documents' => $company->documents->sortByDesc('id')->values()->map(fn (Document $document) => [
                 'id' => $document->id,

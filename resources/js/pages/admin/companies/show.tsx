@@ -39,7 +39,7 @@ type Props = {
         label: string;
         type: string;
         town: string | null;
-        checklist: { label: string; is_available: boolean; notes: string | null; photos: string[] }[];
+        waste_disposal_method: string | null;
     }[];
     documents: {
         id: number;
@@ -109,28 +109,16 @@ export default function CompanyShow({ company, persons, premises, documents }: P
 
                 <section className="space-y-2">
                     <h2 className="text-lg font-medium">{t('Premises')}</h2>
-                    {premises.map((item) => (
-                        <details key={item.id} className="rounded-md border p-3 text-sm">
-                            <summary className="cursor-pointer font-medium">
-                                {item.label} · {t(item.type)} {item.town && `· ${item.town}`}
-                            </summary>
-                            <ul className="mt-2 space-y-1">
-                                {item.checklist.map((row) => (
-                                    <li key={row.label} className="flex flex-wrap gap-2">
-                                        <span>{t(row.label)}:</span>
-                                        <span className={row.is_available ? 'text-green-700' : 'text-red-700'}>
-                                            {row.is_available ? t('Available') : t('Not available')}
-                                        </span>
-                                        {row.photos.map((url, i) => (
-                                            <a key={url} href={url} className="underline">
-                                                {t('Photo')} {i + 1}
-                                            </a>
-                                        ))}
-                                    </li>
-                                ))}
-                            </ul>
-                        </details>
-                    ))}
+                    <ul className="divide-y rounded-md border text-sm">
+                        {premises.map((item) => (
+                            <li key={item.id} className="flex flex-wrap items-center gap-2 p-3">
+                                <span className="font-medium">{item.label}</span>
+                                <span className="text-muted-foreground">{t(item.type)}</span>
+                                {item.town && <span className="text-muted-foreground">{item.town}</span>}
+                                {item.waste_disposal_method && <span>{item.waste_disposal_method}</span>}
+                            </li>
+                        ))}
+                    </ul>
                 </section>
 
                 <section className="space-y-2">

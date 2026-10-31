@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Domain\CompanyRegistry\Contracts\SubmissionState;
-use App\Domain\CompanyRegistry\Enums\ChecklistItem;
 use App\Domain\CompanyRegistry\Enums\DocumentType;
 use App\Domain\CompanyRegistry\Support\ProfileCompleteness;
 use App\Domain\Identity\Enums\StaffRole;
@@ -11,19 +10,18 @@ use App\Domain\Notifications\Mail\CertificateUpdated;
 use App\Models\Company;
 use App\Models\CompanyUser;
 use App\Models\Document;
-use App\Models\FacilityChecklistItem;
-use App\Models\FacilityChecklistPhoto;
 use App\Models\Person;
 use App\Models\Premises;
 use App\Models\Region;
 use App\Models\StoredFile;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 
 /*
-| Premises, photos, documents and upload security (02 §4.4, 03 §12.2,
+| Premises, documents and upload security (02 §4.4, 03 §12.2,
 | §15 item 10, 05 §4.3–§4.4; D-017, D-067, D-073, D-089, D-135).
 */
 
@@ -81,13 +79,33 @@ function uploadDocument(CompanyUser $account, array $data): TestResponse
 }
 
 /*
-| Premises and checklist
+| Premises (05 §4.3). The facility checklist is the Inspector's job (D-192).
 */
 
-it('creates a premises with all 9 checklist items', function () {
+it('saves a premises without any checklist', function () {
     $premises = premisesFor(companyUser());
 
-    expect($premises->checklistItems()->count())->toBe(count(ChecklistItem::cases()));
+    expect($premises->label)->toBe('Main warehouse')
+        ->and(Schema::hasTable('facility_checklist_items'))->toBeFalse()
+        ->and(Schema::hasTable('facility_checklist_photos'))->toBeFalse();
+});
+
+it('has no company checklist or photo routes (D-192)', function () {
+    foreach (['portal.premises.checklist.update', 'portal.premises.photos.store', 'portal.premises.photos.destroy', 'portal.files.photo', 'admin.files.photo'] as $name) {
+        expect(app('router')->getRoutes()->hasNamedRoute($name))->toBeFalse();
+    }
+});
+
+it('has no route that lets a company delete anything (D-187)', function () {
+    foreach (app('router')->getRoutes() as $route) {
+        // Turning off the account's own 2FA is a setting, not company data
+        // (D-064); redirect routes answer every method but change nothing.
+        $isRedirect = str_ends_with($route->getActionName(), 'RedirectController');
+
+        if (str_starts_with((string) $route->getName(), 'portal.') && $route->getName() !== 'portal.two-factor.disable' && ! $isRedirect) {
+            expect($route->methods())->not->toContain('DELETE');
+        }
+    }
 });
 
 it('refuses GPS outside Somalia', function () {
@@ -105,65 +123,14 @@ it('refuses GPS outside Somalia', function () {
     ])->assertSessionHasErrors(['gps_lat', 'gps_lng']);
 });
 
-it('adds re-encoded photos, at most 5 per item, and keeps the file when one is removed', function () {
-    $account = companyUser();
-    $premises = premisesFor($account);
-    $item = $premises->checklistItems()->first();
-
-    foreach (range(1, 5) as $i) {
-        $this->actingAs($account, 'company')
-            ->post(route('portal.premises.photos.store', [$premises, $item]), ['photo' => pngFile(), 'captured_at' => now()->subDay()->toIso8601String()])
-            ->assertSessionHasNoErrors();
-    }
-
-    $this->actingAs($account, 'company')
-        ->post(route('portal.premises.photos.store', [$premises, $item]), ['photo' => pngFile()])
-        ->assertSessionHasErrors('photo');
-
-    $photo = $item->photos()->first();
-    $this->actingAs($account, 'company')->delete(route('portal.premises.photos.destroy', [$premises, $photo]))->assertRedirect();
-
-    expect($item->photos()->count())->toBe(4)
-        ->and(FacilityChecklistPhoto::withTrashed()->find($photo->id)->trashed())->toBeTrue()
-        ->and(StoredFile::query()->find($photo->stored_file_id))->not->toBeNull();
-});
-
-it('removes EXIF data from photos (D-089)', function () {
-    $account = companyUser();
-    $premises = premisesFor($account);
-    $item = $premises->checklistItems()->first();
-
-    $this->actingAs($account, 'company')
-        ->post(route('portal.premises.photos.store', [$premises, $item]), ['photo' => jpegWithExif('SECRET-LOCATION')])
+it('removes EXIF data from uploaded images (D-089)', function () {
+    uploadDocument(companyUser(), ['document_type' => 'COMPANY_PROFILE', 'file' => jpegWithExif('SECRET-LOCATION')])
         ->assertSessionHasNoErrors();
 
     $stored = StoredFile::query()->sole();
     expect(Storage::disk('r2')->get($stored->path))->not->toContain('SECRET-LOCATION')
         ->and($stored->mime_type)->toBe('image/jpeg');
 });
-
-it('accepts only images as checklist photos', function () {
-    $account = companyUser();
-    $premises = premisesFor($account);
-    $item = $premises->checklistItems()->first();
-
-    $this->actingAs($account, 'company')
-        ->post(route('portal.premises.photos.store', [$premises, $item]), ['photo' => pdfFile()])
-        ->assertSessionHasErrors('photo');
-});
-
-it('updates a checklist answer', function () {
-    $account = companyUser();
-    $premises = premisesFor($account);
-    $item = $premises->checklistItems()->first();
-
-    $this->actingAs($account, 'company')
-        ->put(route('portal.premises.checklist.update', [$premises, $item]), ['is_available' => '1', 'notes' => 'Two extinguishers'])
-        ->assertSessionHasNoErrors();
-
-    expect($item->fresh()->is_available)->toBeTrue();
-});
-
 /*
 | Upload security (03 §15 item 10)
 */
@@ -312,7 +279,6 @@ it('marks the profile complete once everything is there', function () {
 it('refuses every profile change while locked, except certificate renewal', function () {
     $account = companyUser();
     $premises = premisesFor($account);
-    $item = $premises->checklistItems()->first();
     $person = Person::factory()->create(['company_id' => $account->company_id]);
     $company = Company::query()->withoutGlobalScopes()->findOrFail($account->company_id);
 
@@ -330,8 +296,6 @@ it('refuses every profile change while locked, except certificate renewal', func
     $as()->put(route('portal.persons.update', $person), ['full_name' => 'Changed', 'national_id_no' => $person->national_id_no])->assertForbidden();
     $as()->post(route('portal.premises.store'), ['label' => 'X', 'premises_type' => 'SHOP'])->assertStatus(302); // validation runs first
     $as()->put(route('portal.premises.update', $premises), ['label' => 'Changed', 'premises_type' => 'SHOP', 'address_fms_id' => $premises->address_fms_id, 'address_region_id' => $premises->address_region_id, 'address_town_or_market' => 'Hodan'])->assertForbidden();
-    $as()->put(route('portal.premises.checklist.update', [$premises, $item]), ['is_available' => '1'])->assertForbidden();
-    $as()->post(route('portal.premises.photos.store', [$premises, $item]), ['photo' => pngFile()])->assertForbidden();
     uploadDocument($account, ['document_type' => 'COMPANY_PROFILE', 'file' => pdfFile()])->assertForbidden();
 
     uploadDocument($account, [
@@ -343,6 +307,6 @@ it('refuses every profile change while locked, except certificate renewal', func
     ])->assertSessionHasNoErrors();
 
     expect($company->fresh()->name)->not->toBe('Changed')
-        ->and(FacilityChecklistItem::query()->find($item->id)->is_available)->toBeFalse()
+        ->and($premises->fresh()->label)->toBe('Main warehouse')
         ->and(Document::query()->withoutGlobalScopes()->count())->toBe(1);
 });

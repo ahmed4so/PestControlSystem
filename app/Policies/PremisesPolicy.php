@@ -11,7 +11,7 @@ use App\Models\Premises;
 use App\Models\User;
 
 /**
- * Premises, their checklist and photos follow the profile lock (D-073).
+ * Premises follow the profile lock (D-073).
  */
 class PremisesPolicy
 {

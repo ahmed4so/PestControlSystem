@@ -7,13 +7,10 @@ use App\Models\AuditActivity;
 use App\Models\Company;
 use App\Models\CompanyUser;
 use App\Models\Document;
-use App\Models\FacilityChecklistItem;
-use App\Models\FacilityChecklistPhoto;
 use App\Models\FederalMemberState;
 use App\Models\Person;
 use App\Models\Premises;
 use App\Models\Region;
-use App\Models\StoredFile;
 use Database\Seeders\ReferenceDataSeeder;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Storage;
@@ -29,22 +26,16 @@ beforeEach(fn () => Storage::fake('r2'));
 /**
  * Records of a second company, with one of everything.
  *
- * @return array{account: CompanyUser, person: Person, premises: Premises, item: FacilityChecklistItem, photo: FacilityChecklistPhoto, document: Document}
+ * @return array{account: CompanyUser, person: Person, premises: Premises, document: Document}
  */
 function otherCompanyRecords(): array
 {
     $account = companyUser();
     $person = Person::factory()->create(['company_id' => $account->company_id]);
     $premises = Premises::factory()->create(['company_id' => $account->company_id]);
-    $item = $premises->checklistItems()->create(['item_code' => 'VENTILATION', 'is_available' => true]);
-    $file = StoredFile::query()->create([
-        'disk' => 'r2', 'path' => 'facility-photo/x/'.uniqid(), 'original_name' => 'p.jpg', 'mime_type' => 'image/jpeg',
-        'size_bytes' => 1, 'sha256' => str_repeat('0', 64), 'purpose' => 'FACILITY_PHOTO',
-    ]);
-    $photo = $item->photos()->create(['stored_file_id' => $file->id]);
     $document = Document::factory()->create(['company_id' => $account->company_id]);
 
-    return compact('account', 'person', 'premises', 'item', 'photo', 'document');
+    return compact('account', 'person', 'premises', 'document');
 }
 
 it('gives 404 for every company route with another company\'s IDs', function () {
@@ -53,8 +44,6 @@ it('gives 404 for every company route with another company\'s IDs', function () 
     $ids = [
         'person' => $other['person']->id,
         'premises' => $other['premises']->id,
-        'item' => $other['item']->id,
-        'photo' => $other['photo']->id,
         'document' => $other['document']->id,
     ];
     $checked = 0;
@@ -76,10 +65,9 @@ it('gives 404 for every company route with another company\'s IDs', function () 
         }
     }
 
-    expect($checked)->toBeGreaterThanOrEqual(8)
+    expect($checked)->toBeGreaterThanOrEqual(5)
         ->and($other['person']->fresh()->full_name)->not->toBe('X')
-        ->and($other['premises']->fresh()->label)->not->toBe('X')
-        ->and(FacilityChecklistPhoto::query()->find($other['photo']->id))->not->toBeNull();
+        ->and($other['premises']->fresh()->label)->not->toBe('X');
 });
 
 it('never lists another company\'s records', function () {
@@ -128,9 +116,8 @@ it('audits every staff file view', function () {
     Storage::disk('r2')->buildTemporaryUrlsUsing(fn (string $path) => 'https://files.test/'.$path);
 
     $this->actingAs($registrar, 'web')->get(route('admin.files.document', $other['document']))->assertRedirect();
-    $this->actingAs($registrar, 'web')->get(route('admin.files.photo', $other['photo']))->assertRedirect();
 
-    expect(AuditActivity::query()->where('event', 'company_file_viewed')->where('causer_id', $registrar->id)->count())->toBe(2);
+    expect(AuditActivity::query()->where('event', 'company_file_viewed')->where('causer_id', $registrar->id)->count())->toBe(1);
 });
 
 it('lets only the System Administrator manage the FMS and region lists', function () {

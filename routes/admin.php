@@ -68,7 +68,6 @@ Route::middleware(['auth:web', 'active', 'session.timeouts', 'password.current',
     Route::get('companies', [CompanyController::class, 'index'])->name('companies.index');
     Route::get('companies/{company}', [CompanyController::class, 'show'])->name('companies.show');
     Route::get('files/documents/{document}', [FileController::class, 'document'])->name('files.document');
-    Route::get('files/photos/{photo}', [FileController::class, 'photo'])->name('files.photo');
 
     // National-ID release by the System Administrator (D-066, D-095).
     Route::middleware('password.confirm:admin.password.confirm')->group(function (): void {

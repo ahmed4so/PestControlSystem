@@ -11,12 +11,10 @@ use App\Domain\CompanyRegistry\Enums\PremisesType;
 use Database\Factories\PremisesFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * A company's premises with its facility checklist (02 §4.4, D-018).
+ * A company's premises (02 §4.4). The facility checklist is the Inspector's job (D-192).
  *
  * @property int $id
  * @property string $label
@@ -61,31 +59,5 @@ class Premises extends Model
             'gps_lat' => 'decimal:7',
             'gps_lng' => 'decimal:7',
         ];
-    }
-
-    /**
-     * @return HasMany<FacilityChecklistItem, $this>
-     */
-    public function checklistItems(): HasMany
-    {
-        return $this->hasMany(FacilityChecklistItem::class);
-    }
-
-    /**
-     * @return HasManyThrough<FacilityChecklistPhoto, FacilityChecklistItem, $this>
-     */
-    public function photos(): HasManyThrough
-    {
-        return $this->hasManyThrough(FacilityChecklistPhoto::class, FacilityChecklistItem::class);
-    }
-
-    /**
-     * Same as checklistItems(); named for scoped route binding of {item}.
-     *
-     * @return HasMany<FacilityChecklistItem, $this>
-     */
-    public function items(): HasMany
-    {
-        return $this->checklistItems();
     }
 }

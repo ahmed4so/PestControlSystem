@@ -5,12 +5,12 @@ import PortalLayout from '@/layouts/portal-layout';
 import { useTranslation } from '@/lib/i18n';
 import { create, edit } from '@/routes/portal/premises';
 
-type Item = { id: number; label: string; type: string; available_count: number };
+type Item = { id: number; label: string; type: string; town: string | null };
 
 /**
  * The company's premises (02 §4.4).
  */
-export default function PremisesIndex({ premises, itemCount, canCreate }: { premises: Item[]; itemCount: number; canCreate: boolean }) {
+export default function PremisesIndex({ premises, canCreate }: { premises: Item[]; canCreate: boolean }) {
     const { t } = useTranslation();
 
     return (
@@ -39,9 +39,7 @@ export default function PremisesIndex({ premises, itemCount, canCreate }: { prem
                                 <Link href={edit(item.id)} className="flex flex-wrap items-center gap-2 p-3 hover:bg-muted">
                                     <span className="font-medium">{item.label}</span>
                                     <span className="text-sm text-muted-foreground">{t(item.type)}</span>
-                                    <span className="ml-auto text-sm text-muted-foreground">
-                                        {t(':done of :total checklist items available', { done: item.available_count, total: itemCount })}
-                                    </span>
+                                    {item.town && <span className="ml-auto text-sm text-muted-foreground">{item.town}</span>}
                                 </Link>
                             </li>
                         ))}

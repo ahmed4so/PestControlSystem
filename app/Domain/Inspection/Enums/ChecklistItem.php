@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\CompanyRegistry\Enums;
+namespace App\Domain\Inspection\Enums;
 
 /**
- * Facility and safety checklist items (02 §4.4, D-018). Forms 1 and 2 use
- * the first six; Form 2 (Operator License) adds the last three.
+ * Facility and safety checklist items (02 §4.4), recorded by the Inspector
+ * in the inspection report (D-192, Phase 4A). Forms 1 and 2 use the first
+ * six; Form 2 (Operator License) adds the last three. Up to 5 photos per
+ * item (D-135).
  */
 enum ChecklistItem: string
 {
