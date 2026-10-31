@@ -1568,6 +1568,22 @@ Entry format:
 - Reason: Stakeholder instruction; makes local development and testing of staff screens easier.
 - Affects: EnsureTwoFactorEnabled middleware, config/identity.php, .env
 
+## D-186: Library styles without a CSP nonce stay blocked
+- Date: 2026-10-31
+- Status: Confirmed
+- Source: Stakeholder (closes open question 20)
+- Decision: The Content-Security-Policy is not loosened for UI libraries (`input-otp`, Radix scroll lock and similar) that add `<style>` tags without the nonce. Those styles stay blocked; no `'unsafe-inline'` and no style hashes are added for them.
+- Reason: Keeps the strict CSP of D-090; the effects are small and visual only.
+- Affects: SarisPolicy (CSP), frontend libraries
+
+## D-187: No deletion of company data
+- Date: 2026-10-31
+- Status: Confirmed
+- Source: Stakeholder (closes open question 21)
+- Decision: Companies cannot delete anything they have entered, in any form (no hard delete and no soft delete): not persons, premises, documents or any other company record. Mistakes are corrected by editing while the profile is unlocked (D-073); documents are replaced, with history (D-067). Only SARIS actions such as the national-ID release (D-066) change a record's state.
+- Reason: Stakeholder decision; keeps a complete record for snapshots, audits and later applications.
+- Affects: Company Portal routes and policies, CompanyRegistry module
+
 ---
 
 ## Open Questions
@@ -1591,5 +1607,5 @@ Entry format:
 17. Release 1 go-live date: not fixed yet; set when Phase 5 is near.
 18. SARIS to approve the template wording corrections (06-documents §6) and provide the Somali wording for the Wholesale and Retailer declarations.
 19. SARIS to provide the DG signature image, the stamp image, the final .docx templates and a permission-to-pay letter template.
-20. Some UI libraries already in the repo (`input-otp`, Radix scroll lock) add `<style>` tags without the CSP nonce, so the browser blocks those styles (small visual effects only). Fix by passing the nonce to them or allowing their style hashes? Not changed in Phase 1.
-21. May a company soft-delete a person or premises it added by mistake, before any submission? The design defines no deletion; Phase 2 has none.
+20. ~~Library styles without a CSP nonce~~ — answered by D-186 (keep blocking).
+21. ~~Deleting persons or premises~~ — answered by D-187 (no deletion of any kind).
