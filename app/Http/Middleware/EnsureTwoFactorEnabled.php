@@ -13,7 +13,8 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Staff must have confirmed TOTP 2FA before any admin page opens (03 §8,
  * D-052). Only 2FA set-up, password confirmation, the password page and
- * logout are reachable until then.
+ * logout are reachable until then. Local development may switch this off
+ * (D-185).
  */
 class EnsureTwoFactorEnabled
 {
@@ -34,7 +35,7 @@ class EnsureTwoFactorEnabled
     {
         $user = $request->user();
 
-        if (! $user instanceof User || $user->two_factor_confirmed_at !== null) {
+        if (! self::isEnforced() || ! $user instanceof User || $user->two_factor_confirmed_at !== null) {
             return $next($request);
         }
 
@@ -46,5 +47,14 @@ class EnsureTwoFactorEnabled
 
         return redirect()->route(AuthArea::Admin->route('two-factor.show'))
             ->with('status', __('Set up two-factor authentication to continue.'));
+    }
+
+    /**
+     * Always enforced, except on a local development machine whose .env
+     * turns it off (D-185). Staging and production ignore the switch.
+     */
+    public static function isEnforced(): bool
+    {
+        return ! app()->environment('local') || (bool) config('identity.staff_two_factor_required');
     }
 }

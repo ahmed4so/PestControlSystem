@@ -61,6 +61,10 @@ return [
     // Public form protection (03 §4, §14; D-080).
     'honeypot_seconds' => 3,
 
+    // Mandatory staff 2FA (D-052). Only APP_ENV=local may turn it off
+    // (D-185); every other environment enforces it whatever this says.
+    'staff_two_factor_required' => (bool) env('STAFF_2FA_REQUIRED', true),
+
     // HMAC key for national-ID lookups and uniqueness (D-088, D-117).
     'nid_hash_key' => env('NID_HASH_KEY'),
 

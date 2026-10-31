@@ -453,7 +453,7 @@ Entry format:
 
 ## D-052: Mandatory staff 2FA
 - Date: 2026-10-28
-- Status: Confirmed
+- Status: Confirmed (amended by D-185: may be switched off in local development only)
 - Source: Claude.ai design chat
 - Decision: Middleware forces every staff user to set up and use TOTP 2FA before any admin page.
 - Reason: Implements D-031 and D-037.
@@ -1559,6 +1559,14 @@ Entry format:
 - Decision: Until SARIS provides the official list (open question 12), a draft list of FMS and regions is seeded for development and testing, clearly marked as a draft. It is replaced by the official list, through the seeder or the admin screens, before go-live.
 - Reason: Phase 2 needs the lists; the official list is pending.
 - Affects: ReferenceDataSeeder, go-live checklist
+
+## D-185: No staff 2FA enforcement in local development
+- Date: 2026-10-31
+- Status: Confirmed
+- Source: Stakeholder (amends D-052)
+- Decision: On a local development machine (`APP_ENV=local`), `STAFF_2FA_REQUIRED=false` in `.env` stops the middleware from forcing staff to set up 2FA. Every other environment (testing, staging, production) always enforces D-052 and ignores the setting. Staff who have set up 2FA are still asked for their code at login.
+- Reason: Stakeholder instruction; makes local development and testing of staff screens easier.
+- Affects: EnsureTwoFactorEnabled middleware, config/identity.php, .env
 
 ---
 

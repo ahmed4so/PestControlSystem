@@ -55,6 +55,33 @@ it('lets staff with confirmed 2FA in', function () {
     $this->actingAs(staffUser())->get(route('admin.dashboard'))->assertOk();
 });
 
+it('lets local development switch the staff 2FA requirement off (D-185)', function () {
+    $this->app->detectEnvironment(fn () => 'local');
+    config(['identity.staff_two_factor_required' => false]);
+
+    $this->actingAs(User::factory()->create(), 'web')
+        ->get(route('admin.dashboard'))
+        ->assertOk();
+});
+
+it('enforces staff 2FA outside local development, whatever the setting says', function (string $environment) {
+    $this->app->detectEnvironment(fn () => $environment);
+    config(['identity.staff_two_factor_required' => false]);
+
+    $this->actingAs(User::factory()->create(), 'web')
+        ->get(route('admin.dashboard'))
+        ->assertRedirect(route('admin.two-factor.show'));
+})->with(['production', 'staging', 'testing']);
+
+it('still enforces staff 2FA locally when the setting is on', function () {
+    $this->app->detectEnvironment(fn () => 'local');
+    config(['identity.staff_two_factor_required' => true]);
+
+    $this->actingAs(User::factory()->create(), 'web')
+        ->get(route('admin.dashboard'))
+        ->assertRedirect(route('admin.two-factor.show'));
+});
+
 it('completes the staff login with a valid code', function () {
     $staff = User::factory()->create();
     $secret = withRealTwoFactor($staff);
