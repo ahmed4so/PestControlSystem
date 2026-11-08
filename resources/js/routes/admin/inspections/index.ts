@@ -4,7 +4,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFo
  * @see app/Http/Controllers/Admin/InspectionController.php:47
  * @route '/admin/inspections/{inspection}'
  */
-export const show = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -19,7 +19,7 @@ show.definition = {
  * @see app/Http/Controllers/Admin/InspectionController.php:47
  * @route '/admin/inspections/{inspection}'
  */
-show.url = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+show.url = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { inspection: args }
     }
@@ -52,7 +52,7 @@ show.url = (args: { inspection: string | number | { id: string | number } } | [i
  * @see app/Http/Controllers/Admin/InspectionController.php:47
  * @route '/admin/inspections/{inspection}'
  */
-show.get = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -61,7 +61,7 @@ show.get = (args: { inspection: string | number | { id: string | number } } | [i
  * @see app/Http/Controllers/Admin/InspectionController.php:47
  * @route '/admin/inspections/{inspection}'
  */
-show.head = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })
@@ -71,7 +71,7 @@ show.head = (args: { inspection: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/Admin/InspectionController.php:47
  * @route '/admin/inspections/{inspection}'
  */
-    const showForm = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    const showForm = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: show.url(args, options),
         method: 'get',
     })
@@ -81,7 +81,7 @@ show.head = (args: { inspection: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/Admin/InspectionController.php:47
  * @route '/admin/inspections/{inspection}'
  */
-        showForm.get = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        showForm.get = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: show.url(args, options),
             method: 'get',
         })
@@ -90,7 +90,7 @@ show.head = (args: { inspection: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/Admin/InspectionController.php:47
  * @route '/admin/inspections/{inspection}'
  */
-        showForm.head = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        showForm.head = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: show.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',
@@ -106,7 +106,7 @@ show.head = (args: { inspection: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/Admin/InspectionController.php:107
  * @route '/admin/inspections/{inspection}/report'
  */
-export const report = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const report = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: report.url(args, options),
     method: 'put',
 })
@@ -121,7 +121,7 @@ report.definition = {
  * @see app/Http/Controllers/Admin/InspectionController.php:107
  * @route '/admin/inspections/{inspection}/report'
  */
-report.url = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+report.url = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { inspection: args }
     }
@@ -154,7 +154,7 @@ report.url = (args: { inspection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/InspectionController.php:107
  * @route '/admin/inspections/{inspection}/report'
  */
-report.put = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+report.put = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: report.url(args, options),
     method: 'put',
 })
@@ -164,7 +164,7 @@ report.put = (args: { inspection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/InspectionController.php:107
  * @route '/admin/inspections/{inspection}/report'
  */
-    const reportForm = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const reportForm = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: report.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'PUT',
@@ -179,7 +179,7 @@ report.put = (args: { inspection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/InspectionController.php:107
  * @route '/admin/inspections/{inspection}/report'
  */
-        reportForm.put = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        reportForm.put = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: report.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PUT',
@@ -195,7 +195,7 @@ report.put = (args: { inspection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/InspectionController.php:127
  * @route '/admin/inspections/{inspection}/media'
  */
-export const media = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const media = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: media.url(args, options),
     method: 'post',
 })
@@ -210,7 +210,7 @@ media.definition = {
  * @see app/Http/Controllers/Admin/InspectionController.php:127
  * @route '/admin/inspections/{inspection}/media'
  */
-media.url = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+media.url = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { inspection: args }
     }
@@ -243,7 +243,7 @@ media.url = (args: { inspection: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/Admin/InspectionController.php:127
  * @route '/admin/inspections/{inspection}/media'
  */
-media.post = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+media.post = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: media.url(args, options),
     method: 'post',
 })
@@ -253,7 +253,7 @@ media.post = (args: { inspection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/InspectionController.php:127
  * @route '/admin/inspections/{inspection}/media'
  */
-    const mediaForm = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const mediaForm = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: media.url(args, options),
         method: 'post',
     })
@@ -263,7 +263,7 @@ media.post = (args: { inspection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/InspectionController.php:127
  * @route '/admin/inspections/{inspection}/media'
  */
-        mediaForm.post = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        mediaForm.post = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: media.url(args, options),
             method: 'post',
         })
@@ -274,7 +274,7 @@ media.post = (args: { inspection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/InspectionController.php:153
  * @route '/admin/inspections/{inspection}/visit'
  */
-export const visit = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const visit = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: visit.url(args, options),
     method: 'post',
 })
@@ -289,7 +289,7 @@ visit.definition = {
  * @see app/Http/Controllers/Admin/InspectionController.php:153
  * @route '/admin/inspections/{inspection}/visit'
  */
-visit.url = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+visit.url = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { inspection: args }
     }
@@ -322,7 +322,7 @@ visit.url = (args: { inspection: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/Admin/InspectionController.php:153
  * @route '/admin/inspections/{inspection}/visit'
  */
-visit.post = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+visit.post = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: visit.url(args, options),
     method: 'post',
 })
@@ -332,7 +332,7 @@ visit.post = (args: { inspection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/InspectionController.php:153
  * @route '/admin/inspections/{inspection}/visit'
  */
-    const visitForm = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const visitForm = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: visit.url(args, options),
         method: 'post',
     })
@@ -342,7 +342,7 @@ visit.post = (args: { inspection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/InspectionController.php:153
  * @route '/admin/inspections/{inspection}/visit'
  */
-        visitForm.post = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        visitForm.post = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: visit.url(args, options),
             method: 'post',
         })
@@ -353,7 +353,7 @@ visit.post = (args: { inspection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/InspectionController.php:170
  * @route '/admin/inspections/{inspection}/reschedule'
  */
-export const reschedule = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const reschedule = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: reschedule.url(args, options),
     method: 'post',
 })
@@ -368,7 +368,7 @@ reschedule.definition = {
  * @see app/Http/Controllers/Admin/InspectionController.php:170
  * @route '/admin/inspections/{inspection}/reschedule'
  */
-reschedule.url = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+reschedule.url = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { inspection: args }
     }
@@ -401,7 +401,7 @@ reschedule.url = (args: { inspection: string | number | { id: string | number } 
  * @see app/Http/Controllers/Admin/InspectionController.php:170
  * @route '/admin/inspections/{inspection}/reschedule'
  */
-reschedule.post = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+reschedule.post = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: reschedule.url(args, options),
     method: 'post',
 })
@@ -411,7 +411,7 @@ reschedule.post = (args: { inspection: string | number | { id: string | number }
  * @see app/Http/Controllers/Admin/InspectionController.php:170
  * @route '/admin/inspections/{inspection}/reschedule'
  */
-    const rescheduleForm = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const rescheduleForm = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: reschedule.url(args, options),
         method: 'post',
     })
@@ -421,7 +421,7 @@ reschedule.post = (args: { inspection: string | number | { id: string | number }
  * @see app/Http/Controllers/Admin/InspectionController.php:170
  * @route '/admin/inspections/{inspection}/reschedule'
  */
-        rescheduleForm.post = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        rescheduleForm.post = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: reschedule.url(args, options),
             method: 'post',
         })
@@ -432,7 +432,7 @@ reschedule.post = (args: { inspection: string | number | { id: string | number }
  * @see app/Http/Controllers/Admin/InspectionController.php:193
  * @route '/admin/inspections/{inspection}/sign'
  */
-export const sign = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const sign = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: sign.url(args, options),
     method: 'post',
 })
@@ -447,7 +447,7 @@ sign.definition = {
  * @see app/Http/Controllers/Admin/InspectionController.php:193
  * @route '/admin/inspections/{inspection}/sign'
  */
-sign.url = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+sign.url = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { inspection: args }
     }
@@ -480,7 +480,7 @@ sign.url = (args: { inspection: string | number | { id: string | number } } | [i
  * @see app/Http/Controllers/Admin/InspectionController.php:193
  * @route '/admin/inspections/{inspection}/sign'
  */
-sign.post = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+sign.post = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: sign.url(args, options),
     method: 'post',
 })
@@ -490,7 +490,7 @@ sign.post = (args: { inspection: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/Admin/InspectionController.php:193
  * @route '/admin/inspections/{inspection}/sign'
  */
-    const signForm = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const signForm = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: sign.url(args, options),
         method: 'post',
     })
@@ -500,7 +500,7 @@ sign.post = (args: { inspection: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/Admin/InspectionController.php:193
  * @route '/admin/inspections/{inspection}/sign'
  */
-        signForm.post = (args: { inspection: string | number | { id: string | number } } | [inspection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        signForm.post = (args: { inspection: number | { id: number } } | [inspection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: sign.url(args, options),
             method: 'post',
         })
@@ -511,7 +511,7 @@ sign.post = (args: { inspection: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/Admin/InspectionController.php:209
  * @route '/admin/inspections/{inspection}/media/{media}'
  */
-export const file = (args: { inspection: string | number | { id: string | number }, media: string | number | { id: string | number } } | [inspection: string | number | { id: string | number }, media: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const file = (args: { inspection: number | { id: number }, media: number | { id: number } } | [inspection: number | { id: number }, media: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: file.url(args, options),
     method: 'get',
 })
@@ -526,7 +526,7 @@ file.definition = {
  * @see app/Http/Controllers/Admin/InspectionController.php:209
  * @route '/admin/inspections/{inspection}/media/{media}'
  */
-file.url = (args: { inspection: string | number | { id: string | number }, media: string | number | { id: string | number } } | [inspection: string | number | { id: string | number }, media: string | number | { id: string | number } ], options?: RouteQueryOptions) => {
+file.url = (args: { inspection: number | { id: number }, media: number | { id: number } } | [inspection: number | { id: number }, media: number | { id: number } ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
                     inspection: args[0],
@@ -556,7 +556,7 @@ file.url = (args: { inspection: string | number | { id: string | number }, media
  * @see app/Http/Controllers/Admin/InspectionController.php:209
  * @route '/admin/inspections/{inspection}/media/{media}'
  */
-file.get = (args: { inspection: string | number | { id: string | number }, media: string | number | { id: string | number } } | [inspection: string | number | { id: string | number }, media: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+file.get = (args: { inspection: number | { id: number }, media: number | { id: number } } | [inspection: number | { id: number }, media: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: file.url(args, options),
     method: 'get',
 })
@@ -565,7 +565,7 @@ file.get = (args: { inspection: string | number | { id: string | number }, media
  * @see app/Http/Controllers/Admin/InspectionController.php:209
  * @route '/admin/inspections/{inspection}/media/{media}'
  */
-file.head = (args: { inspection: string | number | { id: string | number }, media: string | number | { id: string | number } } | [inspection: string | number | { id: string | number }, media: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+file.head = (args: { inspection: number | { id: number }, media: number | { id: number } } | [inspection: number | { id: number }, media: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: file.url(args, options),
     method: 'head',
 })
@@ -575,7 +575,7 @@ file.head = (args: { inspection: string | number | { id: string | number }, medi
  * @see app/Http/Controllers/Admin/InspectionController.php:209
  * @route '/admin/inspections/{inspection}/media/{media}'
  */
-    const fileForm = (args: { inspection: string | number | { id: string | number }, media: string | number | { id: string | number } } | [inspection: string | number | { id: string | number }, media: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    const fileForm = (args: { inspection: number | { id: number }, media: number | { id: number } } | [inspection: number | { id: number }, media: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: file.url(args, options),
         method: 'get',
     })
@@ -585,7 +585,7 @@ file.head = (args: { inspection: string | number | { id: string | number }, medi
  * @see app/Http/Controllers/Admin/InspectionController.php:209
  * @route '/admin/inspections/{inspection}/media/{media}'
  */
-        fileForm.get = (args: { inspection: string | number | { id: string | number }, media: string | number | { id: string | number } } | [inspection: string | number | { id: string | number }, media: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        fileForm.get = (args: { inspection: number | { id: number }, media: number | { id: number } } | [inspection: number | { id: number }, media: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: file.url(args, options),
             method: 'get',
         })
@@ -594,7 +594,7 @@ file.head = (args: { inspection: string | number | { id: string | number }, medi
  * @see app/Http/Controllers/Admin/InspectionController.php:209
  * @route '/admin/inspections/{inspection}/media/{media}'
  */
-        fileForm.head = (args: { inspection: string | number | { id: string | number }, media: string | number | { id: string | number } } | [inspection: string | number | { id: string | number }, media: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        fileForm.head = (args: { inspection: number | { id: number }, media: number | { id: number } } | [inspection: number | { id: number }, media: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: file.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',

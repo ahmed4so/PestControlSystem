@@ -37,7 +37,7 @@ enum AuthArea: string
     public static function forRoute(?Route $route): ?self
     {
         foreach ((array) $route?->middleware() as $middleware) {
-            if (is_string($middleware) && str_starts_with($middleware, 'area:')) {
+            if (str_starts_with($middleware, 'area:')) {
                 return self::tryFrom(substr($middleware, 5));
             }
         }

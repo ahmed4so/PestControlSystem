@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Identity\Enums\StaffRole;
+use App\Models\Application;
 use App\Models\AuditActivity;
 use App\Models\Company;
 use App\Models\CompanyUser;
@@ -34,7 +35,7 @@ function otherCompanyRecords(): array
     $person = Person::factory()->create(['company_id' => $account->company_id]);
     $premises = Premises::factory()->create(['company_id' => $account->company_id]);
     $document = Document::factory()->create(['company_id' => $account->company_id]);
-    $application = App\Models\Application::factory()->create(['company_id' => $account->company_id]);
+    $application = Application::factory()->create(['company_id' => $account->company_id]);
 
     return compact('account', 'person', 'premises', 'document', 'application');
 }

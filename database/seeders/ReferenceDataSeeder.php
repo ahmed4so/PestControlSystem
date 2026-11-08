@@ -34,7 +34,7 @@ class ReferenceDataSeeder extends Seeder
         }
 
         if ($data['is_draft']) {
-            $this->command?->warn('Seeded the DRAFT FMS and region list (D-184). Replace it with the official SARIS list before go-live.');
+            $this->command->warn('Seeded the DRAFT FMS and region list (D-184). Replace it with the official SARIS list before go-live.');
         }
     }
 }
