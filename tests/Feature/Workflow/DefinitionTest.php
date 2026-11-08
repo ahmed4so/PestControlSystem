@@ -54,6 +54,14 @@ it('loads the Company License definition, and a second run changes nothing', fun
         ->and($template->fresh()->definition_hash)->toBe($template->definition_hash);
 });
 
+it('loads the workflow definitions as the last step of the database seeder, and can seed twice', function () {
+    $this->seed();
+    $this->seed();
+
+    expect(WorkflowTemplate::query()->where('code', 'COMPANY_LICENSE_V1')->count())->toBe(1)
+        ->and(WorkflowTransition::query()->count())->toBe(24);
+});
+
 it('stores the T12 conditional target and the review items of 04 §5.3', function () {
     $this->artisan('workflows:load')->assertSuccessful();
     $template = WorkflowTemplate::query()->where('code', 'COMPANY_LICENSE_V1')->sole();

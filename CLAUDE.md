@@ -79,7 +79,7 @@ Pest. Inertia SSR kept as in the repo. Emails from noreply@saris.gov.so. Full de
 
 ### Commands
 - Install: `composer install && npm ci && cp .env.example .env && php artisan key:generate`
-- DB: `php artisan migrate --seed && php artisan workflows:load`
+- DB: `php artisan migrate --seed` (the last seeding step runs `workflows:load`)
 - Run: `composer run dev`
 - Test: `php artisan test` (MySQL 8, database saris_portal_testing)
 - Check before every commit: `composer run check` (Pint, Larastan, ESLint, TypeScript, tests, audits, build)
