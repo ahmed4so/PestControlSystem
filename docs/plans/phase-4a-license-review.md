@@ -1,6 +1,6 @@
 # Phase 4A: Company License, application to consolidated review
 
-- Status: Draft (waiting for approval)
+- Status: Approved (2026-11-08)
 - Branch: `feature/phase-4a-license-review` (from `feature/phase-3-workflow`; rebase on `main` once Phase 3 is merged)
 - Pull requests: one per row of 09 Phase 4A (D-115), in the order of the Steps below
 
@@ -149,7 +149,13 @@
 2. **Photo GPS.** The device position comes from the browser's location permission. If the Inspector refuses it, a reason is required (D-136).
 3. **Phase 3 isn't merged yet.** This branch builds on it, so Phase 3 should be merged first.
 
-## 8. Questions for you (blocking)
+## 8. Questions (answered 2026-11-08)
+
+- **Q1:** yes, as proposed (D-196).
+- **Q2:** option (a): an unused version may be replaced (D-202, amends D-189).
+- **Q3:** allow correction: the reviewer may change their own result while the application is still at the stage, audit-logged (D-195).
+
+The questions as asked:
 
 **Q1. Several premises, several Inspectors.**
 - The problem:
@@ -174,7 +180,9 @@
 
 **Q3. D-195 (Proposed in Phase 3).** Can a reviewer correct a review-item result before completing the stage? The review screens in Step 6 depend on it.
 
-## 9. Proposed decisions (Source: Claude Code)
+## 9. Decisions (confirmed 2026-11-08 with the plan)
+
+D-195 (correction allowed), D-196 to D-201 below, and D-202 (unused version may be replaced).
 
 | ID | Proposal | Why |
 |---|---|---|

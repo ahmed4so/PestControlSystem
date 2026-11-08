@@ -6,6 +6,7 @@ use App\Domain\Applications\Actions\RecordReviewItems;
 use App\Domain\Applications\Enums\ApplicationStatus;
 use App\Domain\Workflow\Enums\ReviewResult;
 use App\Domain\Workflow\Exceptions\TransitionRefused;
+use App\Models\AuditActivity;
 use App\Models\ReviewItem;
 
 /*
@@ -66,18 +67,48 @@ it('refuses another stage, an unknown item and another role', function () {
     expect(ReviewItem::query()->count())->toBe(0);
 });
 
-it('keeps a recorded result: no second result, no change, no deletion', function () {
+it('lets the reviewer correct their own result while at the stage, keeping the old value in the audit log (D-195)', function () {
     $registrar = staffWithRole('REGISTRAR');
     $application = advanceTo(submittedApplication(), ApplicationStatus::AdminReview, $registrar);
     $record = app(RecordReviewItems::class);
     $record->handle($application, $registrar, 'ADMIN_REVIEW', ['ITEM_A' => ['result' => 'COMPLIANT']]);
 
-    expect(recordRefusal(fn () => $record->handle($application, $registrar, 'ADMIN_REVIEW', [
-        'ITEM_A' => ['result' => 'DEFICIENT', 'comment' => 'Changed my mind.'],
-    ])))->toBe(__(RecordReviewItems::REASON_RECORDED, ['item' => 'ITEM_A']));
+    $record->handle($application, $registrar, 'ADMIN_REVIEW', [
+        'ITEM_A' => ['result' => 'DEFICIENT', 'comment' => 'The stamp is missing.'],
+    ]);
 
     $item = ReviewItem::query()->sole();
-    expect(fn () => $item->update(['result' => ReviewResult::Deficient]))->toThrow(LogicException::class)
-        ->and(fn () => $item->delete())->toThrow(LogicException::class)
+    expect($item->result)->toBe(ReviewResult::Deficient)
+        ->and($item->comment)->toBe('The stamp is missing.');
+
+    $change = AuditActivity::query()
+        ->where('subject_type', $item->getMorphClass())->where('subject_id', $item->id)->where('event', 'updated')->sole();
+    expect($change->properties['old']['result'])->toBe('COMPLIANT')
+        ->and($change->properties['attributes']['result'])->toBe('DEFICIENT');
+});
+
+it('refuses a correction by another reviewer', function () {
+    $registrar = staffWithRole('REGISTRAR');
+    $application = advanceTo(submittedApplication(), ApplicationStatus::AdminReview, $registrar);
+    $record = app(RecordReviewItems::class);
+    $record->handle($application, $registrar, 'ADMIN_REVIEW', ['ITEM_A' => ['result' => 'COMPLIANT']]);
+
+    expect(recordRefusal(fn () => $record->handle($application, staffWithRole('REGISTRAR'), 'ADMIN_REVIEW', [
+        'ITEM_A' => ['result' => 'DEFICIENT', 'comment' => 'No.'],
+    ])))->toBe(__(RecordReviewItems::REASON_OTHER_REVIEWER, ['item' => 'ITEM_A']));
+    expect(ReviewItem::query()->sole()->result)->toBe(ReviewResult::Compliant);
+});
+
+it('refuses corrections once the application has left the stage, and never deletes a result', function () {
+    $registrar = staffWithRole('REGISTRAR');
+    $application = advanceTo(submittedApplication(), ApplicationStatus::TechnicalDocReview, $registrar);
+    $record = app(RecordReviewItems::class);
+
+    expect(recordRefusal(fn () => $record->handle($application, $registrar, 'ADMIN_REVIEW', [
+        'ITEM_A' => ['result' => 'DEFICIENT', 'comment' => 'Too late.'],
+    ])))->toBe(RecordReviewItems::REASON_STAGE);
+
+    $item = ReviewItem::query()->where('item_code', 'ITEM_A')->sole();
+    expect(fn () => $item->delete())->toThrow(LogicException::class)
         ->and($item->fresh()->result)->toBe(ReviewResult::Compliant);
 });

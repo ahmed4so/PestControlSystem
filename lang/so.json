@@ -261,6 +261,7 @@
     "The provided two factor authentication code was invalid.": "The provided two factor authentication code was invalid.",
     "The provided two factor recovery code was invalid.": "The provided two factor recovery code was invalid.",
     "The result of :item is already recorded.": "The result of :item is already recorded.",
+    "The result of :item was recorded by another reviewer.": "The result of :item was recorded by another reviewer.",
     "The System Administrator role cannot be combined with a workflow role.": "The System Administrator role cannot be combined with a workflow role.",
     "This action is not available to your account.": "This action is not available to your account.",
     "This action is not possible at this stage.": "This action is not possible at this stage.",

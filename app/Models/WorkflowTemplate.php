@@ -8,6 +8,7 @@ use App\Domain\Applications\Enums\Service;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * One loaded version of a workflow definition (02-data-model §4.7, D-071,
@@ -23,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class WorkflowTemplate extends Model
 {
+    use SoftDeletes;
+
     /**
      * @var list<string>
      */

@@ -83,15 +83,38 @@ it('stores the T12 conditional target and the review items of 04 §5.3', functio
         ->and($submit->requires_password)->toBeTrue();
 });
 
-it('refuses a loaded version whose content changed (D-189)', function () {
+it('replaces a changed version while no application uses it, soft deleting what left (D-202)', function () {
     loadTestWorkflow();
+    $template = WorkflowTemplate::query()->where('code', 'TEST_FLOW_V1')->sole();
+    $acknowledge = $template->transitions()->where('action', 'ACKNOWLEDGE')->sole();
+
+    $changed = fixtureDefinition();
+    $changed['transitions'][1]['comment'] = true;
+    $changed['transitions'] = array_values(array_filter($changed['transitions'], fn ($t) => $t['action'] !== 'ASSIGN_TECHNICAL_REVIEWER'));
+
+    expect(app(DefinitionLoader::class)->load($changed))->toBe(DefinitionLoader::REPLACED);
+
+    expect(WorkflowTemplate::query()->count())->toBe(1)
+        ->and($template->fresh()->definition_hash)->not->toBe($template->definition_hash)
+        ->and($acknowledge->fresh()->requires_comment)->toBeTrue()
+        ->and($template->transitions()->where('action', 'ASSIGN_TECHNICAL_REVIEWER')->exists())->toBeFalse()
+        ->and(WorkflowTransition::query()->onlyTrashed()->where('action', 'ASSIGN_TECHNICAL_REVIEWER')->count())->toBe(1);
+
+    // Loading the original again brings the transition back.
+    expect(app(DefinitionLoader::class)->load(fixtureDefinition()))->toBe(DefinitionLoader::REPLACED)
+        ->and($template->transitions()->where('action', 'ASSIGN_TECHNICAL_REVIEWER')->exists())->toBeTrue();
+});
+
+it('refuses to change a version that an application uses (D-189, D-202)', function () {
+    submittedApplication();
     $counts = workflowTableCounts();
 
     $changed = fixtureDefinition();
     $changed['transitions'][1]['comment'] = true;
 
-    expect(definitionErrors($changed)[0])->toContain('already loaded with different content');
-    expect(workflowTableCounts())->toBe($counts);
+    expect(definitionErrors($changed)[0])->toContain('used by applications and cannot change');
+    expect(workflowTableCounts())->toBe($counts)
+        ->and(WorkflowTransition::query()->where('action', 'ACKNOWLEDGE')->sole()->requires_comment)->toBeFalse();
 });
 
 it('makes a newer version the active one and keeps the older one for running applications', function () {

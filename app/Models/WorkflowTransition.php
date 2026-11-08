@@ -8,6 +8,7 @@ use App\Domain\Workflow\Enums\ActorRole;
 use App\Domain\Workflow\Enums\WorkflowActionCode;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * "From stage X, actor Y may perform action Z, which moves to stage W"
@@ -30,6 +31,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class WorkflowTransition extends Model
 {
+    use SoftDeletes;
+
     /**
      * @var list<string>
      */

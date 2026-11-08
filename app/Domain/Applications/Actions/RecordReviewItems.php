@@ -18,10 +18,10 @@ use Illuminate\Support\Facades\DB;
  * Records review-item results on the current version for the stage the
  * application is at (04 §5.3, 02 §4.7, D-024, D-102). Only the stage's
  * role may record; at TECHNICAL_DOC_REVIEW also the assigned Technical
- * Reviewer. A result that is not COMPLIANT needs a comment. Review items
- * keep their rows forever (Phase 3 plan §6): one result per item and
- * version, never changed or deleted. Whether a reviewer may correct a
- * result before leaving the stage is Proposed D-195.
+ * Reviewer. A result that is not COMPLIANT needs a comment. The reviewer
+ * who recorded a result may correct it while the application is still at
+ * the stage; the audit log keeps the old value, and rows are never
+ * deleted (D-195).
  */
 final class RecordReviewItems
 {
@@ -33,7 +33,7 @@ final class RecordReviewItems
 
     public const REASON_COMMENT = 'Add a comment for each item that is not compliant.';
 
-    public const REASON_RECORDED = 'The result of :item is already recorded.';
+    public const REASON_OTHER_REVIEWER = 'The result of :item was recorded by another reviewer.';
 
     /**
      * @param  array<string, array{result: ReviewResult|string, comment?: string|null}>  $items
@@ -68,21 +68,31 @@ final class RecordReviewItems
             }
         }
 
-        $recorded = ReviewItem::query()
-            ->where('application_version_id', $version->id)
-            ->where('stage', $stage)
-            ->whereIn('item_code', array_keys($items))
-            ->value('item_code');
+        DB::transaction(function () use ($application, $items, $version, $stage, $reviewer): void {
+            // The stage must not change while results are written (D-096 lock).
+            $locked = Application::query()->withoutGlobalScope('company')->whereKey($application->id)->lockForUpdate()->firstOrFail();
 
-        if ($recorded !== null) {
-            throw TransitionRefused::because(__(self::REASON_RECORDED, ['item' => $recorded]));
-        }
+            if ($locked->status->value !== $stage) {
+                throw TransitionRefused::because(self::REASON_STAGE);
+            }
 
-        DB::transaction(function () use ($items, $version, $stage, $reviewer): void {
+            $existing = ReviewItem::query()
+                ->where('application_version_id', $version->id)
+                ->where('stage', $stage)
+                ->whereIn('item_code', array_keys($items))
+                ->get()
+                ->keyBy('item_code');
+
             foreach ($items as $code => $item) {
-                $row = new ReviewItem([
-                    'stage' => $stage,
-                    'item_code' => $code,
+                $row = $existing->get($code);
+
+                // D-195: only the reviewer who recorded a result may correct it.
+                if ($row !== null && $row->reviewed_by !== $reviewer->id) {
+                    throw TransitionRefused::because(__(self::REASON_OTHER_REVIEWER, ['item' => $code]));
+                }
+
+                $row ??= new ReviewItem(['stage' => $stage, 'item_code' => $code]);
+                $row->fill([
                     'result' => $item['result'],
                     'comment' => $item['comment'] ?? null,
                     'reviewed_by' => $reviewer->id,

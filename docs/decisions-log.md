@@ -1612,7 +1612,7 @@ Entry format:
 
 ## D-189: Loaded workflow versions never change
 - Date: 2026-10-31
-- Status: Confirmed
+- Status: Confirmed; amended by D-202
 - Source: Claude Code (confirmed; plan docs/plans/phase-3-workflow-engine.md)
 - Decision: `workflows:load` never changes a loaded version: identical content is skipped, different content for the same code and version is refused (a change needs a new version file). The newest loaded version of a service is the active one for new applications; running applications keep theirs.
 - Reason: 04 §2: changing a definition creates a new version; running applications are not affected.
@@ -1644,21 +1644,19 @@ Entry format:
 
 ---
 
-## D-195: A recorded review-item result cannot be corrected
-- Date: 2026-10-31
-- Status: Proposed
-- Source: Claude Code (Phase 3)
-- Decision: A review-item result is recorded once per item, stage and version and is never changed or deleted, as the Phase 3 plan (§6) says for `review_items`. Recording the same item again on the same version is refused ("The result of :item is already recorded."). A new version (after resubmission) gets new results.
-- Reason: 02 §4.7 and the plan keep review history unchanged. The design does not say whether a reviewer may correct a slip before completing the stage.
-- Alternative: allow a reviewer to change their own result while the application is still at that stage, with the change audit-logged (the row stays, the audit log keeps the old value). This is a one-line change in `RecordReviewItems` and the `ReviewItem` model.
+## D-195: A reviewer may correct their own review-item result before the stage ends
+- Date: 2026-11-08
+- Status: Confirmed
+- Source: User (answer to Phase 4A plan question Q3; replaces the Phase 3 proposal of no correction)
+- Decision: The reviewer who recorded a review-item result may change it (result and comment) while the application is still at that stage. The row is updated, never deleted, and the audit log keeps the old value. Once the application leaves the stage, the result can no longer change; a new version (after resubmission) gets new results.
+- Reason: Lets a reviewer fix a slip before completing the stage, while the history stays in the audit log.
 - Affects: RecordReviewItems, ReviewItem
 
 ---
-
 ## D-196: Inspections of several premises
 - Date: 2026-11-08
-- Status: Proposed
-- Source: Claude Code (Phase 4A plan, question Q1)
+- Status: Confirmed
+- Source: Claude Code (confirmed by the user; Phase 4A plan, question Q1)
 - Decision:
   - `RECORD_INSPECTION_VISIT` (T10) moves the application to `INSPECTION_REPORT` on the first visit.
   - Visits to the other premises are recorded on their own inspection, as an audited Inspection action without a status change.
@@ -1669,45 +1667,53 @@ Entry format:
 
 ## D-197: Premises required at submission
 - Date: 2026-11-08
-- Status: Proposed
-- Source: Claude Code (Phase 4A plan)
+- Status: Confirmed
+- Source: Claude Code (confirmed with the Phase 4A plan)
 - Decision: A new guard, `PremisesSelected`, on SUBMIT and RESUBMIT: at least one premises is selected, and every selected premises belongs to the company.
 - Reason: 05 §5.1 requires at least one premises. The removed `ChecklistPhotos` guard (D-192) was the only check that implied it.
 - Affects: Workflow guards, company_license definition
 
 ## D-198: Work-item emails
 - Date: 2026-11-08
-- Status: Proposed
-- Source: Claude Code (Phase 4A plan)
+- Status: Confirmed
+- Source: Claude Code (confirmed with the Phase 4A plan)
 - Decision: `WORK_ITEM_READY` is a `Notify` code listed in the definition on every transition whose target is a staff stage. It goes to every active holder of the stage role, or only to the assignee when there is one, and never to the actor (D-127).
 - Reason: 07 §3.3 says "enters any staff stage" without listing every transition.
 - Affects: Notifications, company_license definition
 
 ## D-199: Version differences computed on view
 - Date: 2026-11-08
-- Status: Proposed
-- Source: Claude Code (Phase 4A plan)
+- Status: Confirmed
+- Source: Claude Code (confirmed with the Phase 4A plan)
 - Decision: The differences between two application versions are computed when the page opens, by comparing the two snapshots field by field. Nothing extra is stored.
 - Reason: Snapshots are immutable and complete (02 §6.3).
 - Affects: Admin application file
 
 ## D-200: Inspection video checks
 - Date: 2026-11-08
-- Status: Proposed
-- Source: Claude Code (Phase 4A plan)
+- Status: Confirmed
+- Source: Claude Code (confirmed with the Phase 4A plan)
 - Decision: Inspection videos must be MP4, checked from the file content, up to 50 MB, and are accepted only as inspection media. They are stored as uploaded, with no conversion. Company uploads keep the 5 MB limit.
 - Reason: D-135 sets the type and size, not how the file is checked.
 - Affects: Documents (SafeUploads), Inspection
 
 ## D-201: What the company sees of the processing
 - Date: 2026-11-08
-- Status: Proposed
-- Source: Claude Code (Phase 4A plan)
+- Status: Confirmed
+- Source: Claude Code (confirmed with the Phase 4A plan)
 - Decision:
   - The company sees: status changes, with company labels (D-045); the comments of returns and DG deferrals; and review items that are not compliant, with their comments.
   - It does not see: internal comments (Director return, re-inspection reason), staff names, or inspection reports beyond the planned date.
 - Reason: 02 §4.7 says "company-visible actions and comments only" without listing them; 02 §4.8 gives the company only the planned date.
 - Affects: Company Portal application page
+
+## D-202: An unused workflow version may be replaced
+- Date: 2026-11-08
+- Status: Confirmed
+- Source: User (answer to Phase 4A plan question Q2)
+- Decision: Amends D-189. `workflows:load` may replace a loaded version whose content changed, but only while no application uses that version (no `applications.workflow_template_id` points to it). It then reloads the stages and transitions, all in one transaction. Once any application uses a version, it never changes, and a change needs a new version file.
+- Reason: `company_license_v1` was loaded only on development and test databases and needs the 07 notification codes; running applications are still never affected (04 §2).
+- Affects: DefinitionLoader, workflows:load
 
 ---
 
