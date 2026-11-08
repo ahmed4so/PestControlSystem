@@ -118,7 +118,7 @@ final class DefinitionLoader
                 'is_final' => (bool) ($stage['final'] ?? false),
                 'review_items' => $stage['review_items'] ?? null,
             ]);
-            $row->deleted_at = null;
+            $row->setAttribute('deleted_at', null);
             $row->save();
             $kept[] = $row->id;
         }
@@ -151,7 +151,7 @@ final class DefinitionLoader
                 'effects' => array_values((array) ($transition['effects'] ?? [])),
                 'sequence' => $sequence + 1,
             ]);
-            $row->deleted_at = null;
+            $row->setAttribute('deleted_at', null);
             $row->save();
             $kept[] = $row->id;
         }

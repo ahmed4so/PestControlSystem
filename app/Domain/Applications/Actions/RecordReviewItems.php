@@ -85,6 +85,12 @@ final class RecordReviewItems
 
             foreach ($items as $code => $item) {
                 $row = $existing->get($code);
+                $result = $item['result'] instanceof ReviewResult ? $item['result'] : ReviewResult::from($item['result']);
+
+                // Unchanged results are left as they are (the form sends every item).
+                if ($row !== null && $row->result === $result && (string) $row->comment === (string) ($item['comment'] ?? '')) {
+                    continue;
+                }
 
                 // D-195: only the reviewer who recorded a result may correct it.
                 if ($row !== null && $row->reviewed_by !== $reviewer->id) {

@@ -27,6 +27,41 @@ enum NotificationCode: string
     case CertificateUpdated = 'CERTIFICATE_UPDATED';
     case NationalIdReleased = 'NATIONAL_ID_RELEASED';
 
+    // Application workflow (07 §3.3). Codes of later phases are listed so
+    // definitions validate; they are sent once their phase builds them.
+    case ApplicationSubmitted = 'APPLICATION_SUBMITTED';
+    case WorkItemReady = 'WORK_ITEM_READY';
+    case ApplicationAcknowledged = 'APPLICATION_ACKNOWLEDGED';
+    case ApplicationReturned = 'APPLICATION_RETURNED';
+    case ApplicationResubmitted = 'APPLICATION_RESUBMITTED';
+    case ReviewerAssigned = 'REVIEWER_ASSIGNED';
+    case TechnicalReviewDone = 'TECHNICAL_REVIEW_DONE';
+    case InspectionScheduled = 'INSPECTION_SCHEDULED';
+    case InspectionRescheduled = 'INSPECTION_RESCHEDULED';
+    case PaymentRequired = 'PAYMENT_REQUIRED';
+    case ReceiptRejected = 'RECEIPT_REJECTED';
+    case PaymentCleared = 'PAYMENT_CLEARED';
+    case LicenseIssued = 'LICENSE_ISSUED';
+    case ApplicationRejected = 'APPLICATION_REJECTED';
+
+    /**
+     * Codes listed for the workflow definitions whose email comes with a
+     * later step or phase (D-188): inspections in Phase 4A step 7, payment,
+     * license and rejection in Phase 4B.
+     */
+    public function isBuiltLater(): bool
+    {
+        return in_array($this, [
+            self::InspectionScheduled,
+            self::InspectionRescheduled,
+            self::PaymentRequired,
+            self::ReceiptRejected,
+            self::PaymentCleared,
+            self::LicenseIssued,
+            self::ApplicationRejected,
+        ], true);
+    }
+
     /**
      * Short subject in English; translated into the recipient's language.
      */
@@ -45,6 +80,20 @@ enum NotificationCode: string
             self::EmailChangeNotice => 'A change of login email was requested',
             self::CertificateUpdated => 'A renewed certificate was uploaded',
             self::NationalIdReleased => 'A person was removed from your profile',
+            self::ApplicationSubmitted => 'Application received',
+            self::WorkItemReady => 'An application is waiting for you',
+            self::ApplicationAcknowledged => 'Your application is under review',
+            self::ApplicationReturned => 'Action required on your application',
+            self::ApplicationResubmitted => 'An application was resubmitted',
+            self::ReviewerAssigned => 'You are assigned to an application',
+            self::TechnicalReviewDone => 'Technical review completed',
+            self::InspectionScheduled => 'Inspection planned',
+            self::InspectionRescheduled => 'Inspection moved',
+            self::PaymentRequired => 'Permission to pay issued',
+            self::ReceiptRejected => 'Receipt not accepted',
+            self::PaymentCleared => 'Payment confirmed',
+            self::LicenseIssued => 'Your license was issued',
+            self::ApplicationRejected => 'Your application was rejected',
         };
     }
 

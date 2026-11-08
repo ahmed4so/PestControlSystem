@@ -38,7 +38,7 @@ abstract class NotificationMail extends Mailable implements ShouldBeEncrypted, S
     public array $backoff = [60, 300];
 
     /**
-     * @param  array<string, string>  $data  values used by the template
+     * @param  array<string, mixed>  $data  values used by the template
      */
     public function __construct(
         public readonly int $notificationLogId,

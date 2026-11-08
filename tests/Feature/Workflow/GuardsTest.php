@@ -191,7 +191,13 @@ it('throws from every effect of a later phase, so the transition rolls back (D-1
 
     expect(fn () => $effect->apply($context, null))->toThrow(LogicException::class, "[{$name}]");
 })->with([
-    'Notify', 'CreateInspections', 'UpdateInspectionDate', 'SetConductedAt', 'SignInspection',
+    'CreateInspections', 'UpdateInspectionDate', 'SetConductedAt', 'SignInspection',
     'CancelOpenInspections', 'IssuePermissionToPayLetter', 'RecordPayment', 'ClearPayment', 'RejectPayment',
     'IssueLicense', 'SupersedePreviousLicense', 'ClearAmendmentFlag', 'FlagRestrictedIngredient',
 ]);
+
+it('refuses an email whose recipients come in a later phase, and an unknown code (D-188)', function (string $code) {
+    [$effect] = app(WorkflowRegistry::class)->effect("Notify:{$code}");
+
+    expect(fn () => $effect->apply(submitContext(readyApplication()), $code))->toThrow(LogicException::class);
+})->with(['PAYMENT_REQUIRED', 'LICENSE_ISSUED', 'NO_SUCH_EMAIL']);

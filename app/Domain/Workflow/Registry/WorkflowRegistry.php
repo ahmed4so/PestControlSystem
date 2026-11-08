@@ -12,6 +12,7 @@ use App\Domain\Workflow\Effects\CreateAssignment;
 use App\Domain\Workflow\Effects\CreateVersionSnapshot;
 use App\Domain\Workflow\Effects\EndAssignment;
 use App\Domain\Workflow\Effects\GenerateReference;
+use App\Domain\Workflow\Effects\Notify;
 use App\Domain\Workflow\Effects\NotYetAvailableEffect;
 use App\Domain\Workflow\Guards\ActiveDelegation;
 use App\Domain\Workflow\Guards\AssigneeHasRole;
@@ -19,6 +20,7 @@ use App\Domain\Workflow\Guards\CertificatesValid;
 use App\Domain\Workflow\Guards\NoOpenAssignment;
 use App\Domain\Workflow\Guards\NoOtherOpenApplication;
 use App\Domain\Workflow\Guards\NotYetAvailableGuard;
+use App\Domain\Workflow\Guards\PremisesSelected;
 use App\Domain\Workflow\Guards\ProfileComplete;
 use App\Domain\Workflow\Guards\RequiredDocuments;
 use App\Domain\Workflow\Guards\ReviewItemsGuard;
@@ -49,6 +51,7 @@ final class WorkflowRegistry
             'CertificatesValid' => fn () => app(CertificatesValid::class),
             'RequiredDocuments' => fn () => app(RequiredDocuments::class),
             'TechnicalPersonSelected' => fn () => app(TechnicalPersonSelected::class),
+            'PremisesSelected' => fn () => app(PremisesSelected::class),
             'NoOtherOpenApplication' => fn () => app(NoOtherOpenApplication::class),
             'ReviewItemsAllCompliant' => fn () => ReviewItemsGuard::allCompliant(),
             'ReviewItemsHaveDeficiency' => fn () => ReviewItemsGuard::haveDeficiency(),
@@ -84,8 +87,8 @@ final class WorkflowRegistry
             'SetDecidedAt' => fn () => new ApplicationFieldEffect('set_decided_at'),
             'CreateAssignment' => fn () => app(CreateAssignment::class),
             'EndAssignment' => fn () => app(EndAssignment::class),
+            'Notify' => fn () => app(Notify::class),
             // Later phases (D-188).
-            'Notify' => fn () => new NotYetAvailableEffect('Notify', 'Phase 4'),
             'CreateInspections' => fn () => new NotYetAvailableEffect('CreateInspections', 'Phase 4A'),
             'UpdateInspectionDate' => fn () => new NotYetAvailableEffect('UpdateInspectionDate', 'Phase 4A'),
             'SetConductedAt' => fn () => new NotYetAvailableEffect('SetConductedAt', 'Phase 4A'),

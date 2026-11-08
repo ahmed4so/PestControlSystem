@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Mail;
 final class SendNotification
 {
     /**
-     * @param  array<string, string>  $data  template values; never stored
+     * @param  array<string, mixed>  $data  template values; never stored
      * @param  string|null  $email  address to use instead of the account's (e.g. a new login email)
      */
     public function __invoke(

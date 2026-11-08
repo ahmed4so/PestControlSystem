@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Identity\Enums\AuthArea;
 use App\Domain\Identity\Support\FortifyRoutes;
+use App\Http\Controllers\Admin\ApplicationController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FailedEmailController;
@@ -63,6 +64,19 @@ Route::middleware(['auth:web', 'active', 'session.timeouts', 'password.current',
 
         Route::resource('roles', RoleController::class)->except(['show'])->middleware('throttle:10,1');
     });
+
+    // Application file and workflow actions (Phase 4A). The policy checks
+    // who may see an application; the engine checks every action (D-096).
+    Route::get('applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
+    Route::post('applications/{application}/actions', [ApplicationController::class, 'perform'])
+        ->middleware('throttle:30,1')
+        ->name('applications.actions');
+    Route::post('applications/{application}/review-items', [ApplicationController::class, 'reviewItems'])
+        ->middleware('throttle:60,1')
+        ->name('applications.review-items');
+    Route::get('applications/{application}/files/{storedFile}', [ApplicationController::class, 'file'])
+        ->middleware('throttle:60,1')
+        ->name('applications.file');
 
     // Company directory and files, read-only (D-177, D-181).
     Route::get('companies', [CompanyController::class, 'index'])->name('companies.index');

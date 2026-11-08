@@ -25,7 +25,7 @@ it('has one Mailable and two templates for every Phase 1 code', function (Notifi
         ->and(is_subclass_of($class, NotificationMail::class))->toBeTrue()
         ->and(view()->exists($code->view()))->toBeTrue()
         ->and(view()->exists($code->textView()))->toBeTrue();
-})->with(NotificationCode::cases());
+})->with(array_values(array_filter(NotificationCode::cases(), fn (NotificationCode $code) => ! $code->isBuiltLater())));
 
 it('queues every email after commit, encrypted, with 3 tries', function () {
     $mail = new PasswordChanged(1, 'en');

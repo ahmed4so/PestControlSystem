@@ -34,8 +34,9 @@ function otherCompanyRecords(): array
     $person = Person::factory()->create(['company_id' => $account->company_id]);
     $premises = Premises::factory()->create(['company_id' => $account->company_id]);
     $document = Document::factory()->create(['company_id' => $account->company_id]);
+    $application = App\Models\Application::factory()->create(['company_id' => $account->company_id]);
 
-    return compact('account', 'person', 'premises', 'document');
+    return compact('account', 'person', 'premises', 'document', 'application');
 }
 
 it('gives 404 for every company route with another company\'s IDs', function () {
@@ -45,6 +46,7 @@ it('gives 404 for every company route with another company\'s IDs', function () 
         'person' => $other['person']->id,
         'premises' => $other['premises']->id,
         'document' => $other['document']->id,
+        'application' => $other['application']->id,
     ];
     $checked = 0;
 

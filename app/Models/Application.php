@@ -114,8 +114,7 @@ class Application extends Model
     public function technicalPersons(): BelongsToMany
     {
         return $this->belongsToMany(Person::class, 'application_persons')
-            ->wherePivot('role', 'TECHNICAL_PERSON')
-            ->withPivot('role')
+            ->withPivotValue('role', 'TECHNICAL_PERSON')
             ->withTimestamps();
     }
 

@@ -6,14 +6,19 @@ declare(strict_types=1);
  * Company License workflow, version 1 (04 §5, written procedure 6.1–6.13,
  * D-022). Loaded with `php artisan workflows:load` (D-071, D-097).
  *
- * A loaded version never changes (D-189): to change this workflow, copy
- * this file to company_license_v2.php with 'version' => 2 and load it.
- * Running applications keep the version they started with.
+ * Once an application uses a version, it never changes (D-189, D-202): to
+ * change this workflow then, copy this file to company_license_v2.php with
+ * 'version' => 2 and load it. Running applications keep their version.
  *
  * Differences from the 04 §5.2 table, from later decisions:
  * - no ChecklistPhotos guard on SUBMIT or RESUBMIT: the facility checklist
- *   is the Inspector's job (D-192);
+ *   is the Inspector's job (D-192); PremisesSelected checks that at least
+ *   one premises is chosen instead (D-197);
  * - no SetOpenKey on SUBMIT: the draft holds the key from creation (D-193).
+ *
+ * Emails use the 07 §3.3 codes. WORK_ITEM_READY goes out whenever the
+ * application enters a new staff stage (D-198); on RESUBMIT the stage's
+ * staff get APPLICATION_RESUBMITTED instead, so they don't get two emails.
  *
  * Targets: 'same' keeps the stage; 'resume_stage' continues where the
  * application was returned (D-043); a map is a conditional target,
@@ -25,6 +30,7 @@ $submitGuards = [
     'CertificatesValid',
     'RequiredDocuments',
     'TechnicalPersonSelected',
+    'PremisesSelected',
     'NoOtherOpenApplication',
     'RenewalWindowOpen',
     'PreviousLicenseActive',
@@ -80,51 +86,52 @@ return [
         [
             'from' => 'DRAFT', 'action' => 'SUBMIT', 'actor' => 'COMPANY', 'to' => 'SUBMITTED', 'password' => true,
             'guards' => $submitGuards,
-            'effects' => ['GenerateReference', 'CreateVersionSnapshot', 'SetLateRenewalFlag', 'Notify:SUBMITTED'],
+            'effects' => ['GenerateReference', 'CreateVersionSnapshot', 'SetLateRenewalFlag', 'Notify:APPLICATION_SUBMITTED', 'Notify:WORK_ITEM_READY'],
         ],
         // T2
         [
             'from' => 'SUBMITTED', 'action' => 'ACKNOWLEDGE', 'actor' => 'REGISTRAR', 'to' => 'ADMIN_REVIEW',
-            'effects' => ['Notify:ACKNOWLEDGED'],
+            'effects' => ['Notify:APPLICATION_ACKNOWLEDGED', 'Notify:WORK_ITEM_READY'],
         ],
         // T3
         [
             'from' => 'ADMIN_REVIEW', 'action' => 'COMPLETE_ADMIN_REVIEW', 'actor' => 'REGISTRAR', 'to' => 'TECHNICAL_DOC_REVIEW',
             'review_items' => true,
             'guards' => ['ReviewItemsAllCompliant:ADMIN_REVIEW'],
+            'effects' => ['Notify:WORK_ITEM_READY'],
         ],
         // T4
         [
             'from' => 'ADMIN_REVIEW', 'action' => 'RETURN_TO_COMPANY', 'actor' => 'REGISTRAR', 'to' => 'RETURNED',
             'comment' => true, 'review_items' => true,
             'guards' => ['ReviewItemsHaveDeficiency:ADMIN_REVIEW'],
-            'effects' => ['SetResumeStage:ADMIN_REVIEW', 'Notify:RETURNED'],
+            'effects' => ['SetResumeStage:ADMIN_REVIEW', 'Notify:APPLICATION_RETURNED'],
         ],
         // T5
         [
             'from' => 'TECHNICAL_DOC_REVIEW', 'action' => 'ASSIGN_TECHNICAL_REVIEWER', 'actor' => 'REGISTRAR', 'to' => 'same',
             'guards' => ['AssigneeHasRole:TECHNICAL_REVIEWER'],
-            'effects' => ['CreateAssignment', 'Notify:ASSIGNED'],
+            'effects' => ['CreateAssignment', 'Notify:REVIEWER_ASSIGNED'],
         ],
         // T6
         [
             'from' => 'TECHNICAL_DOC_REVIEW', 'action' => 'COMPLETE_TECHNICAL_REVIEW', 'actor' => 'TECHNICAL_REVIEWER', 'to' => 'same',
             'review_items' => true,
             'guards' => ['ReviewItemsRecorded:TECHNICAL_DOC_REVIEW'],
-            'effects' => ['EndAssignment', 'Notify:REVIEW_DONE'],
+            'effects' => ['EndAssignment', 'Notify:TECHNICAL_REVIEW_DONE'],
         ],
         // T7
         [
             'from' => 'TECHNICAL_DOC_REVIEW', 'action' => 'SCHEDULE_INSPECTION', 'actor' => 'REGISTRAR', 'to' => 'INSPECTION_SCHEDULED',
             'guards' => ['ReviewItemsAllCompliant:TECHNICAL_DOC_REVIEW', 'NoOpenAssignment'],
-            'effects' => ['CreateInspections', 'Notify:INSPECTION_SCHEDULED'],
+            'effects' => ['CreateInspections', 'Notify:INSPECTION_SCHEDULED', 'Notify:WORK_ITEM_READY'],
         ],
         // T8
         [
             'from' => 'TECHNICAL_DOC_REVIEW', 'action' => 'RETURN_TO_COMPANY', 'actor' => 'REGISTRAR', 'to' => 'RETURNED',
             'comment' => true, 'review_items' => true,
             'guards' => ['ReviewItemsHaveDeficiency:TECHNICAL_DOC_REVIEW'],
-            'effects' => ['SetResumeStage:TECHNICAL_DOC_REVIEW', 'Notify:RETURNED'],
+            'effects' => ['SetResumeStage:TECHNICAL_DOC_REVIEW', 'Notify:APPLICATION_RETURNED'],
         ],
         // T9
         [
@@ -135,14 +142,14 @@ return [
         // T10
         [
             'from' => 'INSPECTION_SCHEDULED', 'action' => 'RECORD_INSPECTION_VISIT', 'actor' => 'INSPECTOR', 'to' => 'INSPECTION_REPORT',
-            'effects' => ['SetConductedAt'],
+            'effects' => ['SetConductedAt', 'Notify:WORK_ITEM_READY'],
         ],
         // T11: on to consolidated review once the last inspection is signed.
         [
             'from' => 'INSPECTION_REPORT', 'action' => 'SUBMIT_INSPECTION_REPORT', 'actor' => 'INSPECTOR', 'password' => true,
             'to' => ['CONSOLIDATED_REVIEW' => 'InspectionsSigned', 'default' => 'same'],
             'guards' => ['InspectionReportComplete'],
-            'effects' => ['SignInspection', 'Notify:REPORT_SUBMITTED'],
+            'effects' => ['SignInspection', 'Notify:WORK_ITEM_READY'],
         ],
         // T12: straight to the DG when a payment is already cleared (D-043).
         [
@@ -150,31 +157,32 @@ return [
             'to' => ['DG_DECISION' => 'PaymentCleared', 'default' => 'DIRECTOR_REVIEW'],
             'review_items' => true,
             'guards' => ['ReviewItemsAllCompliant:CONSOLIDATED_REVIEW', 'InspectionsSigned'],
+            'effects' => ['Notify:WORK_ITEM_READY'],
         ],
         // T13
         [
             'from' => 'CONSOLIDATED_REVIEW', 'action' => 'RETURN_TO_COMPANY', 'actor' => 'REGISTRAR', 'to' => 'RETURNED',
             'comment' => true, 'review_items' => true,
             'guards' => ['ReviewItemsHaveDeficiency:CONSOLIDATED_REVIEW'],
-            'effects' => ['SetResumeStage:CONSOLIDATED_REVIEW', 'Notify:RETURNED'],
+            'effects' => ['SetResumeStage:CONSOLIDATED_REVIEW', 'Notify:APPLICATION_RETURNED'],
         ],
         // T14: re-inspection.
         [
             'from' => 'CONSOLIDATED_REVIEW', 'action' => 'SCHEDULE_INSPECTION', 'actor' => 'REGISTRAR', 'to' => 'INSPECTION_SCHEDULED',
             'comment' => true,
-            'effects' => ['CreateInspections', 'Notify:INSPECTION_SCHEDULED'],
+            'effects' => ['CreateInspections', 'Notify:INSPECTION_SCHEDULED', 'Notify:WORK_ITEM_READY'],
         ],
         // T15
         [
             'from' => 'DIRECTOR_REVIEW', 'action' => 'RECOMMEND', 'actor' => 'DEPARTMENTAL_DIRECTOR', 'to' => 'PERMISSION_TO_PAY',
             'guards' => ['Segregation'],
-            'effects' => ['Notify:RECOMMENDED'],
+            'effects' => ['Notify:WORK_ITEM_READY'],
         ],
         // T16
         [
             'from' => 'DIRECTOR_REVIEW', 'action' => 'RETURN_TO_REGISTRAR', 'actor' => 'DEPARTMENTAL_DIRECTOR', 'to' => 'CONSOLIDATED_REVIEW',
             'comment' => true,
-            'effects' => ['Notify:RETURNED_TO_REGISTRAR'],
+            'effects' => ['Notify:WORK_ITEM_READY'],
         ],
         // T17
         [
@@ -185,13 +193,13 @@ return [
         // T18
         [
             'from' => 'AWAITING_PAYMENT', 'action' => 'UPLOAD_RECEIPT', 'actor' => 'COMPANY', 'to' => 'PAYMENT_VERIFICATION',
-            'effects' => ['RecordPayment', 'Notify:RECEIPT_UPLOADED'],
+            'effects' => ['RecordPayment', 'Notify:WORK_ITEM_READY'],
         ],
         // T19
         [
             'from' => 'PAYMENT_VERIFICATION', 'action' => 'CLEAR_PAYMENT', 'actor' => 'PAYMENT_OFFICER', 'to' => 'DG_DECISION', 'password' => true,
             'guards' => ['AmountMatchesLetter', 'ReceiptNotUsed'],
-            'effects' => ['ClearPayment', 'Notify:PAYMENT_CLEARED'],
+            'effects' => ['ClearPayment', 'Notify:PAYMENT_CLEARED', 'Notify:WORK_ITEM_READY'],
         ],
         // T20
         [
@@ -203,25 +211,25 @@ return [
         [
             'from' => 'DG_DECISION', 'action' => 'APPROVE', 'actor' => 'DIRECTOR_GENERAL', 'to' => 'ISSUED', 'password' => true,
             'guards' => ['PaymentCleared', 'Segregation', 'ActiveDelegation', 'SignerHasSignature'],
-            'effects' => ['IssueLicense', 'SupersedePreviousLicense', 'ClearAmendmentFlag', 'ClearOpenKey', 'SetDecidedAt', 'Notify:ISSUED'],
+            'effects' => ['IssueLicense', 'SupersedePreviousLicense', 'ClearAmendmentFlag', 'ClearOpenKey', 'SetDecidedAt', 'Notify:LICENSE_ISSUED'],
         ],
         // T22: the DG defers; on resubmission the file continues at consolidated review (D-043).
         [
             'from' => 'DG_DECISION', 'action' => 'DEFER', 'actor' => 'DIRECTOR_GENERAL', 'to' => 'RETURNED',
             'comment' => true,
-            'effects' => ['SetResumeStage:CONSOLIDATED_REVIEW', 'Notify:RETURNED'],
+            'effects' => ['SetResumeStage:CONSOLIDATED_REVIEW', 'Notify:APPLICATION_RETURNED'],
         ],
         // T23
         [
             'from' => 'DG_DECISION', 'action' => 'REJECT', 'actor' => 'DIRECTOR_GENERAL', 'to' => 'REJECTED', 'password' => true,
             'comment' => true,
-            'effects' => ['ClearOpenKey', 'SetDecidedAt', 'Notify:REJECTED'],
+            'effects' => ['ClearOpenKey', 'SetDecidedAt', 'Notify:APPLICATION_REJECTED'],
         ],
         // T25 (T24, withdrawal, was removed by D-101)
         [
             'from' => 'RETURNED', 'action' => 'RESUBMIT', 'actor' => 'COMPANY', 'to' => 'resume_stage', 'password' => true,
             'guards' => $submitGuards,
-            'effects' => ['CreateVersionSnapshot', 'ClearResumeStage', 'Notify:RESUBMITTED'],
+            'effects' => ['CreateVersionSnapshot', 'ClearResumeStage', 'Notify:APPLICATION_RESUBMITTED'],
         ],
     ],
 ];

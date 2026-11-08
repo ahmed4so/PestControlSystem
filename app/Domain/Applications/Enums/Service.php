@@ -16,6 +16,18 @@ enum Service: string
     case ImportPermit = 'IMPORT_PERMIT';
 
     /**
+     * English name, translated with __().
+     */
+    public function label(): string
+    {
+        return match ($this) {
+            self::CompanyLicense => 'Pest Control Products Company License',
+            self::OperatorLicense => 'Pest Control Products Operator License',
+            self::ImportPermit => 'Import Permit of Pest Control Products',
+        };
+    }
+
+    /**
      * Application reference prefix: CL, OL, IP (D-075).
      */
     public function referencePrefix(): NumberPrefix

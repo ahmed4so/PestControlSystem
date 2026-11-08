@@ -6,6 +6,7 @@ namespace App\Domain\Workflow\Definitions;
 
 use App\Domain\Applications\Enums\ApplicationStatus;
 use App\Domain\Applications\Enums\Service;
+use App\Domain\Notifications\Enums\NotificationCode;
 use App\Domain\Workflow\Enums\ActorRole;
 use App\Domain\Workflow\Enums\WorkflowActionCode;
 use App\Domain\Workflow\Registry\WorkflowRegistry;
@@ -146,6 +147,12 @@ final class DefinitionValidator
             foreach ((array) ($transition['effects'] ?? []) as $spec) {
                 if (! $this->registry->hasEffect((string) $spec)) {
                     $errors[] = "{$label}: unknown effect [{$spec}].";
+                }
+
+                [$effectName, $effectParam] = WorkflowRegistry::split((string) $spec);
+
+                if ($effectName === 'Notify' && NotificationCode::tryFrom((string) $effectParam) === null) {
+                    $errors[] = "{$label}: unknown email code [{$spec}] (07 §3.3).";
                 }
             }
 

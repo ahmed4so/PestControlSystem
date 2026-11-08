@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Identity\Enums\AuthArea;
 use App\Domain\Identity\Support\FortifyRoutes;
+use App\Http\Controllers\Portal\ApplicationController;
 use App\Http\Controllers\Portal\Auth\SignUpController;
 use App\Http\Controllers\Portal\Auth\TemporaryPasswordController;
 use App\Http\Controllers\Portal\Company\CompanyController;
@@ -72,6 +73,18 @@ Route::prefix('portal')->middleware(['auth:company', 'active', 'session.timeouts
     Route::resource('premises', PremisesController::class)
         ->parameters(['premises' => 'premises'])
         ->only(['index', 'create', 'store', 'edit', 'update']);
+
+    // Applications (Phase 4A): drafts, submit, returns and resubmission.
+    // Status changes only through the workflow engine (D-096).
+    Route::get('applications', [ApplicationController::class, 'index'])->name('applications.index');
+    Route::get('applications/create', [ApplicationController::class, 'create'])->name('applications.create');
+    Route::post('applications', [ApplicationController::class, 'store'])->middleware('throttle:10,1')->name('applications.store');
+    Route::get('applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
+    Route::put('applications/{application}/premises', [ApplicationController::class, 'premises'])->name('applications.premises');
+    Route::put('applications/{application}/technical-person', [ApplicationController::class, 'technicalPerson'])->name('applications.technical-person');
+    Route::post('applications/{application}/submit', [ApplicationController::class, 'submit'])
+        ->middleware('throttle:6,1')
+        ->name('applications.submit');
 
     Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');
     Route::post('documents', [DocumentController::class, 'store'])->middleware('throttle:uploads')->name('documents.store');

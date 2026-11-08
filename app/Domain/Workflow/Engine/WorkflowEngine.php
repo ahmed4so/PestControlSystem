@@ -131,6 +131,10 @@ final class WorkflowEngine
                 'on_behalf_of_id' => $context->onBehalfOf?->id,
             ]);
 
+            // Work that needs the new status, e.g. who gets an email (D-198).
+            $context->record = $record;
+            $context->runAfterStatusChange($from);
+
             $application->setRawAttributes($locked->getAttributes(), sync: true);
 
             return $record;

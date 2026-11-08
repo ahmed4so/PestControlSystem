@@ -22,7 +22,9 @@ class DatabaseSeeder extends Seeder
         // Last step: load the workflow definitions in config/workflows
         // (D-071, D-097). Safe to repeat: loaded versions are skipped (D-189).
         $status = Artisan::call('workflows:load');
-        $this->command?->getOutput()->write(Artisan::output());
+        if (isset($this->command)) {
+            $this->command->getOutput()->write(Artisan::output());
+        }
 
         if ($status !== 0) {
             throw new RuntimeException('Loading the workflow definitions failed.');

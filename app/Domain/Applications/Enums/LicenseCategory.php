@@ -12,4 +12,16 @@ enum LicenseCategory: string
     case Importer = 'IMPORTER';
     case Wholesaler = 'WHOLESALER';
     case Retailer = 'RETAILER';
+
+    /**
+     * English name, translated with __() (D-014).
+     */
+    public function label(): string
+    {
+        return match ($this) {
+            self::Importer => 'Importer',
+            self::Wholesaler => 'Wholesaler',
+            self::Retailer => 'Retailer',
+        };
+    }
 }

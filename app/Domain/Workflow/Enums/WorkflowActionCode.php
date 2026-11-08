@@ -33,6 +33,36 @@ enum WorkflowActionCode: string
     case RescheduleInspection = 'RESCHEDULE_INSPECTION';
 
     /**
+     * English button label, translated with __() (02 §5.2 actions).
+     */
+    public function label(): string
+    {
+        return match ($this) {
+            self::Submit => 'Submit',
+            self::Resubmit => 'Resubmit',
+            self::Acknowledge => 'Acknowledge',
+            self::CompleteAdminReview => 'Complete administrative review',
+            self::CompleteTechnicalReview => 'Complete technical review',
+            self::AssignTechnicalReviewer => 'Assign a Technical Reviewer',
+            self::ScheduleInspection => 'Schedule the inspection',
+            self::SubmitInspectionReport => 'Sign and submit the inspection report',
+            self::CompleteConsolidatedReview => 'Complete consolidated review',
+            self::Recommend => 'Recommend',
+            self::ReturnToRegistrar => 'Return to the Registrar',
+            self::IssuePermissionToPay => 'Issue permission to pay',
+            self::UploadReceipt => 'Upload the receipt',
+            self::ClearPayment => 'Clear the payment',
+            self::RejectReceipt => 'Reject the receipt',
+            self::Approve => 'Approve',
+            self::Defer => 'Defer',
+            self::Reject => 'Reject',
+            self::ReturnToCompany => 'Return to the company',
+            self::RecordInspectionVisit => 'Record the inspection visit',
+            self::RescheduleInspection => 'Reschedule the inspection',
+        };
+    }
+
+    /**
      * The DG's decisions, which segregation of duties protects (D-086).
      *
      * @return list<self>

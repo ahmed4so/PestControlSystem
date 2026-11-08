@@ -19,9 +19,9 @@ final class NotifyRole
     public function __construct(private readonly SendNotification $send) {}
 
     /**
-     * @param  array<string, string>  $data
+     * @param  array<string, mixed>  $data
      */
-    public function __invoke(StaffRole $role, NotificationCode $code, array $data = [], ?Model $related = null, ?User $actor = null): int
+    public function __invoke(StaffRole $role, NotificationCode $code, array $data = [], ?Model $related = null, ?User $actor = null, ?string $reference = null): int
     {
         $recipients = User::role($role->value)
             ->where('status', AccountStatus::Active)
@@ -29,7 +29,7 @@ final class NotifyRole
             ->get();
 
         foreach ($recipients as $user) {
-            ($this->send)($user, $code, $data, related: $related);
+            ($this->send)($user, $code, $data, related: $related, reference: $reference);
         }
 
         return $recipients->count();
