@@ -184,6 +184,11 @@ The questions as asked:
 
 D-195 (correction allowed), D-196 to D-201 below, and D-202 (unused version may be replaced).
 
+**Proposed while coding (waiting for confirmation):**
+- **D-203 (edit lock):**
+  - The lock wins when a license draft and an application in process exist together.
+  - A company with only rejected applications can edit its profile.
+
 | ID | Proposal | Why |
 |---|---|---|
 | D-196 | Multi-premises inspections as in Q1. | The matrix covers one inspection only. |

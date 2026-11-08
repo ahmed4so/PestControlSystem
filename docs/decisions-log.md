@@ -1715,6 +1715,17 @@ Entry format:
 - Reason: `company_license_v1` was loaded only on development and test databases and needs the 07 notification codes; running applications are still never affected (04 §2).
 - Affects: DefinitionLoader, workflows:load
 
+## D-203: Edit lock when a draft and an application in process exist together
+- Date: 2026-11-08
+- Status: Proposed
+- Source: Claude Code (Phase 4A step 3)
+- Decision:
+  - The profile is locked while any application is in process (submitted, not returned, not final), even if a Company or Operator License draft or returned application is open at the same time.
+  - A company with only rejected applications, and no issued license, can edit its profile, as before its first submission.
+- Reason: 02 §6.4 has an "editable" row (license application in DRAFT or RETURNED) and a "locked" row (any application in process) and does not say which wins when both apply. The application under review should not see the profile change under it. The rejected-only case is not in the table.
+- Alternative: let the open draft or returned application unlock the profile; reviewers work from snapshots, so the application in process is not changed.
+- Affects: ApplicationSubmissionState
+
 ---
 
 ## Open Questions

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Domain\Applications\Support\ApplicationSubmissionState;
 use App\Domain\CompanyRegistry\Contracts\SubmissionState;
-use App\Domain\CompanyRegistry\Support\NothingSubmittedYet;
 use App\Domain\Identity\Support\PasswordPolicy;
 use App\Domain\Notifications\Actions\NotifyWorkflowEvent;
 use App\Domain\Notifications\Listeners\MarkNotificationSent;
@@ -25,8 +25,8 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // No applications exist yet; Phase 4 binds the real state (D-073).
-        $this->app->bind(SubmissionState::class, NothingSubmittedYet::class);
+        // The company data edit lock follows the applications (D-073, 02 §6.4).
+        $this->app->bind(SubmissionState::class, ApplicationSubmissionState::class);
 
         // One catalogue of guards and effects; later phases extend it (D-188).
         $this->app->singleton(WorkflowRegistry::class);

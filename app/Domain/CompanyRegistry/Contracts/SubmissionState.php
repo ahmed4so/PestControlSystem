@@ -8,7 +8,7 @@ use App\Models\Company;
 
 /**
  * What the applications say about a company's editing rights (D-073).
- * Phase 2 has no applications; Phase 4 binds the real implementation.
+ * Bound to Applications\Support\ApplicationSubmissionState (Phase 4A).
  */
 interface SubmissionState
 {
