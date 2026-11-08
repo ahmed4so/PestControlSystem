@@ -1,4 +1,4 @@
-import { Form, Head, router } from '@inertiajs/react';
+import { Form, Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import NativeSelect from '@/components/company/native-select';
 import InputError from '@/components/input-error';
@@ -13,6 +13,9 @@ import { Textarea } from '@/components/ui/textarea';
 import PortalLayout from '@/layouts/portal-layout';
 import { useTranslation } from '@/lib/i18n';
 import { premises as premisesRoute, submit as submitRoute, technicalPerson } from '@/routes/portal/applications';
+import { edit as companyEdit } from '@/routes/portal/company';
+import { index as documentsIndex } from '@/routes/portal/documents';
+import { edit as personEdit } from '@/routes/portal/persons';
 
 type Props = {
     application: {
@@ -157,16 +160,28 @@ export default function ApplicationShow({ application, editable, premises, perso
                         <h2 className="font-semibold">{resubmit ? t('Resubmit the application') : t('Submit the application')}</h2>
 
                         {submit.blocked_by.length > 0 && (
-                            <Alert variant="destructive">
-                                <AlertTitle>{t('Before you can submit:')}</AlertTitle>
-                                <AlertDescription>
-                                    <ul className="list-disc space-y-1 pl-5">
-                                        {submit.blocked_by.map((reason) => (
-                                            <li key={reason}>{reason}</li>
-                                        ))}
-                                    </ul>
-                                </AlertDescription>
-                            </Alert>
+                            <div role="alert" className="space-y-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200">
+                                <p className="font-medium">{t('Before you can submit:')}</p>
+                                <ul className="list-disc space-y-1 pl-5">
+                                    {submit.blocked_by.map((reason) => (
+                                        <li key={reason}>{reason}</li>
+                                    ))}
+                                </ul>
+                                <p className="flex flex-wrap gap-x-3 gap-y-1 pt-1">
+                                    <span>{t('Fix it here:')}</span>
+                                    {selected.person_id && (
+                                        <Link href={personEdit(selected.person_id)} className="font-medium underline">
+                                            {t('Technical person (degree certificate, CV)')}
+                                        </Link>
+                                    )}
+                                    <Link href={documentsIndex()} className="font-medium underline">
+                                        {t('Company documents')}
+                                    </Link>
+                                    <Link href={companyEdit()} className="font-medium underline">
+                                        {t('Company profile')}
+                                    </Link>
+                                </p>
+                            </div>
                         )}
 
                         <Form {...submitRoute.form(application.id)} options={{ preserveScroll: true }} resetOnError={['password']} className="space-y-4">
