@@ -13,8 +13,9 @@ import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/admin-layout';
 import { compressImage } from '@/lib/compress-image';
 import { useTranslation } from '@/lib/i18n';
+import { queues } from '@/routes/admin';
 import { show as applicationShow } from '@/routes/admin/applications';
-import { media as mediaRoute, report, reschedule, sign, visit } from '@/routes/admin/inspections';
+import { show as inspectionShow, media as mediaRoute, report, reschedule, sign, visit } from '@/routes/admin/inspections';
 
 type Inspection = {
     id: number;
@@ -133,7 +134,13 @@ export default function InspectionShow({ inspection, premises, checklist, media,
     };
 
     return (
-        <AdminLayout>
+        <AdminLayout
+            breadcrumbs={[
+                { title: t('Work queues'), href: queues().url },
+                { title: inspection.reference ?? t('Application'), href: applicationShow(inspection.application_id).url },
+                { title: t('Inspection'), href: inspectionShow(inspection.id).url },
+            ]}
+        >
             <Head title={t('Inspection')} />
 
             <div className="mx-auto max-w-2xl space-y-6 p-4">

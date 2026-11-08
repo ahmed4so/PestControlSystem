@@ -13,7 +13,7 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useTranslation } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
-import { dashboard } from '@/routes/portal';
+import { dashboard, settings } from '@/routes/portal';
 import { index as applicationsIndex } from '@/routes/portal/applications';
 import { edit as companyEdit } from '@/routes/portal/company';
 import { index as documentsIndex } from '@/routes/portal/documents';
@@ -29,7 +29,7 @@ export default function PortalLayout({ children }: PropsWithChildren) {
         flash: { success?: string; error?: string };
     }>().props;
     const { t } = useTranslation();
-    const { isCurrentUrl } = useCurrentUrl();
+    const { activeSection } = useCurrentUrl();
     const navItems = auth.user?.has_company
         ? [
               { title: t('Dashboard'), href: dashboard() },
@@ -38,8 +38,10 @@ export default function PortalLayout({ children }: PropsWithChildren) {
               { title: t('Persons'), href: personsIndex() },
               { title: t('Premises'), href: premisesIndex() },
               { title: t('Documents'), href: documentsIndex() },
+              { title: t('Settings'), href: settings(), match: ['/portal/settings'] },
           ]
         : [];
+    const active = activeSection(navItems);
 
     return (
         <div className="flex min-h-svh flex-col bg-background">
@@ -77,13 +79,14 @@ export default function PortalLayout({ children }: PropsWithChildren) {
                 </div>
                 {navItems.length > 0 && (
                     <nav aria-label={t('Company Portal')} className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 pb-2">
-                        {navItems.map((item) => (
+                        {navItems.map((item, index) => (
                             <Link
                                 key={item.title}
                                 href={item.href}
+                                aria-current={index === active ? 'page' : undefined}
                                 className={cn(
                                     'rounded-md px-3 py-1.5 text-sm whitespace-nowrap hover:bg-muted',
-                                    isCurrentUrl(item.href) && 'bg-muted font-medium',
+                                    index === active && 'bg-muted font-medium',
                                 )}
                             >
                                 {item.title}

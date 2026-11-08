@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import BackLink from '@/components/back-link';
 import NativeSelect from '@/components/company/native-select';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import PortalLayout from '@/layouts/portal-layout';
 import { useTranslation } from '@/lib/i18n';
-import { store } from '@/routes/portal/applications';
+import { index as backTo, store } from '@/routes/portal/applications';
 
 type Props = { categories: { value: string; label: string }[] };
 
@@ -22,6 +23,7 @@ export default function ApplicationCreate({ categories }: Props) {
             <Head title={t('New application')} />
 
             <div className="mx-auto max-w-xl space-y-6">
+                <BackLink href={backTo()}>{t('Back to applications')}</BackLink>
                 <h1 className="text-xl font-semibold">{t('New application')}</h1>
                 <p className="text-sm text-muted-foreground">{t('Pest Control Products Company License')}</p>
 

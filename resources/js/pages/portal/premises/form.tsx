@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import BackLink from '@/components/back-link';
 import AddressFields, { type AddressValues, type FmsOption } from '@/components/company/address-fields';
 import NativeSelect from '@/components/company/native-select';
 import InputError from '@/components/input-error';
@@ -8,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import PortalLayout from '@/layouts/portal-layout';
 import { useTranslation } from '@/lib/i18n';
-import { store, update } from '@/routes/portal/premises';
+import { index as backTo, store, update } from '@/routes/portal/premises';
 
 type Premises = AddressValues & {
     id: number;
@@ -39,6 +40,7 @@ export default function PremisesForm({ premises, canEdit, types, fms }: Props) {
             <Head title={premises ? premises.label : t('Add premises')} />
 
             <div className="mx-auto max-w-3xl space-y-8">
+                <BackLink href={backTo()}>{t('Back to premises')}</BackLink>
                 <h1 className="text-xl font-semibold">{premises ? premises.label : t('Add premises')}</h1>
 
                 <Form {...form} options={{ preserveScroll: true }} className="space-y-6">

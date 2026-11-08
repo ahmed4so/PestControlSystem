@@ -1,5 +1,6 @@
 import { Form, Head } from '@inertiajs/react';
 import StatusMessage from '@/components/auth/status-message';
+import BackLink from '@/components/back-link';
 import AddressFields, { type AddressValues, type FmsOption } from '@/components/company/address-fields';
 import DocumentUpload from '@/components/company/document-upload';
 import NativeSelect from '@/components/company/native-select';
@@ -11,7 +12,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import PortalLayout from '@/layouts/portal-layout';
 import { useTranslation } from '@/lib/i18n';
-import { store, update } from '@/routes/portal/persons';
+import { index as backTo, store, update } from '@/routes/portal/persons';
 
 type Person = AddressValues & {
     id: number;
@@ -50,6 +51,7 @@ export default function PersonForm({ person, canEdit, personDocumentTypes, fms, 
             <Head title={person ? person.full_name : t('Add person')} />
 
             <div className="mx-auto max-w-3xl space-y-6">
+                <BackLink href={backTo()}>{t('Back to persons')}</BackLink>
                 <h1 className="text-xl font-semibold">{person ? person.full_name : t('Add person')}</h1>
 
                 {person?.released && (

@@ -1,5 +1,6 @@
 import { Form, Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import BackLink from '@/components/back-link';
 import NativeSelect from '@/components/company/native-select';
 import InputError from '@/components/input-error';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -12,7 +13,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import PortalLayout from '@/layouts/portal-layout';
 import { useTranslation } from '@/lib/i18n';
-import { premises as premisesRoute, submit as submitRoute, technicalPerson } from '@/routes/portal/applications';
+import { index as backTo, premises as premisesRoute, submit as submitRoute, technicalPerson } from '@/routes/portal/applications';
 import { edit as companyEdit } from '@/routes/portal/company';
 import { index as documentsIndex } from '@/routes/portal/documents';
 import { edit as personEdit } from '@/routes/portal/persons';
@@ -68,6 +69,7 @@ export default function ApplicationShow({ application, editable, premises, perso
             <Head title={application.reference ?? t('Draft')} />
 
             <div className="mx-auto max-w-3xl space-y-8">
+                <BackLink href={backTo()}>{t('Back to applications')}</BackLink>
                 <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
                         <h1 className="text-xl font-semibold">{application.reference ?? t('Draft')}</h1>

@@ -1,4 +1,4 @@
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head, Link, usePage } from '@inertiajs/react';
 import NativeSelect from '@/components/company/native-select';
 import InputError from '@/components/input-error';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -10,7 +10,9 @@ import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/admin-layout';
 import { useTranslation } from '@/lib/i18n';
-import { actions as actionsRoute, reviewItems as reviewItemsRoute } from '@/routes/admin/applications';
+import { queues } from '@/routes/admin';
+import { actions as actionsRoute, reviewItems as reviewItemsRoute, show as applicationShow } from '@/routes/admin/applications';
+import { show as companyShow } from '@/routes/admin/companies';
 import { show as inspectionShow } from '@/routes/admin/inspections';
 
 type Action = { action: string; label: string; to: string | null; requires_comment: boolean; requires_password: boolean; blocked_by: string[] };
@@ -86,10 +88,17 @@ function SnapshotSection({ value }: { value: unknown }) {
 export default function ApplicationFile({ application, snapshot, versions, reviewItems, assignments, timeline, actions, technicalReviewers, inspections, schedule }: Props) {
     const shownActions = actions.filter((action) => !INSPECTION_ACTIONS.includes(action.action));
     const { t } = useTranslation();
+    const { auth } = usePage().props;
+    const seesCompanies = auth.permissions?.includes('view applications') ?? false;
     const currentResult = (code: string) => reviewItems.recorded.find((item) => item.stage === reviewItems.stage && item.code === code);
 
     return (
-        <AdminLayout>
+        <AdminLayout
+            breadcrumbs={[
+                { title: t('Work queues'), href: queues().url },
+                { title: application.reference ?? t('Draft'), href: applicationShow(application.id).url },
+            ]}
+        >
             <Head title={application.reference ?? t('Draft')} />
 
             <div className="space-y-8 p-4">
@@ -99,7 +108,14 @@ export default function ApplicationFile({ application, snapshot, versions, revie
                         <Badge>{application.stage}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                        {application.company.name} — {t(application.service)}
+                        {seesCompanies ? (
+                            <Link href={companyShow(application.company.id)} className="underline">
+                                {application.company.name}
+                            </Link>
+                        ) : (
+                            application.company.name
+                        )}{' '}
+                        — {t(application.service)}
                         {application.category && ` — ${t(application.category)}`}
                     </p>
                 </div>
