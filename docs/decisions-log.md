@@ -1655,6 +1655,62 @@ Entry format:
 
 ---
 
+## D-196: Inspections of several premises
+- Date: 2026-11-08
+- Status: Proposed
+- Source: Claude Code (Phase 4A plan, question Q1)
+- Decision:
+  - `RECORD_INSPECTION_VISIT` (T10) moves the application to `INSPECTION_REPORT` on the first visit.
+  - Visits to the other premises are recorded on their own inspection, as an audited Inspection action without a status change.
+  - While the application is at `INSPECTION_REPORT`, the Registrar can reschedule an inspection not yet visited, through the same Inspection action and with the same email.
+  - `SUBMIT_INSPECTION_REPORT` (T11) keeps the stage until the last report of the round is signed.
+- Reason: The 04 §5.2 matrix covers one inspection; D-077 gives one inspection per premises, each with its own Inspector.
+- Affects: Inspection module, company_license definition
+
+## D-197: Premises required at submission
+- Date: 2026-11-08
+- Status: Proposed
+- Source: Claude Code (Phase 4A plan)
+- Decision: A new guard, `PremisesSelected`, on SUBMIT and RESUBMIT: at least one premises is selected, and every selected premises belongs to the company.
+- Reason: 05 §5.1 requires at least one premises. The removed `ChecklistPhotos` guard (D-192) was the only check that implied it.
+- Affects: Workflow guards, company_license definition
+
+## D-198: Work-item emails
+- Date: 2026-11-08
+- Status: Proposed
+- Source: Claude Code (Phase 4A plan)
+- Decision: `WORK_ITEM_READY` is a `Notify` code listed in the definition on every transition whose target is a staff stage. It goes to every active holder of the stage role, or only to the assignee when there is one, and never to the actor (D-127).
+- Reason: 07 §3.3 says "enters any staff stage" without listing every transition.
+- Affects: Notifications, company_license definition
+
+## D-199: Version differences computed on view
+- Date: 2026-11-08
+- Status: Proposed
+- Source: Claude Code (Phase 4A plan)
+- Decision: The differences between two application versions are computed when the page opens, by comparing the two snapshots field by field. Nothing extra is stored.
+- Reason: Snapshots are immutable and complete (02 §6.3).
+- Affects: Admin application file
+
+## D-200: Inspection video checks
+- Date: 2026-11-08
+- Status: Proposed
+- Source: Claude Code (Phase 4A plan)
+- Decision: Inspection videos must be MP4, checked from the file content, up to 50 MB, and are accepted only as inspection media. They are stored as uploaded, with no conversion. Company uploads keep the 5 MB limit.
+- Reason: D-135 sets the type and size, not how the file is checked.
+- Affects: Documents (SafeUploads), Inspection
+
+## D-201: What the company sees of the processing
+- Date: 2026-11-08
+- Status: Proposed
+- Source: Claude Code (Phase 4A plan)
+- Decision:
+  - The company sees: status changes, with company labels (D-045); the comments of returns and DG deferrals; and review items that are not compliant, with their comments.
+  - It does not see: internal comments (Director return, re-inspection reason), staff names, or inspection reports beyond the planned date.
+- Reason: 02 §4.7 says "company-visible actions and comments only" without listing them; 02 §4.8 gives the company only the planned date.
+- Affects: Company Portal application page
+
+---
+
 ## Open Questions
 
 1. Fee schedule per service and category (F1).
