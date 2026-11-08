@@ -14,6 +14,7 @@ import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useTranslation } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes/portal';
+import { index as applicationsIndex } from '@/routes/portal/applications';
 import { edit as companyEdit } from '@/routes/portal/company';
 import { index as documentsIndex } from '@/routes/portal/documents';
 import { index as personsIndex } from '@/routes/portal/persons';
@@ -32,6 +33,7 @@ export default function PortalLayout({ children }: PropsWithChildren) {
     const navItems = auth.user?.has_company
         ? [
               { title: t('Dashboard'), href: dashboard() },
+              { title: t('Applications'), href: applicationsIndex() },
               { title: t('Company'), href: companyEdit() },
               { title: t('Persons'), href: personsIndex() },
               { title: t('Premises'), href: premisesIndex() },

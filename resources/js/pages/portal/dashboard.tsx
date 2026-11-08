@@ -3,11 +3,12 @@ import StatusMessage from '@/components/auth/status-message';
 import { Button } from '@/components/ui/button';
 import PortalLayout from '@/layouts/portal-layout';
 import { useTranslation } from '@/lib/i18n';
+import { create, index as applicationsIndex } from '@/routes/portal/applications';
 import { edit } from '@/routes/portal/company';
 
 /**
- * Company dashboard: profile completeness (D-178). Applications arrive in
- * Phase 4.
+ * Company dashboard: profile completeness (D-178) and the way to start an
+ * application once the profile is complete.
  */
 export default function Dashboard({ companyName, missing, amendmentRequired }: { companyName: string; missing: string[]; amendmentRequired: boolean }) {
     const { auth } = usePage().props;
@@ -26,7 +27,17 @@ export default function Dashboard({ companyName, missing, amendmentRequired }: {
                 )}
 
                 {missing.length === 0 ? (
-                    <StatusMessage status={t('Your company profile is complete.')} />
+                    <div className="space-y-3">
+                        <StatusMessage status={t('Your company profile is complete.')} />
+                        <div className="flex flex-wrap gap-2">
+                            <Button asChild size="sm">
+                                <Link href={create()}>{t('Start an application')}</Link>
+                            </Button>
+                            <Button asChild size="sm" variant="outline">
+                                <Link href={applicationsIndex()}>{t('My applications')}</Link>
+                            </Button>
+                        </div>
+                    </div>
                 ) : (
                     <div className="space-y-3 rounded-md border p-4">
                         <p className="font-medium">{t('Complete your company profile')}</p>
