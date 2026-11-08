@@ -412,6 +412,84 @@ settings.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => 
         })
     
     settings.form = settingsForm
+/**
+* @see \App\Http\Controllers\Admin\WorkQueueController::__invoke
+ * @see app/Http/Controllers/Admin/WorkQueueController.php:35
+ * @route '/admin/queues'
+ */
+export const queues = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: queues.url(options),
+    method: 'get',
+})
+
+queues.definition = {
+    methods: ["get","head"],
+    url: '/admin/queues',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\Admin\WorkQueueController::__invoke
+ * @see app/Http/Controllers/Admin/WorkQueueController.php:35
+ * @route '/admin/queues'
+ */
+queues.url = (options?: RouteQueryOptions) => {
+    return queues.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\Admin\WorkQueueController::__invoke
+ * @see app/Http/Controllers/Admin/WorkQueueController.php:35
+ * @route '/admin/queues'
+ */
+queues.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: queues.url(options),
+    method: 'get',
+})
+/**
+* @see \App\Http\Controllers\Admin\WorkQueueController::__invoke
+ * @see app/Http/Controllers/Admin/WorkQueueController.php:35
+ * @route '/admin/queues'
+ */
+queues.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: queues.url(options),
+    method: 'head',
+})
+
+    /**
+* @see \App\Http\Controllers\Admin\WorkQueueController::__invoke
+ * @see app/Http/Controllers/Admin/WorkQueueController.php:35
+ * @route '/admin/queues'
+ */
+    const queuesForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: queues.url(options),
+        method: 'get',
+    })
+
+            /**
+* @see \App\Http\Controllers\Admin\WorkQueueController::__invoke
+ * @see app/Http/Controllers/Admin/WorkQueueController.php:35
+ * @route '/admin/queues'
+ */
+        queuesForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: queues.url(options),
+            method: 'get',
+        })
+            /**
+* @see \App\Http\Controllers\Admin\WorkQueueController::__invoke
+ * @see app/Http/Controllers/Admin/WorkQueueController.php:35
+ * @route '/admin/queues'
+ */
+        queuesForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: queues.url({
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    queues.form = queuesForm
 const admin = {
     login: Object.assign(login, loginDf2c2a),
 password: Object.assign(password, password),
@@ -424,6 +502,7 @@ userPassword: Object.assign(userPassword, userPassword),
 appearance: Object.assign(appearance, appearance),
 users: Object.assign(users, users),
 roles: Object.assign(roles, roles),
+queues: Object.assign(queues, queues),
 applications: Object.assign(applications, applications),
 companies: Object.assign(companies, companies),
 files: Object.assign(files, files),

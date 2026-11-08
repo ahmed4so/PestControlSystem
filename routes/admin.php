@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\Settings\PasswordController;
 use App\Http\Controllers\Admin\Settings\ProfileController;
 use App\Http\Controllers\Admin\Settings\TwoFactorAuthenticationController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\WorkQueueController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -64,6 +65,9 @@ Route::middleware(['auth:web', 'active', 'session.timeouts', 'password.current',
 
         Route::resource('roles', RoleController::class)->except(['show'])->middleware('throttle:10,1');
     });
+
+    // Work queues (04 §15, D-105).
+    Route::get('queues', WorkQueueController::class)->name('queues');
 
     // Application file and workflow actions (Phase 4A). The policy checks
     // who may see an application; the engine checks every action (D-096).

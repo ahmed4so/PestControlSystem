@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Building, Building2, Fingerprint, Home, MailWarning, MapPin, Shield, Users } from 'lucide-react';
+import { Building, Building2, Fingerprint, Home, Inbox, MailWarning, MapPin, Shield, Users } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -13,7 +13,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useTranslation } from '@/lib/i18n';
-import { dashboard } from '@/routes/admin';
+import { dashboard, queues } from '@/routes/admin';
 import { index as companies } from '@/routes/admin/companies';
 import { index as failedEmails } from '@/routes/admin/failed-emails';
 import { show as nationalIds } from '@/routes/admin/national-ids';
@@ -31,6 +31,9 @@ export function AppSidebar() {
 
     const mainNavItems: NavItem[] = [
         { title: t('Dashboard'), href: dashboard(), icon: Home },
+        ...(can('view applications') || can('view assigned applications')
+            ? [{ title: t('Work queues'), href: queues(), icon: Inbox }]
+            : []),
         ...(can('view user')
             ? [{ title: t('Users'), href: users(), icon: Users }]
             : []),
