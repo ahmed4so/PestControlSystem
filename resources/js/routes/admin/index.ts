@@ -7,6 +7,7 @@ import userPassword from './user-password'
 import appearance from './appearance'
 import users from './users'
 import roles from './roles'
+import applications from './applications'
 import companies from './companies'
 import files from './files'
 import nationalIds from './national-ids'
@@ -423,6 +424,7 @@ userPassword: Object.assign(userPassword, userPassword),
 appearance: Object.assign(appearance, appearance),
 users: Object.assign(users, users),
 roles: Object.assign(roles, roles),
+applications: Object.assign(applications, applications),
 companies: Object.assign(companies, companies),
 files: Object.assign(files, files),
 nationalIds: Object.assign(nationalIds, nationalIds),

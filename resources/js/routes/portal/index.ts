@@ -10,6 +10,7 @@ import userPassword from './user-password'
 import company from './company'
 import persons from './persons'
 import premises from './premises'
+import applications from './applications'
 import documents from './documents'
 import files from './files'
 /**
@@ -582,6 +583,7 @@ userPassword: Object.assign(userPassword, userPassword),
 company: Object.assign(company, company),
 persons: Object.assign(persons, persons),
 premises: Object.assign(premises, premises),
+applications: Object.assign(applications, applications),
 documents: Object.assign(documents, documents),
 files: Object.assign(files, files),
 }
