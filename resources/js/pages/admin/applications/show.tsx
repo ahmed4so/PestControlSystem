@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import NativeSelect from '@/components/company/native-select';
 import InputError from '@/components/input-error';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/admin-layout';
 import { useTranslation } from '@/lib/i18n';
 import { actions as actionsRoute, reviewItems as reviewItemsRoute } from '@/routes/admin/applications';
+import { show as inspectionShow } from '@/routes/admin/inspections';
 
 type Action = { action: string; label: string; to: string | null; requires_comment: boolean; requires_password: boolean; blocked_by: string[] };
 type Recorded = { stage: string; code: string; label: string; result: string; comment: string | null; mine: boolean; reviewer: string | null; reviewed_at: string };
@@ -33,7 +34,12 @@ type Props = {
     timeline: { id: number; action: string; from: string; to: string; actor: string | null; role: string | null; on_behalf_of: string | null; comment: string | null; at: string }[];
     actions: Action[];
     technicalReviewers: { id: number; name: string }[];
+    inspections: { id: number; round: number; premises: string | null; inspector: string | null; planned_date: string; conducted_at: string | null; signed_at: string | null; status: string }[];
+    schedule: { premises: { id: number; label: string }[]; inspectors: { id: number; name: string }[] } | null;
 };
+
+/** Actions on one inspection are taken from the inspection page. */
+const INSPECTION_ACTIONS = ['RECORD_INSPECTION_VISIT', 'SUBMIT_INSPECTION_REPORT', 'RESCHEDULE_INSPECTION'];
 
 const RESULTS = ['COMPLIANT', 'DEFICIENT', 'CLARIFICATION_REQUIRED'] as const;
 const RESULT_LABELS: Record<string, string> = { COMPLIANT: 'Compliant', DEFICIENT: 'Deficient', CLARIFICATION_REQUIRED: 'Clarification required' };
@@ -77,7 +83,8 @@ function SnapshotSection({ value }: { value: unknown }) {
  * work from, the versions and their differences (D-199), review items, the
  * timeline and the actions the user may take (D-191).
  */
-export default function ApplicationFile({ application, snapshot, versions, reviewItems, assignments, timeline, actions, technicalReviewers }: Props) {
+export default function ApplicationFile({ application, snapshot, versions, reviewItems, assignments, timeline, actions, technicalReviewers, inspections, schedule }: Props) {
+    const shownActions = actions.filter((action) => !INSPECTION_ACTIONS.includes(action.action));
     const { t } = useTranslation();
     const currentResult = (code: string) => reviewItems.recorded.find((item) => item.stage === reviewItems.stage && item.code === code);
 
@@ -97,11 +104,11 @@ export default function ApplicationFile({ application, snapshot, versions, revie
                     </p>
                 </div>
 
-                {actions.length > 0 && (
+                {shownActions.length > 0 && (
                     <section className="space-y-3">
                         <h2 className="font-semibold">{t('Actions')}</h2>
                         <div className="grid gap-3 md:grid-cols-2">
-                            {actions.map((action) => (
+                            {shownActions.map((action) => (
                                 <Form key={action.action} {...actionsRoute.form(application.id)} options={{ preserveScroll: true }} resetOnSuccess className="space-y-2 rounded-md border p-3">
                                     {({ processing, errors }) => (
                                         <>
@@ -118,6 +125,26 @@ export default function ApplicationFile({ application, snapshot, versions, revie
                                                         </option>
                                                     ))}
                                                 </NativeSelect>
+                                            )}
+
+                                            {action.action === 'SCHEDULE_INSPECTION' && schedule && (
+                                                <div className="space-y-2">
+                                                    {schedule.premises.map((premises, index) => (
+                                                        <div key={premises.id} className="grid gap-2 rounded border p-2">
+                                                            <input type="hidden" name={`inspections[${index}][premises_id]`} value={premises.id} />
+                                                            <span className="text-sm font-medium">{premises.label}</span>
+                                                            <NativeSelect name={`inspections[${index}][inspector_id]`} defaultValue="" required>
+                                                                <option value="">{t('Choose an Inspector…')}</option>
+                                                                {schedule.inspectors.map((inspector) => (
+                                                                    <option key={inspector.id} value={inspector.id}>
+                                                                        {inspector.name}
+                                                                    </option>
+                                                                ))}
+                                                            </NativeSelect>
+                                                            <Input type="date" name={`inspections[${index}][planned_date]`} required />
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             )}
 
                                             {action.requires_comment && <Textarea name="comment" required maxLength={2000} placeholder={t('Comment')} />}
@@ -231,6 +258,26 @@ export default function ApplicationFile({ application, snapshot, versions, revie
                                 )}
                             </div>
                         ))}
+                    </section>
+                )}
+
+                {inspections.length > 0 && (
+                    <section className="space-y-2">
+                        <h2 className="font-semibold">{t('Inspections')}</h2>
+                        <ul className="divide-y rounded-md border text-sm">
+                            {inspections.map((inspection) => (
+                                <li key={inspection.id}>
+                                    <Link href={inspectionShow(inspection.id)} className="flex flex-wrap items-center gap-2 p-2 hover:bg-muted">
+                                        <span className="font-medium">{inspection.premises}</span>
+                                        <span>{inspection.inspector}</span>
+                                        <span className="text-muted-foreground">{t('Round :round', { round: String(inspection.round) })} — {inspection.planned_date}</span>
+                                        <Badge variant="outline" className="ml-auto">
+                                            {inspection.signed_at ? t('Signed') : inspection.status === 'CANCELLED' ? t('Cancelled') : inspection.conducted_at ? t('Visited') : t('Planned')}
+                                        </Badge>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
                     </section>
                 )}
 

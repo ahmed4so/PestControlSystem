@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Domain\Applications\Support;
 
 use App\Domain\Applications\Enums\ApplicationStatus;
+use App\Domain\Inspection\Enums\InspectionStatus;
 use App\Domain\Workflow\Enums\ReviewResult;
 use App\Domain\Workflow\Enums\WorkflowActionCode;
 use App\Models\Application;
+use App\Models\Inspection;
 use App\Models\ReviewItem;
 use App\Models\WorkflowAction;
 
@@ -52,6 +54,35 @@ final class CompanyApplicationView
         }
 
         return $entries;
+    }
+
+    /**
+     * Planned inspections of the latest round: premises and date only
+     * (02 §4.8 company access, D-201); reports are never shown.
+     *
+     * @return list<array{premises: string, planned_date: string}>
+     */
+    public static function inspections(Application $application): array
+    {
+        $round = Inspection::query()->where('application_id', $application->id)->max('round');
+
+        if ($round === null || ! in_array($application->status, [ApplicationStatus::InspectionScheduled, ApplicationStatus::InspectionReport], true)) {
+            return [];
+        }
+
+        return Inspection::query()
+            ->where('application_id', $application->id)
+            ->where('round', $round)
+            ->where('status', InspectionStatus::Scheduled)
+            ->with('premises')
+            ->orderBy('planned_date')
+            ->get()
+            ->map(fn (Inspection $inspection) => [
+                'premises' => (string) $inspection->premises?->label,
+                'planned_date' => $inspection->planned_date->format('Y-m-d'),
+            ])
+            ->values()
+            ->all();
     }
 
     /**

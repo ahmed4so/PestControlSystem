@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\Workflow\Registry;
 
 use App\Domain\Applications\Enums\ApplicationType;
+use App\Domain\Inspection\Support\InspectionEffects;
+use App\Domain\Inspection\Support\InspectionGuards;
 use App\Domain\Workflow\Contracts\Effect;
 use App\Domain\Workflow\Contracts\Guard;
 use App\Domain\Workflow\Effects\ApplicationFieldEffect;
@@ -61,9 +63,9 @@ final class WorkflowRegistry
             'ActiveDelegation' => fn () => app(ActiveDelegation::class),
             'AssigneeHasRole' => fn () => app(AssigneeHasRole::class),
             // Later phases (D-188).
-            'InspectionsSigned' => fn () => new NotYetAvailableGuard('InspectionsSigned', 'Phase 4A'),
-            'InspectionReportComplete' => fn () => new NotYetAvailableGuard('InspectionReportComplete', 'Phase 4A'),
-            'InspectionPlanProvided' => fn () => new NotYetAvailableGuard('InspectionPlanProvided', 'Phase 4A'),
+            'InspectionsSigned' => fn () => InspectionGuards::signed(),
+            'InspectionReportComplete' => fn () => InspectionGuards::report(),
+            'InspectionPlanProvided' => fn () => InspectionGuards::plan(),
             'FeeScheduleExists' => fn () => new NotYetAvailableGuard('FeeScheduleExists', 'Phase 4B'),
             'AmountMatchesLetter' => fn () => new NotYetAvailableGuard('AmountMatchesLetter', 'Phase 4B'),
             'ReceiptNotUsed' => fn () => new NotYetAvailableGuard('ReceiptNotUsed', 'Phase 4B'),
@@ -89,11 +91,11 @@ final class WorkflowRegistry
             'EndAssignment' => fn () => app(EndAssignment::class),
             'Notify' => fn () => app(Notify::class),
             // Later phases (D-188).
-            'CreateInspections' => fn () => new NotYetAvailableEffect('CreateInspections', 'Phase 4A'),
-            'UpdateInspectionDate' => fn () => new NotYetAvailableEffect('UpdateInspectionDate', 'Phase 4A'),
-            'SetConductedAt' => fn () => new NotYetAvailableEffect('SetConductedAt', 'Phase 4A'),
-            'SignInspection' => fn () => new NotYetAvailableEffect('SignInspection', 'Phase 4A'),
-            'CancelOpenInspections' => fn () => new NotYetAvailableEffect('CancelOpenInspections', 'Phase 4A'),
+            'CreateInspections' => fn () => new InspectionEffects('create'),
+            'UpdateInspectionDate' => fn () => new InspectionEffects('reschedule'),
+            'SetConductedAt' => fn () => new InspectionEffects('visit'),
+            'SignInspection' => fn () => new InspectionEffects('sign'),
+            'CancelOpenInspections' => fn () => new InspectionEffects('cancel'),
             'IssuePermissionToPayLetter' => fn () => new NotYetAvailableEffect('IssuePermissionToPayLetter', 'Phase 4B'),
             'RecordPayment' => fn () => new NotYetAvailableEffect('RecordPayment', 'Phase 4B'),
             'ClearPayment' => fn () => new NotYetAvailableEffect('ClearPayment', 'Phase 4B'),

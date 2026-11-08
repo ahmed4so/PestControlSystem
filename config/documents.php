@@ -17,6 +17,9 @@ return [
     // Types allowed for company files, detected from content (D-017, D-089).
     'allowed_mime_types' => ['application/pdf', 'image/jpeg', 'image/png'],
 
+    // Inspection videos: MP4 only, checked from the content (D-135, D-200).
+    'max_video_kb' => 51200,
+
     // Photos are re-encoded no larger than this on the longest side.
     'photo_max_pixels' => 2000,
 

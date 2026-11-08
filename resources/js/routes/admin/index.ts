@@ -8,6 +8,7 @@ import appearance from './appearance'
 import users from './users'
 import roles from './roles'
 import applications from './applications'
+import inspections from './inspections'
 import companies from './companies'
 import files from './files'
 import nationalIds from './national-ids'
@@ -504,6 +505,7 @@ users: Object.assign(users, users),
 roles: Object.assign(roles, roles),
 queues: Object.assign(queues, queues),
 applications: Object.assign(applications, applications),
+inspections: Object.assign(inspections, inspections),
 companies: Object.assign(companies, companies),
 files: Object.assign(files, files),
 nationalIds: Object.assign(nationalIds, nationalIds),

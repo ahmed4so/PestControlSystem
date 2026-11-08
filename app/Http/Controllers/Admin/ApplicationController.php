@@ -23,6 +23,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\ApplicationVersion;
 use App\Models\CompanyUser;
+use App\Models\Inspection;
 use App\Models\ReviewItem;
 use App\Models\StageAssignment;
 use App\Models\StoredFile;
@@ -88,6 +89,18 @@ class ApplicationController extends Controller
                     'assigned_at' => $assignment->assigned_at->toIso8601String(),
                     'ended_at' => $assignment->ended_at?->toIso8601String(),
                 ]),
+            'inspections' => Inspection::query()->where('application_id', $application->id)->with(['inspector', 'premises'])->orderBy('round')->orderBy('id')->get()
+                ->map(fn (Inspection $inspection) => [
+                    'id' => $inspection->id,
+                    'round' => $inspection->round,
+                    'premises' => $inspection->premises?->label,
+                    'inspector' => $inspection->inspector?->name,
+                    'planned_date' => $inspection->planned_date->format('Y-m-d'),
+                    'conducted_at' => $inspection->conducted_at?->toIso8601String(),
+                    'signed_at' => $inspection->signed_at?->toIso8601String(),
+                    'status' => $inspection->status->value,
+                ]),
+            'schedule' => $this->scheduleOptions($application, $current, $engine, $user),
             'timeline' => $this->timeline($application),
             'actions' => array_map(fn (array $action) => [
                 ...$action,
@@ -258,6 +271,36 @@ class ApplicationController extends Controller
             ->map(fn (User $reviewer) => ['id' => $reviewer->id, 'name' => $reviewer->name])
             ->values()
             ->all();
+    }
+
+    /**
+     * The submitted premises and the active Inspectors, offered when the
+     * user may schedule an inspection (T7, T14).
+     *
+     * @return array{premises: list<array{id: int, label: string}>, inspectors: list<array{id: int, name: string}>}|null
+     */
+    private function scheduleOptions(Application $application, ?ApplicationVersion $current, WorkflowEngine $engine, User $user): ?array
+    {
+        $canSchedule = collect($engine->availableActions($application, $user))
+            ->contains('action', WorkflowActionCode::ScheduleInspection->value);
+
+        if (! $canSchedule || $current === null) {
+            return null;
+        }
+
+        return [
+            'premises' => collect((array) ($current->snapshot['premises'] ?? []))
+                ->map(fn (array $premises) => ['id' => (int) $premises['id'], 'label' => (string) $premises['label']])
+                ->values()
+                ->all(),
+            'inspectors' => User::role(StaffRole::Inspector->value)
+                ->where('status', AccountStatus::Active)
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn (User $inspector) => ['id' => $inspector->id, 'name' => $inspector->name])
+                ->values()
+                ->all(),
+        ];
     }
 
     private function stageName(?WorkflowTemplate $template, string $code): string

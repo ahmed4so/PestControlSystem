@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::show
- * @see app/Http/Controllers/Admin/ApplicationController.php:52
+ * @see app/Http/Controllers/Admin/ApplicationController.php:53
  * @route '/admin/applications/{application}'
  */
 export const show = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::show
- * @see app/Http/Controllers/Admin/ApplicationController.php:52
+ * @see app/Http/Controllers/Admin/ApplicationController.php:53
  * @route '/admin/applications/{application}'
  */
 show.url = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -49,7 +49,7 @@ show.url = (args: { application: number | { id: number } } | [application: numbe
 
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::show
- * @see app/Http/Controllers/Admin/ApplicationController.php:52
+ * @see app/Http/Controllers/Admin/ApplicationController.php:53
  * @route '/admin/applications/{application}'
  */
 show.get = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -58,7 +58,7 @@ show.get = (args: { application: number | { id: number } } | [application: numbe
 })
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::show
- * @see app/Http/Controllers/Admin/ApplicationController.php:52
+ * @see app/Http/Controllers/Admin/ApplicationController.php:53
  * @route '/admin/applications/{application}'
  */
 show.head = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -68,7 +68,7 @@ show.head = (args: { application: number | { id: number } } | [application: numb
 
     /**
 * @see \App\Http\Controllers\Admin\ApplicationController::show
- * @see app/Http/Controllers/Admin/ApplicationController.php:52
+ * @see app/Http/Controllers/Admin/ApplicationController.php:53
  * @route '/admin/applications/{application}'
  */
     const showForm = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -78,7 +78,7 @@ show.head = (args: { application: number | { id: number } } | [application: numb
 
             /**
 * @see \App\Http\Controllers\Admin\ApplicationController::show
- * @see app/Http/Controllers/Admin/ApplicationController.php:52
+ * @see app/Http/Controllers/Admin/ApplicationController.php:53
  * @route '/admin/applications/{application}'
  */
         showForm.get = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -87,7 +87,7 @@ show.head = (args: { application: number | { id: number } } | [application: numb
         })
             /**
 * @see \App\Http\Controllers\Admin\ApplicationController::show
- * @see app/Http/Controllers/Admin/ApplicationController.php:52
+ * @see app/Http/Controllers/Admin/ApplicationController.php:53
  * @route '/admin/applications/{application}'
  */
         showForm.head = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -103,7 +103,7 @@ show.head = (args: { application: number | { id: number } } | [application: numb
     show.form = showForm
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::actions
- * @see app/Http/Controllers/Admin/ApplicationController.php:104
+ * @see app/Http/Controllers/Admin/ApplicationController.php:117
  * @route '/admin/applications/{application}/actions'
  */
 export const actions = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -118,7 +118,7 @@ actions.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::actions
- * @see app/Http/Controllers/Admin/ApplicationController.php:104
+ * @see app/Http/Controllers/Admin/ApplicationController.php:117
  * @route '/admin/applications/{application}/actions'
  */
 actions.url = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -151,7 +151,7 @@ actions.url = (args: { application: number | { id: number } } | [application: nu
 
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::actions
- * @see app/Http/Controllers/Admin/ApplicationController.php:104
+ * @see app/Http/Controllers/Admin/ApplicationController.php:117
  * @route '/admin/applications/{application}/actions'
  */
 actions.post = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -161,7 +161,7 @@ actions.post = (args: { application: number | { id: number } } | [application: n
 
     /**
 * @see \App\Http\Controllers\Admin\ApplicationController::actions
- * @see app/Http/Controllers/Admin/ApplicationController.php:104
+ * @see app/Http/Controllers/Admin/ApplicationController.php:117
  * @route '/admin/applications/{application}/actions'
  */
     const actionsForm = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -171,7 +171,7 @@ actions.post = (args: { application: number | { id: number } } | [application: n
 
             /**
 * @see \App\Http\Controllers\Admin\ApplicationController::actions
- * @see app/Http/Controllers/Admin/ApplicationController.php:104
+ * @see app/Http/Controllers/Admin/ApplicationController.php:117
  * @route '/admin/applications/{application}/actions'
  */
         actionsForm.post = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -182,7 +182,7 @@ actions.post = (args: { application: number | { id: number } } | [application: n
     actions.form = actionsForm
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::reviewItems
- * @see app/Http/Controllers/Admin/ApplicationController.php:136
+ * @see app/Http/Controllers/Admin/ApplicationController.php:149
  * @route '/admin/applications/{application}/review-items'
  */
 export const reviewItems = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -197,7 +197,7 @@ reviewItems.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::reviewItems
- * @see app/Http/Controllers/Admin/ApplicationController.php:136
+ * @see app/Http/Controllers/Admin/ApplicationController.php:149
  * @route '/admin/applications/{application}/review-items'
  */
 reviewItems.url = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -230,7 +230,7 @@ reviewItems.url = (args: { application: number | { id: number } } | [application
 
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::reviewItems
- * @see app/Http/Controllers/Admin/ApplicationController.php:136
+ * @see app/Http/Controllers/Admin/ApplicationController.php:149
  * @route '/admin/applications/{application}/review-items'
  */
 reviewItems.post = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -240,7 +240,7 @@ reviewItems.post = (args: { application: number | { id: number } } | [applicatio
 
     /**
 * @see \App\Http\Controllers\Admin\ApplicationController::reviewItems
- * @see app/Http/Controllers/Admin/ApplicationController.php:136
+ * @see app/Http/Controllers/Admin/ApplicationController.php:149
  * @route '/admin/applications/{application}/review-items'
  */
     const reviewItemsForm = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -250,7 +250,7 @@ reviewItems.post = (args: { application: number | { id: number } } | [applicatio
 
             /**
 * @see \App\Http\Controllers\Admin\ApplicationController::reviewItems
- * @see app/Http/Controllers/Admin/ApplicationController.php:136
+ * @see app/Http/Controllers/Admin/ApplicationController.php:149
  * @route '/admin/applications/{application}/review-items'
  */
         reviewItemsForm.post = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -261,7 +261,7 @@ reviewItems.post = (args: { application: number | { id: number } } | [applicatio
     reviewItems.form = reviewItemsForm
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::file
- * @see app/Http/Controllers/Admin/ApplicationController.php:165
+ * @see app/Http/Controllers/Admin/ApplicationController.php:178
  * @route '/admin/applications/{application}/files/{storedFile}'
  */
 export const file = (args: { application: number | { id: number }, storedFile: number | { id: number } } | [application: number | { id: number }, storedFile: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -276,7 +276,7 @@ file.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::file
- * @see app/Http/Controllers/Admin/ApplicationController.php:165
+ * @see app/Http/Controllers/Admin/ApplicationController.php:178
  * @route '/admin/applications/{application}/files/{storedFile}'
  */
 file.url = (args: { application: number | { id: number }, storedFile: number | { id: number } } | [application: number | { id: number }, storedFile: number | { id: number } ], options?: RouteQueryOptions) => {
@@ -306,7 +306,7 @@ file.url = (args: { application: number | { id: number }, storedFile: number | {
 
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::file
- * @see app/Http/Controllers/Admin/ApplicationController.php:165
+ * @see app/Http/Controllers/Admin/ApplicationController.php:178
  * @route '/admin/applications/{application}/files/{storedFile}'
  */
 file.get = (args: { application: number | { id: number }, storedFile: number | { id: number } } | [application: number | { id: number }, storedFile: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -315,7 +315,7 @@ file.get = (args: { application: number | { id: number }, storedFile: number | {
 })
 /**
 * @see \App\Http\Controllers\Admin\ApplicationController::file
- * @see app/Http/Controllers/Admin/ApplicationController.php:165
+ * @see app/Http/Controllers/Admin/ApplicationController.php:178
  * @route '/admin/applications/{application}/files/{storedFile}'
  */
 file.head = (args: { application: number | { id: number }, storedFile: number | { id: number } } | [application: number | { id: number }, storedFile: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -325,7 +325,7 @@ file.head = (args: { application: number | { id: number }, storedFile: number | 
 
     /**
 * @see \App\Http\Controllers\Admin\ApplicationController::file
- * @see app/Http/Controllers/Admin/ApplicationController.php:165
+ * @see app/Http/Controllers/Admin/ApplicationController.php:178
  * @route '/admin/applications/{application}/files/{storedFile}'
  */
     const fileForm = (args: { application: number | { id: number }, storedFile: number | { id: number } } | [application: number | { id: number }, storedFile: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -335,7 +335,7 @@ file.head = (args: { application: number | { id: number }, storedFile: number | 
 
             /**
 * @see \App\Http\Controllers\Admin\ApplicationController::file
- * @see app/Http/Controllers/Admin/ApplicationController.php:165
+ * @see app/Http/Controllers/Admin/ApplicationController.php:178
  * @route '/admin/applications/{application}/files/{storedFile}'
  */
         fileForm.get = (args: { application: number | { id: number }, storedFile: number | { id: number } } | [application: number | { id: number }, storedFile: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -344,7 +344,7 @@ file.head = (args: { application: number | { id: number }, storedFile: number | 
         })
             /**
 * @see \App\Http\Controllers\Admin\ApplicationController::file
- * @see app/Http/Controllers/Admin/ApplicationController.php:165
+ * @see app/Http/Controllers/Admin/ApplicationController.php:178
  * @route '/admin/applications/{application}/files/{storedFile}'
  */
         fileForm.head = (args: { application: number | { id: number }, storedFile: number | { id: number } } | [application: number | { id: number }, storedFile: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

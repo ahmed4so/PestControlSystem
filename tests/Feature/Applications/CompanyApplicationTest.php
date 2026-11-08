@@ -15,12 +15,9 @@ use App\Domain\Workflow\Guards\PremisesSelected;
 use App\Models\Application;
 use App\Models\ApplicationVersion;
 use App\Models\Company;
-use App\Models\CompanyUser;
 use App\Models\Premises;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Testing\TestResponse;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /*
@@ -33,46 +30,6 @@ beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
     $this->artisan('workflows:load')->assertSuccessful();
 });
-
-/**
- * A ready draft with one premises selected, and its company account.
- *
- * @return array{0: Application, 1: CompanyUser}
- */
-function licenseDraft(): array
-{
-    $application = readyApplication();
-    $premises = Premises::factory()->create(['company_id' => $application->company_id]);
-    $application->premises()->attach($premises->id);
-
-    return [$application, ownerOf($application)];
-}
-
-function submitAs(CompanyUser $account, Application $application, array $overrides = []): TestResponse
-{
-    return test()->actingAs($account, 'company')->post(route('portal.applications.submit', $application), [
-        'expected_status' => $application->fresh()->status->value,
-        'declaration_name' => 'Amina Hassan',
-        'declaration_designation' => 'Managing Director',
-        'confirm' => '1',
-        'password' => 'password',
-        ...$overrides,
-    ]);
-}
-
-function freshApplication(Application $application): Application
-{
-    return Application::query()->withoutGlobalScopes()->findOrFail($application->id);
-}
-
-function staffAction(User $user, Application $application, string $action, array $data = []): TestResponse
-{
-    return test()->actingAs($user, 'web')->post(route('admin.applications.actions', $application), [
-        'action' => $action,
-        'expected_status' => freshApplication($application)->status->value,
-        ...$data,
-    ]);
-}
 
 it('creates a draft that holds the category slot (D-044, D-193)', function () {
     $account = companyUser();

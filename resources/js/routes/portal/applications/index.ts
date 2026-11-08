@@ -314,7 +314,7 @@ show.head = (args: { application: number | { id: number } } | [application: numb
     show.form = showForm
 /**
 * @see \App\Http\Controllers\Portal\ApplicationController::premises
- * @see app/Http/Controllers/Portal/ApplicationController.php:130
+ * @see app/Http/Controllers/Portal/ApplicationController.php:131
  * @route '/portal/applications/{application}/premises'
  */
 export const premises = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -329,7 +329,7 @@ premises.definition = {
 
 /**
 * @see \App\Http\Controllers\Portal\ApplicationController::premises
- * @see app/Http/Controllers/Portal/ApplicationController.php:130
+ * @see app/Http/Controllers/Portal/ApplicationController.php:131
  * @route '/portal/applications/{application}/premises'
  */
 premises.url = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -362,7 +362,7 @@ premises.url = (args: { application: number | { id: number } } | [application: n
 
 /**
 * @see \App\Http\Controllers\Portal\ApplicationController::premises
- * @see app/Http/Controllers/Portal/ApplicationController.php:130
+ * @see app/Http/Controllers/Portal/ApplicationController.php:131
  * @route '/portal/applications/{application}/premises'
  */
 premises.put = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -372,7 +372,7 @@ premises.put = (args: { application: number | { id: number } } | [application: n
 
     /**
 * @see \App\Http\Controllers\Portal\ApplicationController::premises
- * @see app/Http/Controllers/Portal/ApplicationController.php:130
+ * @see app/Http/Controllers/Portal/ApplicationController.php:131
  * @route '/portal/applications/{application}/premises'
  */
     const premisesForm = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -387,7 +387,7 @@ premises.put = (args: { application: number | { id: number } } | [application: n
 
             /**
 * @see \App\Http\Controllers\Portal\ApplicationController::premises
- * @see app/Http/Controllers/Portal/ApplicationController.php:130
+ * @see app/Http/Controllers/Portal/ApplicationController.php:131
  * @route '/portal/applications/{application}/premises'
  */
         premisesForm.put = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -403,7 +403,7 @@ premises.put = (args: { application: number | { id: number } } | [application: n
     premises.form = premisesForm
 /**
 * @see \App\Http\Controllers\Portal\ApplicationController::technicalPerson
- * @see app/Http/Controllers/Portal/ApplicationController.php:144
+ * @see app/Http/Controllers/Portal/ApplicationController.php:145
  * @route '/portal/applications/{application}/technical-person'
  */
 export const technicalPerson = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -418,7 +418,7 @@ technicalPerson.definition = {
 
 /**
 * @see \App\Http\Controllers\Portal\ApplicationController::technicalPerson
- * @see app/Http/Controllers/Portal/ApplicationController.php:144
+ * @see app/Http/Controllers/Portal/ApplicationController.php:145
  * @route '/portal/applications/{application}/technical-person'
  */
 technicalPerson.url = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -451,7 +451,7 @@ technicalPerson.url = (args: { application: number | { id: number } } | [applica
 
 /**
 * @see \App\Http\Controllers\Portal\ApplicationController::technicalPerson
- * @see app/Http/Controllers/Portal/ApplicationController.php:144
+ * @see app/Http/Controllers/Portal/ApplicationController.php:145
  * @route '/portal/applications/{application}/technical-person'
  */
 technicalPerson.put = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -461,7 +461,7 @@ technicalPerson.put = (args: { application: number | { id: number } } | [applica
 
     /**
 * @see \App\Http\Controllers\Portal\ApplicationController::technicalPerson
- * @see app/Http/Controllers/Portal/ApplicationController.php:144
+ * @see app/Http/Controllers/Portal/ApplicationController.php:145
  * @route '/portal/applications/{application}/technical-person'
  */
     const technicalPersonForm = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -476,7 +476,7 @@ technicalPerson.put = (args: { application: number | { id: number } } | [applica
 
             /**
 * @see \App\Http\Controllers\Portal\ApplicationController::technicalPerson
- * @see app/Http/Controllers/Portal/ApplicationController.php:144
+ * @see app/Http/Controllers/Portal/ApplicationController.php:145
  * @route '/portal/applications/{application}/technical-person'
  */
         technicalPersonForm.put = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -492,7 +492,7 @@ technicalPerson.put = (args: { application: number | { id: number } } | [applica
     technicalPerson.form = technicalPersonForm
 /**
 * @see \App\Http\Controllers\Portal\ApplicationController::submit
- * @see app/Http/Controllers/Portal/ApplicationController.php:155
+ * @see app/Http/Controllers/Portal/ApplicationController.php:156
  * @route '/portal/applications/{application}/submit'
  */
 export const submit = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -507,7 +507,7 @@ submit.definition = {
 
 /**
 * @see \App\Http\Controllers\Portal\ApplicationController::submit
- * @see app/Http/Controllers/Portal/ApplicationController.php:155
+ * @see app/Http/Controllers/Portal/ApplicationController.php:156
  * @route '/portal/applications/{application}/submit'
  */
 submit.url = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -540,7 +540,7 @@ submit.url = (args: { application: number | { id: number } } | [application: num
 
 /**
 * @see \App\Http\Controllers\Portal\ApplicationController::submit
- * @see app/Http/Controllers/Portal/ApplicationController.php:155
+ * @see app/Http/Controllers/Portal/ApplicationController.php:156
  * @route '/portal/applications/{application}/submit'
  */
 submit.post = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -550,7 +550,7 @@ submit.post = (args: { application: number | { id: number } } | [application: nu
 
     /**
 * @see \App\Http\Controllers\Portal\ApplicationController::submit
- * @see app/Http/Controllers/Portal/ApplicationController.php:155
+ * @see app/Http/Controllers/Portal/ApplicationController.php:156
  * @route '/portal/applications/{application}/submit'
  */
     const submitForm = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -560,7 +560,7 @@ submit.post = (args: { application: number | { id: number } } | [application: nu
 
             /**
 * @see \App\Http\Controllers\Portal\ApplicationController::submit
- * @see app/Http/Controllers/Portal/ApplicationController.php:155
+ * @see app/Http/Controllers/Portal/ApplicationController.php:156
  * @route '/portal/applications/{application}/submit'
  */
         submitForm.post = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

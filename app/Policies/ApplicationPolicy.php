@@ -7,6 +7,7 @@ namespace App\Policies;
 use App\Domain\Applications\Enums\ApplicationStatus;
 use App\Models\Application;
 use App\Models\CompanyUser;
+use App\Models\Inspection;
 use App\Models\StageAssignment;
 use App\Models\User;
 
@@ -38,14 +39,19 @@ class ApplicationPolicy
     }
 
     /**
-     * A Technical Reviewer assignment to the application, open or ended.
+     * A Technical Reviewer assignment to the application, open or ended, or
+     * an inspection of it assigned to the user (D-077).
      */
     public static function isAssigned(User $user, Application $application): bool
     {
         return StageAssignment::query()
             ->where('application_id', $application->id)
             ->where('assigned_user_id', $user->id)
-            ->exists();
+            ->exists()
+            || Inspection::query()
+                ->where('application_id', $application->id)
+                ->where('inspector_id', $user->id)
+                ->exists();
     }
 
     public function create(User|CompanyUser $user): bool

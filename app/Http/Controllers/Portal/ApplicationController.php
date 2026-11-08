@@ -119,6 +119,7 @@ class ApplicationController extends Controller
             ],
             'declarationName' => $account->full_name,
             'returned' => CompanyApplicationView::returned($application),
+            'inspections' => CompanyApplicationView::inspections($application),
             'versions' => $application->versions()->get(['id', 'version_no', 'submitted_at'])->map(fn (ApplicationVersion $version) => [
                 'version_no' => $version->version_no,
                 'submitted_at' => $version->submitted_at->toIso8601String(),

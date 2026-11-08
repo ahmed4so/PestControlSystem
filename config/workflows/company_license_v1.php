@@ -123,7 +123,7 @@ return [
         // T7
         [
             'from' => 'TECHNICAL_DOC_REVIEW', 'action' => 'SCHEDULE_INSPECTION', 'actor' => 'REGISTRAR', 'to' => 'INSPECTION_SCHEDULED',
-            'guards' => ['ReviewItemsAllCompliant:TECHNICAL_DOC_REVIEW', 'NoOpenAssignment'],
+            'guards' => ['ReviewItemsAllCompliant:TECHNICAL_DOC_REVIEW', 'NoOpenAssignment', 'InspectionPlanProvided'],
             'effects' => ['CreateInspections', 'Notify:INSPECTION_SCHEDULED', 'Notify:WORK_ITEM_READY'],
         ],
         // T8
@@ -170,6 +170,7 @@ return [
         [
             'from' => 'CONSOLIDATED_REVIEW', 'action' => 'SCHEDULE_INSPECTION', 'actor' => 'REGISTRAR', 'to' => 'INSPECTION_SCHEDULED',
             'comment' => true,
+            'guards' => ['InspectionPlanProvided'],
             'effects' => ['CreateInspections', 'Notify:INSPECTION_SCHEDULED', 'Notify:WORK_ITEM_READY'],
         ],
         // T15

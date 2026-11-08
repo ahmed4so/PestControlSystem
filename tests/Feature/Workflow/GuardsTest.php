@@ -174,7 +174,7 @@ it('refuses every guard of a later phase (D-188)', function (string $name) {
         ->and($guard->check(submitContext(readyApplication(['application_type' => ApplicationType::Renewal])), null)->reasons)
         ->toBe([NotYetAvailableGuard::REASON]);
 })->with([
-    'InspectionsSigned', 'InspectionReportComplete', 'InspectionPlanProvided', 'FeeScheduleExists',
+    'FeeScheduleExists',
     'AmountMatchesLetter', 'ReceiptNotUsed', 'PaymentCleared', 'SignerHasSignature', 'PreviousLicenseActive',
     'RenewalWindowOpen', 'ImportationLicenseActive', 'ProductVerified', 'IngredientNotBanned', 'StoragePremisesSelected',
 ]);
@@ -191,8 +191,7 @@ it('throws from every effect of a later phase, so the transition rolls back (D-1
 
     expect(fn () => $effect->apply($context, null))->toThrow(LogicException::class, "[{$name}]");
 })->with([
-    'CreateInspections', 'UpdateInspectionDate', 'SetConductedAt', 'SignInspection',
-    'CancelOpenInspections', 'IssuePermissionToPayLetter', 'RecordPayment', 'ClearPayment', 'RejectPayment',
+    'IssuePermissionToPayLetter', 'RecordPayment', 'ClearPayment', 'RejectPayment',
     'IssueLicense', 'SupersedePreviousLicense', 'ClearAmendmentFlag', 'FlagRestrictedIngredient',
 ]);
 

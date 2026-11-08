@@ -6,6 +6,8 @@ use App\Domain\Notifications\Mail\ApplicationAcknowledged;
 use App\Domain\Notifications\Mail\ApplicationResubmitted;
 use App\Domain\Notifications\Mail\ApplicationReturned;
 use App\Domain\Notifications\Mail\ApplicationSubmitted;
+use App\Domain\Notifications\Mail\InspectionRescheduled;
+use App\Domain\Notifications\Mail\InspectionScheduled;
 use App\Domain\Notifications\Mail\ReviewerAssigned;
 use App\Domain\Notifications\Mail\TechnicalReviewDone;
 use App\Domain\Notifications\Mail\WorkItemReady;
@@ -27,6 +29,8 @@ function workflowEmailData(): array
         'stage_en' => 'Administrative review',
         'stage_so' => 'Dib-u-eegis maamul',
         'version' => '2',
+        'premises' => 'Main warehouse',
+        'date' => '2026-11-20',
         'comment' => 'Please upload a readable copy.',
         'items' => [['label' => 'Commerce registration', 'result' => 'Deficient', 'comment' => 'Not readable.']],
     ];
@@ -49,4 +53,6 @@ it('renders each workflow email in both languages with its reference in the subj
     'resubmitted' => [ApplicationResubmitted::class, 'version 2'],
     'reviewer assigned' => [ReviewerAssigned::class, 'technical review'],
     'review done' => [TechnicalReviewDone::class, 'completed'],
+    'inspection scheduled' => [InspectionScheduled::class, '2026-11-20'],
+    'inspection rescheduled' => [InspectionRescheduled::class, 'Main warehouse'],
 ]);

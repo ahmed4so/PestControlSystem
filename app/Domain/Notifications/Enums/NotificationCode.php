@@ -46,14 +46,12 @@ enum NotificationCode: string
 
     /**
      * Codes listed for the workflow definitions whose email comes with a
-     * later step or phase (D-188): inspections in Phase 4A step 7, payment,
+     * later phase (D-188): payment,
      * license and rejection in Phase 4B.
      */
     public function isBuiltLater(): bool
     {
         return in_array($this, [
-            self::InspectionScheduled,
-            self::InspectionRescheduled,
             self::PaymentRequired,
             self::ReceiptRejected,
             self::PaymentCleared,

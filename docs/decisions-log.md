@@ -1726,6 +1726,30 @@ Entry format:
 - Alternative: let the open draft or returned application unlock the profile; reviewers work from snapshots, so the application in process is not changed.
 - Affects: ApplicationSubmissionState
 
+## D-204: Inspection rounds and the GPS reason
+- Date: 2026-11-08
+- Status: Proposed
+- Source: Claude Code (Phase 4A step 7)
+- Decision:
+  - `inspections` gets two columns that 02 §4.8 does not list:
+    - `round` (1, 2, … for each re-inspection, T14), so `InspectionsSigned` checks only the latest round;
+    - `gps_unavailable_reason`, for the reason D-136 asks for when the device cannot give a position.
+  - An inspection is `SCHEDULED` until its report is signed, then `COMPLETED`. Its visit is `conducted_at`.
+  - Scheduling (T7, T14) uses the `InspectionPlanProvided` guard: one inspection per submitted premises, each with an active Inspector and a planned date from today (05 §6).
+- Reason: 02 §4.8 has no field for either value, and does not say when an inspection becomes COMPLETED.
+- Affects: inspections table, Inspection module
+
+## D-205: One email per person for one event
+- Date: 2026-11-08
+- Status: Proposed
+- Source: Claude Code (Phase 4A steps 1 and 7)
+- Decision: Where 07 §3.3 lists two codes for the same people on one transition, only the more specific one is sent:
+  - on RESUBMIT the stage's staff get `APPLICATION_RESUBMITTED`, not also `WORK_ITEM_READY`;
+  - at the stages worked by an assignee (Inspector, Technical Reviewer), `WORK_ITEM_READY` is not sent, because the assignee already gets `INSPECTION_SCHEDULED` or `REVIEWER_ASSIGNED`. It is never sent to every holder of those roles.
+- Reason: 07 §3.3 lists T7 and T25 under both codes, which would send the same person two emails for one action.
+- Alternative: send both emails, as 07 §3.3 literally lists them.
+- Affects: NotifyWorkflowEvent, company_license definition
+
 ---
 
 ## Open Questions

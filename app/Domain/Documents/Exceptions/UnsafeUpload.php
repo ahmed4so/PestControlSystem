@@ -22,6 +22,16 @@ final class UnsafeUpload extends RuntimeException
         return new self('The file is larger than 5 MB.');
     }
 
+    public static function video(): self
+    {
+        return new self('Upload an MP4 video.');
+    }
+
+    public static function videoSize(): self
+    {
+        return new self('The video is larger than 50 MB.');
+    }
+
     public static function pdf(): self
     {
         return new self('This PDF cannot be accepted. Save it again without passwords or active content, then upload it.');

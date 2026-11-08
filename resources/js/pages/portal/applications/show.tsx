@@ -32,6 +32,7 @@ type Props = {
     submit: { action: string; blocked_by: string[] } | null;
     declarationName: string;
     returned: { comment: string | null; items: { label: string; result: string; comment: string | null }[] } | null;
+    inspections: { premises: string; planned_date: string }[];
     versions: { version_no: number; submitted_at: string }[];
     history: { date: string; status: string; comment: string | null }[];
 };
@@ -43,7 +44,7 @@ const date = (value: string) => new Date(value).toLocaleDateString();
  * technical person, sign the declaration, submit; on return, fix and
  * resubmit (T1, T25). The company sees only what D-201 allows.
  */
-export default function ApplicationShow({ application, editable, premises, persons, selected, submit, declarationName, returned, versions, history }: Props) {
+export default function ApplicationShow({ application, editable, premises, persons, selected, submit, declarationName, returned, inspections, versions, history }: Props) {
     const { t } = useTranslation();
     const [chosen, setChosen] = useState<number[]>(selected.premises);
     const [saving, setSaving] = useState(false);
@@ -89,6 +90,21 @@ export default function ApplicationShow({ application, editable, premises, perso
                                 </ul>
                             )}
                             {returned.comment && <p>{returned.comment}</p>}
+                        </AlertDescription>
+                    </Alert>
+                )}
+
+                {inspections.length > 0 && (
+                    <Alert>
+                        <AlertTitle>{t('Inspection planned')}</AlertTitle>
+                        <AlertDescription>
+                            <ul className="space-y-1">
+                                {inspections.map((inspection) => (
+                                    <li key={inspection.premises}>
+                                        {inspection.premises}: {date(inspection.planned_date)}
+                                    </li>
+                                ))}
+                            </ul>
                         </AlertDescription>
                     </Alert>
                 )}

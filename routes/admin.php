@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FailedEmailController;
 use App\Http\Controllers\Admin\FileController;
+use App\Http\Controllers\Admin\InspectionController;
 use App\Http\Controllers\Admin\NationalIdReleaseController;
 use App\Http\Controllers\Admin\ReferenceData\FederalMemberStateController;
 use App\Http\Controllers\Admin\ReferenceData\RegionController;
@@ -81,6 +82,16 @@ Route::middleware(['auth:web', 'active', 'session.timeouts', 'password.current',
     Route::get('applications/{application}/files/{storedFile}', [ApplicationController::class, 'file'])
         ->middleware('throttle:60,1')
         ->name('applications.file');
+
+    // Inspections (D-077, D-136, D-196): the phone form, visit, reschedule,
+    // signing, photos and video. Status changes go through the engine.
+    Route::get('inspections/{inspection}', [InspectionController::class, 'show'])->name('inspections.show');
+    Route::put('inspections/{inspection}/report', [InspectionController::class, 'report'])->middleware('throttle:60,1')->name('inspections.report');
+    Route::post('inspections/{inspection}/media', [InspectionController::class, 'media'])->middleware('throttle:uploads')->name('inspections.media');
+    Route::post('inspections/{inspection}/visit', [InspectionController::class, 'visit'])->middleware('throttle:30,1')->name('inspections.visit');
+    Route::post('inspections/{inspection}/reschedule', [InspectionController::class, 'reschedule'])->middleware('throttle:30,1')->name('inspections.reschedule');
+    Route::post('inspections/{inspection}/sign', [InspectionController::class, 'sign'])->middleware('throttle:6,1')->name('inspections.sign');
+    Route::get('inspections/{inspection}/media/{media}', [InspectionController::class, 'file'])->middleware('throttle:60,1')->name('inspections.file');
 
     // Company directory and files, read-only (D-177, D-181).
     Route::get('companies', [CompanyController::class, 'index'])->name('companies.index');

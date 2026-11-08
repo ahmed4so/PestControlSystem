@@ -188,6 +188,11 @@ D-195 (correction allowed), D-196 to D-201 below, and D-202 (unused version may 
 - **D-203 (edit lock):**
   - The lock wins when a license draft and an application in process exist together.
   - A company with only rejected applications can edit its profile.
+- **D-204 (inspections):**
+  - `round` and `gps_unavailable_reason` columns;
+  - the inspection becomes COMPLETED when signed;
+  - the scheduling plan is checked by `InspectionPlanProvided`.
+- **D-205 (emails):** one email per person for one event. RESUBMIT sends `APPLICATION_RESUBMITTED` only, and assigned stages get no role-wide `WORK_ITEM_READY`.
 
 | ID | Proposal | Why |
 |---|---|---|

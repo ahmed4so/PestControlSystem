@@ -162,6 +162,12 @@ final class NotifyWorkflowEvent
             return;
         }
 
+        // Assigned stages: the assignee already got REVIEWER_ASSIGNED or
+        // INSPECTION_SCHEDULED; never email every holder of the role (07 §2).
+        if (in_array($role, [ActorRole::Inspector, ActorRole::TechnicalReviewer], true) && ! isset($this->handlers['assignees:'.$role->value])) {
+            return;
+        }
+
         if (isset($this->handlers['assignees:'.$role->value])) {
             // Inspector stages: the Inspection module names the assignees.
             ($this->handlers['assignees:'.$role->value])($context, ['code' => $code, ...$data], $application->status->value);

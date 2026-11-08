@@ -7,9 +7,13 @@ namespace App\Providers;
 use App\Domain\Applications\Support\ApplicationSubmissionState;
 use App\Domain\CompanyRegistry\Contracts\SubmissionState;
 use App\Domain\Identity\Support\PasswordPolicy;
+use App\Domain\Inspection\Support\InspectionNotifications;
 use App\Domain\Notifications\Actions\NotifyWorkflowEvent;
+use App\Domain\Notifications\Enums\NotificationCode;
 use App\Domain\Notifications\Listeners\MarkNotificationSent;
+use App\Domain\Workflow\Engine\TransitionContext;
 use App\Domain\Workflow\Registry\WorkflowRegistry;
+use App\Models\Inspection;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -31,6 +35,19 @@ class AppServiceProvider extends ServiceProvider
         // One catalogue of guards and effects; later phases extend it (D-188).
         $this->app->singleton(WorkflowRegistry::class);
         $this->app->singleton(NotifyWorkflowEvent::class);
+
+        // Inspection emails come from the Inspection module (07 §3.3).
+        $this->app->afterResolving(NotifyWorkflowEvent::class, function (NotifyWorkflowEvent $notifier): void {
+            $notifier->extend(NotificationCode::InspectionScheduled, fn (TransitionContext $context) => app(InspectionNotifications::class)
+                ->scheduled($context->application, $context->staffUser()));
+            $notifier->extend(NotificationCode::InspectionRescheduled, function (TransitionContext $context): void {
+                $inspection = Inspection::query()->where('application_id', $context->application->id)->find($context->payload('inspection_id'));
+
+                if ($inspection !== null) {
+                    app(InspectionNotifications::class)->rescheduled($inspection, $context->staffUser());
+                }
+            });
+        });
     }
 
     public function boot(): void

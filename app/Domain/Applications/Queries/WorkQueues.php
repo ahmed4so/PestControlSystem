@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
  * Staff work queues (04 §15, D-105):
  * - My work: applications whose current stage's role the user holds (or
  *   holds for the DG through an active delegation, D-027), plus their open
- *   Technical Reviewer assignments;
+ *   Technical Reviewer assignments and open inspections;
  * - By stage: count and oldest age per stage;
  * - Waiting on company: RETURNED and AWAITING_PAYMENT, with days waiting;
  * - Flags: late renewals, restricted ingredients, amendment-required
@@ -70,7 +70,15 @@ final class WorkQueues
                         ->whereColumn('stage_assignments.application_id', 'applications.id')
                         ->whereColumn('stage_assignments.stage', 'applications.status')
                         ->where('stage_assignments.assigned_user_id', $user->id)
-                        ->whereNull('stage_assignments.ended_at'));
+                        ->whereNull('stage_assignments.ended_at'))
+                    ->orWhereExists(fn ($inspection) => $inspection->select(DB::raw(1))
+                        ->from('inspections')
+                        ->whereColumn('inspections.application_id', 'applications.id')
+                        ->where('inspections.inspector_id', $user->id)
+                        ->where('inspections.status', 'SCHEDULED')
+                        ->whereNull('inspections.signed_at')
+                        ->whereNull('inspections.deleted_at')
+                        ->whereIn('applications.status', [ApplicationStatus::InspectionScheduled->value, ApplicationStatus::InspectionReport->value]));
             })
             ->orderBy('entered_at')
             ->paginate(self::PER_PAGE)
